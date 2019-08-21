@@ -1,0 +1,30 @@
+<script type="application/json">
+  {
+    "usingComponents": {
+      "valuation-card": "components/valuationCard"
+    }
+  }
+</script>
+
+<template>
+  <valuation-card></valuation-card>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+
+  createPage({
+    data: {
+
+    },
+    onLoad: function (query) {
+      wx.showShareMenu();
+      wx.setNavigationBarTitle({
+        title: '用户评价'
+      });
+    }
+  })
+</script>
+
+<style lang="less">
+</style>

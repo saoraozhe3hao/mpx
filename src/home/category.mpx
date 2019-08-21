@@ -1,0 +1,56 @@
+<script type="application/json">
+  {
+    "usingComponents": {
+      "product-card": "components/productCard"
+    }
+  }
+</script>
+
+<template>
+  <view>
+    <view class="top">
+      <text class="location" bindtap="locate">{{location}}</text>
+      <input placeholder="" class="search-input" />
+      <text class="search">搜索</text>
+    </view>
+    <product-card></product-card>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+
+  createPage({
+    data: {
+      location: '全国'
+    },
+    onLoad: function (query) {
+      wx.showShareMenu();
+      wx.setNavigationBarTitle({
+        title: '分类'
+      })
+    },
+    locate: function () {
+      wx.navigateTo({
+        url: '/location'
+      })
+    }
+  })
+</script>
+
+<style lang="less">
+  .top{
+    width: 80%;
+    margin: 0 auto 10px;
+  }
+  .top .location{
+    margin-right: 10px;
+  }
+  .top .search{
+    float: right;
+  }
+  .search-input{
+    display:inline-block;
+    vertical-align:middle;
+  }
+</style>

@@ -1,0 +1,90 @@
+<script type="application/json">
+  {
+    "component": true,
+    "usingComponents": {}
+  }
+</script>
+
+<template>
+  <view class="publish-card clearfixed" id="0" bindtap="publishDetail">
+    <image mode="widthFix" src="https://developers.weixin.qq.com/miniprogram/dev/image/cat/0.jpg?t=19032513"></image>
+    <view class="info">
+      <text class="name">干塘体验一日游</text>
+      <view>
+        <text class="label">打野、民俗</text>
+      </view>
+      <view>
+        <text class="date">3月2日-4月5日</text>
+        <text class="number">10人预约</text>
+      </view>
+      <text class="price">100$</text>
+      <text class="status">预约中</text>
+    </view>
+  </view>
+</template>
+
+<script>
+  import { createComponent } from '@mpxjs/core'
+
+  createComponent({
+    properties: {
+
+    },
+    data: {
+    },
+    lifetimes: {
+      attached() { },
+      moved() { },
+      detached() { },
+    },
+    pageLifetimes: {
+      show() { },
+      hide() { },
+      resize() { },
+    },
+    methods: {
+      publishDetail: function (event) {
+        wx.navigateTo({
+          url: '/publishDetail' + '?id=' + event.currentTarget.id
+        })
+      }
+    }
+  })
+</script>
+
+
+<style lang="less">
+  .clearfixed::after {
+    clear: both;
+    content: '';
+    display: block;
+  }
+
+  .publish-card{
+    width: 90%;
+    margin: 10px auto;
+    border: 1px solid #ccc;
+  }
+  .location{
+    float: right;
+  }
+  .distance{
+    float: right;
+    padding-left: 10px;
+  }
+  image{
+    width: 30%;
+  }
+  .info{
+    box-sizing:border-box;
+    float: right;
+    padding: 10px;
+    width: 70%;
+  }
+  .product-card .number{
+    float: right;
+  }
+  .status{
+    float: right;
+  }
+</style>

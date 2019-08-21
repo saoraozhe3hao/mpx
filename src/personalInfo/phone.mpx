@@ -1,0 +1,60 @@
+<script type="application/json">
+  {
+    "usingComponents": {    }
+  }
+</script>
+
+<template>
+  <view>
+    <view>
+      <text>手机号：</text>
+      <input placeholder="" type="number" />
+      <button size="mini" bindtap="send" disabled="{{countDown > 0}}">{{countDown > 0 ? countDown : '发送验证码'}}</button>
+    </view>
+    <view>
+      <text>验证码：</text>
+      <input placeholder="" type="number" />
+    </view>
+    <button bindtap="save">保存</button>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+
+  createPage({
+    data: {
+      countDown: 0
+    },
+    onLoad: function(options) {
+      wx.showShareMenu();
+      wx.setNavigationBarTitle({
+        title: '手机号'
+      })
+    },
+    send: function(event){
+      this.setData({
+        countDown: 60
+      });
+      this.countDown();
+    },
+    countDown: function(){
+      if(this.data.countDown <= 0){
+        return;
+      }
+      setTimeout(()=>{
+        this.setData({
+          countDown: this.data.countDown - 1
+        });
+        this.countDown();
+      }, 1000);
+    },
+    save: function (event) {
+
+    }
+  })
+</script>
+
+<style lang="less">
+
+</style>

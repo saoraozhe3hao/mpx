@@ -1,0 +1,63 @@
+<script type="application/json">
+  {
+    "component": true,
+    "usingComponents": {
+      "van-tabbar": "vant-weapp/dist/tabbar/index",
+      "van-tabbar-item": "vant-weapp/dist/tabbar-item/index"
+    }
+  }
+</script>
+
+<template>
+  <van-tabbar active="{{ active }}" bind:change="onChange">
+    <van-tabbar-item wx:for="{{ list }}" wx:key="index" icon="{{ item.icon }}">{{ item.text }}</van-tabbar-item>
+  </van-tabbar>
+</template>
+
+<script>
+    import {createComponent} from '@mpxjs/core'
+
+    createComponent({
+        properties: {},
+        data: {
+            active: 0,
+            list: [
+                {
+                    icon: 'home-o',
+                    url: '/home/home',
+                    text: "首页"
+                },
+                {
+                    icon: 'records',
+                    url: '/publish/myPublish',
+                    text: "发布"
+                },
+                {
+                    icon: 'orders-o',
+                    url: '/order/myOrder',
+                    text: "订单"
+                },
+                {
+                    icon: 'user-o',
+                    url: '/mine/mine',
+                    text: "我的"
+                }
+            ]
+        },
+        ready: function() {
+        },
+        methods: {
+            onChange(event) {
+                this.setData({active: event.detail});
+                wx.switchTab({
+                    url: this.data.list[event.detail].url
+                });
+            }
+        }
+    })
+</script>
+
+
+<style lang="less">
+
+</style>

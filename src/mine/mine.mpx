@@ -1,0 +1,67 @@
+<script type="application/json">
+  {
+    "usingComponents": {}
+  }
+</script>
+
+<template>
+  <view>
+    <view>
+      <button size="mini" bindtap="verify">验证订单</button>
+      <button size="mini" bindtap="message">信息</button>
+      <button size="mini" bindtap="profit">收益</button>
+    </view>
+    <button bindtap="personalInfo">个人信息</button>
+    <button bindtap="collection">收藏</button>
+  </view>
+</template>
+
+<script>
+    import {createPage} from '@mpxjs/core'
+
+    createPage({
+        data: {},
+        onLoad: function (options) {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '我的'
+            })
+        },
+        onShow() {
+            this.getTabBar && this.getTabBar().setData({
+                active: 3
+            })
+        },
+        verify: function (event) {
+            wx.navigateTo({
+                url: '/verify'
+            })
+        },
+        message: function (event) {
+            wx.navigateTo({
+                url: '/message'
+            })
+        },
+        profit: function (event) {
+            wx.navigateTo({
+                url: '/profit'
+            })
+        },
+        personalInfo: function (event) {
+            wx.navigateTo({
+                url: '/personalInfo'
+            })
+        },
+        collection: function (event) {
+            wx.navigateTo({
+                url: '/collection'
+            })
+        }
+    })
+</script>
+
+<style lang="less">
+  .recent text {
+    margin: 0 10px 0 0;
+  }
+</style>

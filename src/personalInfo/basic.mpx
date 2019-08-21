@@ -1,0 +1,41 @@
+<script type="application/json">
+  {
+    "usingComponents": {    }
+  }
+</script>
+
+<template>
+  <view>
+    <view>
+      <text>昵称：</text>
+      <input placeholder="" />
+    </view>
+    <view>
+      <text>地址：</text>
+      <input placeholder="" />
+    </view>
+    <button bindtap="save">保存</button>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+
+  createPage({
+    data: {
+
+    },
+    onLoad: function(options) {
+      wx.showShareMenu();
+      wx.setNavigationBarTitle({
+        title: '基本信息'
+      })
+    },
+    save: function (event) {
+    }
+  })
+</script>
+
+<style lang="less">
+
+</style>

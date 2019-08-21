@@ -1,0 +1,35 @@
+<script type="application/json">
+  {
+    "usingComponents": {
+      "seller-card": "components/sellerCard"
+    }
+  }
+</script>
+
+<template>
+  <view>
+    <seller-card></seller-card>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+
+  createPage({
+    data: {
+
+    },
+    onLoad: function(options) {
+      wx.showShareMenu();
+      wx.setNavigationBarTitle({
+        title: '我的收藏'
+      })
+    },
+    verify: function(event) {
+    }
+  })
+</script>
+
+<style lang="less">
+
+</style>

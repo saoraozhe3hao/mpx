@@ -1,0 +1,174 @@
+<script type="application/json">
+  {
+    "usingComponents": {
+      "product-card": "components/productCard",
+      "van-icon": "vant-weapp/dist/icon/index",
+      "van-search": "vant-weapp/dist/search/index",
+      "van-row": "vant-weapp/dist/row/index",
+      "van-col": "vant-weapp/dist/col/index",
+      "van-card": "vant-weapp/dist/card/index"
+    },
+    "navigationBarTitleText": "首页"
+  }
+</script>
+
+<template>
+  <view>
+    <view class="top">
+      <van-row>
+        <van-col span="4">
+          <text class="location" bindtap="locate">{{location}}</text>
+          <van-icon name="arrow-down" custom-style="vertical-align:middle"/>
+        </van-col>
+        <van-col span="20">
+          <van-search placeholder="搜'播主的名称'" use-action-slot bind:search="onSearch">
+            <view slot="action">搜索</view>
+          </van-search>
+        </van-col>
+      </van-row>
+    </view>
+    <view class="categories">
+      <view id="daye" bindtap="category">
+        <view class="iconfont icon-huwai"></view>
+        <view>打野</view>
+      </view>
+      <view id="ganhai" bindtap="category">
+        <view class="iconfont icon-haixian"></view>
+        <view>赶海</view>
+      </view>
+      <view id="yeshi" bindtap="category">
+        <view class="iconfont icon-yinshixuanzhong"></view>
+        <view>野食</view>
+      </view>
+      <view id="yeju" bindtap="category">
+        <view class="iconfont icon-huwaixuanzhong"></view>
+        <view>野居</view>
+      </view>
+      <view id="buzhuo" bindtap="category">
+        <view class="iconfont icon-yu"></view>
+        <view>捕捉</view>
+      </view>
+      <view id="caizhai" bindtap="category">
+        <view class="iconfont icon-rengongcaizhai"></view>
+        <view>采摘</view>
+      </view>
+      <view id="minsu" bindtap="category">
+        <view class="iconfont icon-nongcungongshuigongcheng"></view>
+        <view>民俗</view>
+      </view>
+      <view id="tanmi" bindtap="category">
+        <view class="iconfont icon-tansuofaxian"></view>
+        <view>探秘</view>
+      </view>
+    </view>
+    <van-card wx:for="{{products}}" wx:key="index" lazy-load="true"
+              tag="打野、民俗" price="100" desc="干塘体验一日游" title="{{ item.name }}"
+              thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
+      <view slot="bottom">
+        <text class="date">3月2日-4月5日</text>
+        <text class="number">10人预约</text>
+      </view>
+      <view slot="footer">
+        <text class="distance">100km</text>
+        <text class="location">户县</text>
+      </view>
+    </van-card>
+  </view>
+</template>
+<script>
+    import {createPage} from '@mpxjs/core'
+
+    let app = getApp();
+    createPage({
+        data: {
+            location: '全国',
+            products: []
+        },
+        watch: {},
+        onLoad: function () {
+            wx.showShareMenu();
+            this.login();
+        },
+        onShow(){
+            this.getTabBar && this.getTabBar().setData({
+                active: 0
+            })
+        },
+        login() {     // 登录
+            wx.login({
+                success: res => {
+                    wx.request({
+                        method: 'POST',
+                        url: app.globalData.basePath + "/login",
+                        header: {
+                            "content-type": 'application/x-www-form-urlencoded'
+                        },
+                        data: {
+                            code: res.code
+                        },
+                        success: (res) => {
+                            console.log(res);
+                            wx.removeStorageSync('sessionId');
+                            wx.setStorageSync("sessionId", res.header && res.header["Set-Cookie"]);
+                            this.fetchProducts();
+                        }
+                    });
+                }
+            })
+        },
+        fetchProducts: function () {
+            wx.request({
+                method: 'GET',
+                url: app.globalData.basePath + "/mini/product",
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    this.products = res.data.data;
+                }
+            });
+        },
+        category: function (event) {
+            wx.navigateTo({
+                url: '/category' + '?category=' + event.currentTarget.id
+            })
+        },
+        locate: function () {
+            wx.navigateTo({
+                url: '/location'
+            })
+        },
+        onSearch: function (event) {
+            console.log(event.detail);
+        }
+    })
+</script>
+
+<style lang="less">
+  .top {
+    width: 90vw;
+    margin: 0 auto 10px;
+
+    .location {
+      vertical-align: middle;
+      line-height: 54px;
+    }
+  }
+
+  .categories {
+    margin: 0 5vw;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    text-align: center;
+
+    > view {
+      width: 20vw;
+
+      .iconfont {
+        font-size: 30px;
+        color: #FFA41F;
+      }
+    }
+  }
+</style>

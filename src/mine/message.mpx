@@ -1,0 +1,58 @@
+<script type="application/json">
+  {
+    "usingComponents": {}
+  }
+</script>
+
+<template>
+  <view>
+    <view>
+      <view class="receive-message">
+        客服回复：******
+      </view>
+      <view class="receive-message">
+        系统通知：******
+      </view>
+      <view class="receive-message">
+        预约通知：******
+      </view>
+      <view class="send-message">
+        ******
+      </view>
+    </view>
+    <input placeholder="留言" confirm-type="send" bindconfirm="send" class="leave-word" />
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+
+  createPage({
+    data: {
+
+    },
+    onLoad: function(options) {
+      wx.showShareMenu();
+      wx.setNavigationBarTitle({
+        title: '信息中心'
+      })
+    },
+    send: function(event) {
+    }
+  })
+</script>
+
+<style lang="less">
+  .receive-message{
+    border: 1px solid #ccc;
+    margin: 0 50px 20px 20px;
+  }
+  .send-message{
+    border: 1px solid #ccc;
+    margin: 0 20px 20px 50px;
+  }
+  .leave-word{
+    position: absolute;
+    bottom: 0;
+  }
+</style>

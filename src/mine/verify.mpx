@@ -1,0 +1,44 @@
+<script type="application/json">
+  {
+    "usingComponents": {}
+  }
+</script>
+
+<template>
+  <view>
+    <view>
+      <input placeholder="券码" />
+      <button size="mini" bindtap="verify">验证</button>
+    </view>
+    <button size="mini" bindtap="scan">扫描</button>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+
+  createPage({
+    data: {
+
+    },
+    onLoad: function(options) {
+      wx.showShareMenu();
+      wx.setNavigationBarTitle({
+        title: '验证订单'
+      })
+    },
+    verify: function(event) {
+    },
+    scan: function (event) {
+      wx.scanCode({
+        onlyFromCamera: true,
+        success(res) {
+          console.log(res)
+        }
+      })
+    }
+  })
+</script>
+
+<style lang="less">
+</style>

@@ -1,0 +1,8 @@
+<script type="application/json">
+  {
+    "pages": [
+      "./evaluate",
+      "./valuation"
+    ]
+  }
+</script>

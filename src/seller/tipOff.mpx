@@ -1,0 +1,55 @@
+<script type="application/json">
+  {
+    "usingComponents": {}
+  }
+</script>
+
+<template>
+  <view>
+    <view>
+      <view>
+        <text>趣导名称：</text>
+        <text>小六打野</text>
+      </view>
+      <view>
+        <picker bindchange="typeChange" value="{{type}}" range="{{types}}">
+          <view class="picker">
+            举报类型：{{types[type]}}
+          </view>
+        </picker>
+      </view>
+      <view>
+        <textarea auto-height placeholder="详细描述" />
+      </view>
+    </view>
+    <button bindtap="submit">提交</button>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+
+  createPage({
+    data: {
+      types: ['未提供服务','联系不上','与描述差距太大','其他'],
+      type: 0
+    },
+    onLoad: function (options) {
+      wx.showShareMenu();
+      wx.setNavigationBarTitle({
+        title: '举报趣导'
+      })
+    },
+    typeChange: function(event){
+      this.setData({
+        type: event.detail.value
+      });
+    },
+    submit: function(){
+
+    }
+  })
+</script>
+
+<style lang="less">
+</style>

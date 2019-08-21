@@ -1,0 +1,131 @@
+<script type="application/json">
+  {
+    "pages": [
+      "home/home",
+      "order/myOrder",
+      "publish/myPublish",
+      "mine/mine"
+    ],
+    "packages": [
+      "home/index",
+      "mine/index",
+      "order/index",
+      "personalInfo/index",
+      "product/index",
+      "publish/index",
+      "seller/index",
+      "valuation/index"
+    ],
+    "window": {
+      "backgroundTextStyle": "light",
+      "navigationBarBackgroundColor": "#fff",
+      "navigationBarTitleText": "WeChat",
+      "navigationBarTextStyle": "black"
+    },
+    "usingComponents": {
+      "van-tabbar": "vant-weapp/dist/tabbar/index",
+      "van-tabbar-item": "vant-weapp/dist/tabbar-item/index"
+    },
+    "tabBar": {
+      "custom": true,
+      "list": [
+        {
+          "pagePath": "home/home",
+          "text": "首页"
+        },
+        {
+          "pagePath": "publish/myPublish",
+          "text": "发布"
+        },
+        {
+          "pagePath": "order/myOrder",
+          "text": "订单"
+        },
+        {
+          "pagePath": "mine/mine",
+          "text": "我的"
+        }
+      ]
+    }
+  }
+</script>
+
+<script>
+    import mpx from '@mpxjs/core'
+    import apiProxy from '@mpxjs/api-proxy'
+    /*only dev start*/
+    import './mock'
+    /*only dev end*/
+
+    mpx.use(apiProxy, {usePromise: true});
+    // app.js
+    App({
+        onLaunch: function () {
+        },
+        globalData: {
+            userInfo: null,
+            basePath: "https://yequxiaoquan.com:8443"
+        }
+    })
+</script>
+
+<style>
+  @font-face {
+    font-family: 'iconfont';  /* project id 1359337 */
+    src: url('//at.alicdn.com/t/font_1359337_kzpwgau3co.eot');
+    src: url('//at.alicdn.com/t/font_1359337_kzpwgau3co.eot?#iefix') format('embedded-opentype'),
+    url('//at.alicdn.com/t/font_1359337_kzpwgau3co.woff2') format('woff2'),
+    url('//at.alicdn.com/t/font_1359337_kzpwgau3co.woff') format('woff'),
+    url('//at.alicdn.com/t/font_1359337_kzpwgau3co.ttf') format('truetype'),
+    url('//at.alicdn.com/t/font_1359337_kzpwgau3co.svg#iconfont') format('svg');
+  }
+
+  .iconfont {
+    font-family: "iconfont" !important;
+    font-size: 16px;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .icon-tansuofaxian:before {
+    content: "\e714";
+  }
+
+  .icon-huwai:before {
+    content: "\e7b0";
+  }
+
+  .icon-nongcungongshuigongcheng:before {
+    content: "\e634";
+  }
+
+  .icon-rengongcaizhai:before {
+    content: "\e614";
+  }
+
+  .icon-yu:before {
+    content: "\e63d";
+  }
+
+  .icon-huwaixuanzhong:before {
+    content: "\e74a";
+  }
+
+  .icon-yinshixuanzhong:before {
+    content: "\e74b";
+  }
+
+  .icon-RectangleCopy:before {
+    content: "\e6a4";
+  }
+
+  .icon-haixian:before {
+    content: "\e645";
+  }
+
+  page {
+    font-size: 16px;
+    line-height: 22px;
+  }
+</style>

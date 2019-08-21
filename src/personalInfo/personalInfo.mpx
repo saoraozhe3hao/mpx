@@ -1,0 +1,84 @@
+<script type="application/json">
+  {
+    "usingComponents": {}
+  }
+</script>
+
+<template>
+  <view>
+    <button open-type="getUserInfo" bindgetuserinfo="getUserInfo" wx:if="{{!authed}}">获取用户信息</button>
+    <view bindtap="basic">昵称： {{ nickName }} ></view>
+    <view bindtap="basic">地址：*** ></view>
+    <view bindtap="phone">手机号：*** ></view>
+    <view bindtap="selfMedia">自媒体号/短视频号：3个 ></view>
+    <view bindtap="bankCard">姓名：*** ></view>
+    <view bindtap="bankCard">银行卡：未设置></view>
+  </view>
+</template>
+
+<script>
+  import {createPage} from '@mpxjs/core'
+
+  createPage({
+    data: {
+      nickName: '',
+      authed: false
+    },
+    onLoad: function (options) {
+      wx.showShareMenu();
+      wx.setNavigationBarTitle({
+        title: '个人信息'
+      });
+      this.auth();
+    },
+    auth: function() {
+      wx.getSetting({
+        success: (res) => {
+          // 已授权
+          if (res.authSetting['scope.userInfo']) {
+            this.authed = true;
+            wx.getUserInfo({
+              success: (res)=>{
+                this.getUserInfo({detail: res});
+              }
+            })
+          }
+        }
+      })
+    },
+    getUserInfo: function (res) {
+      console.log(JSON.stringify(res));
+      let userInfo = res.detail.userInfo;
+      this.nickName = userInfo.nickName;
+      let avatarUrl = userInfo.avatarUrl;
+      let gender = userInfo.gender;       //性别 0：未知、1：男、2：女
+      let province = userInfo.province;
+      let city = userInfo.city;
+      let country = userInfo.country;
+    },
+    basic(event) {
+      wx.navigateTo({
+        url: './basic/basic'
+      })
+    },
+    phone(event) {
+      wx.navigateTo({
+        url: '/phone'
+      })
+    },
+    selfMedia(event) {
+      wx.navigateTo({
+        url: '/selfMedia'
+      })
+    },
+    bankCard(event) {
+      wx.navigateTo({
+        url: '/bankCard'
+      })
+    }
+  })
+</script>
+
+<style lang="less">
+
+</style>

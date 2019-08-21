@@ -1,0 +1,41 @@
+<script type="application/json">
+  {
+    "usingComponents": {
+      "publish-card": "components/publishCard"
+    }
+  }
+</script>
+
+<template>
+  <view>
+    <button bindtap="publish">发布</button>
+    <publish-card></publish-card>
+  </view>
+</template>
+
+<script>
+    import {createPage} from '@mpxjs/core'
+
+    createPage({
+        data: {},
+        onLoad: function (options) {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '我的发布'
+            });
+        },
+        onShow() {
+            this.getTabBar && this.getTabBar().setData({
+                active: 1
+            })
+        },
+        publish: function () {
+            wx.navigateTo({
+                url: '/publish'
+            })
+        }
+    })
+</script>
+
+<style lang="less">
+</style>

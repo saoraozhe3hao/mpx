@@ -1,0 +1,78 @@
+<script type="application/json">
+  {
+    "usingComponents": {   }
+  }
+</script>
+
+<template>
+  <view>
+    <view>
+      <text>抖音号：</text>
+      <input placeholder="" />
+    </view>
+    <view>
+      <text>快手号：</text>
+      <input placeholder="" />
+    </view>
+    <view>
+      <text>火山号：</text>
+      <input placeholder="" />
+    </view>
+    <view>
+      <text>西瓜号：</text>
+      <input placeholder="" />
+    </view>
+    <view>
+      <text>B站号：</text>
+      <input placeholder="" />
+    </view>
+    <view>
+      <text>美拍号：</text>
+      <input placeholder="" />
+    </view>
+    <view>
+      <text>秒拍号：</text>
+      <input placeholder="" />
+    </view>
+    <view>
+      <text>好看号：</text>
+      <input placeholder="" />
+    </view>
+    <view>
+      <text>微视号：</text>
+      <input placeholder="" />
+    </view>
+    <view>
+      <text>微博号：</text>
+      <input placeholder="" />
+    </view>
+    <view>
+      <text>公众号：</text>
+      <input placeholder="" />
+    </view>
+    <button bindtap="save">保存</button>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+
+  createPage({
+    data: {
+
+    },
+    onLoad: function (options) {
+      wx.showShareMenu();
+      wx.setNavigationBarTitle({
+        title: '自媒体号'
+      })
+    },
+    save: function (event) {
+
+    }
+  })
+</script>
+
+<style lang="less">
+
+</style>

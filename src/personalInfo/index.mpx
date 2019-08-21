@@ -1,0 +1,11 @@
+<script type="application/json">
+  {
+    "pages": [
+      "./bankCard",
+      "./basic",
+      "./personalInfo",
+      "./phone",
+      "./selfMedia"
+    ]
+  }
+</script>

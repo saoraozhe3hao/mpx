@@ -1,0 +1,10 @@
+<script type="application/json">
+  {
+    "pages": [
+      "./bespeak",
+      "./myOrder",
+      "./orderDetail",
+      "./refund"
+    ]
+  }
+</script>

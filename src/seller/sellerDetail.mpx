@@ -1,0 +1,89 @@
+<script type="application/json">
+  {
+    "usingComponents": {
+      "product-card": "components/productCard",
+      "valuation-card": "components/valuationCard"
+    }
+  }
+</script>
+
+<template>
+  <view>
+    <view class="clearfixed">
+      <view class="left">
+        <view>小六打野</view>
+        <view>福建省漳平市永福镇</view>
+        <view>距您100公里</view>
+        <view>抖音号：aaaa</view>
+        <view>快手号：aaaa</view>
+        <view>火山号：cccc</view>
+        <view>西瓜号：bbbbb</view>
+        <view>B站号：dddd</view>
+        <view>美拍号：dddd</view>
+        <view>秒拍号：dddd</view>
+        <view>好看号：dddd</view>
+        <view>微视号：dddd</view>
+        <view>微博号：dddd</view>
+        <view>公众号：dddd</view>
+      </view>
+      <view class="right">
+        <button size="mini" bindtap="collect">收藏</button>
+        <button size="mini" bindtap="tipOff">举报趣导</button>
+        <image mode="widthFix" src="https://developers.weixin.qq.com/miniprogram/dev/image/cat/0.jpg?t=19032513"></image>
+      </view>
+    </view>
+    <view>
+      <button size="mini" id="product" bindtap="switch">他的野趣</button>
+      <button size="mini" id="valuation" bindtap="switch">趣友评价</button>
+    </view>
+    <view wx:if="{{current == 'product'}}">
+      <product-card></product-card>
+    </view>
+    <view wx:if="{{current == 'valuation'}}">
+      <valuation-card></valuation-card>
+    </view>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+
+  createPage({
+    data: {
+      current: 'product'
+    },
+    onLoad: function (query) {
+      wx.showShareMenu();
+      wx.setNavigationBarTitle({
+        title: '趣导'
+      });
+    },
+    collect: function(event){
+
+    },
+    tipOff: function(event){
+      wx.navigateTo({
+        url: '/tipOff' + '?sellerId=' + 0
+      })
+    },
+    switch: function(event){
+      this.setData({
+        current: event.target.id
+      });
+    }
+  })
+</script>
+
+<style lang="less">
+  .left{
+    float:left;
+    width: 50%;
+  }
+  .right{
+    float:right;
+    width: 50%;
+  }
+  .right image{
+    width: 100px;
+  }
+</style>

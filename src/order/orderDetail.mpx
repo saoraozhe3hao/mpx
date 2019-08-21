@@ -1,0 +1,43 @@
+<script type="application/json">
+  {
+    "usingComponents": {
+      "product-card": "components/productCard"
+    }
+  }
+</script>
+
+<template>
+  <view>
+    <product-card></product-card>
+    <view>券码：</view>
+    <image mode="widthFix" src="https://developers.weixin.qq.com/miniprogram/dev/image/cat/0.jpg?t=19032512"></image>
+    <view>订单信息</view>
+    <view>订单号：</view>
+    <view>付款时间：</view>
+    <view>预约时间：</view>
+    <view>人数：</view>
+    <view>房间数：</view>
+    <view>床位数：</view>
+    <view>订单总价：</view>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+
+  createPage({
+    data: {
+
+    },
+    onLoad: function (options) {
+      wx.showShareMenu();
+      wx.setNavigationBarTitle({
+        title: '订单详情'
+      })
+    }
+  })
+</script>
+
+<style lang="less">
+
+</style>

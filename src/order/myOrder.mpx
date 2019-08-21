@@ -1,0 +1,90 @@
+<script type="application/json">
+  {
+    "usingComponents": {}
+  }
+</script>
+
+<template>
+  <view>
+    <view class="tabs">
+      <button size="mini" id="all" bindtap="switch">全部</button>
+      <button size="mini" id="unused" bindtap="switch">待使用</button>
+      <button size="mini" id="used" bindtap="switch">待评价</button>
+      <button size="mini" id="refund" bindtap="switch">退款</button>
+    </view>
+    <view class="order-card clearfixed" bindtap="orderDetail">
+      <view class="left">
+        <view>干塘体验</view>
+        <view>预约时间：2009年33月33日</view>
+        <view>人数：5</view>
+        <view>房间数：3</view>
+        <view>床位数：3</view>
+        <view>总价: 4440元</view>
+      </view>
+      <view class="right">
+        <text>待使用</text>
+        <view>
+          <button size="mini" id="0" bindtap="refund">申请退款</button>
+        </view>
+        <view>
+          <button size="mini" id="0" bindtap="evaluate">评价</button>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+    import {createPage} from '@mpxjs/core'
+
+    createPage({
+        data: {},
+        onLoad: function (options) {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '我的订单'
+            })
+        },
+        onShow() {
+            this.getTabBar && this.getTabBar().setData({
+                active: 2
+            })
+        },
+        switch: function (event) {
+
+        },
+        orderDetail: function (event) {
+            wx.navigateTo({
+                url: '/orderDetail' + '?orderId=' + event.currentTarget.id
+            })
+        },
+        refund: function (event) {
+            wx.navigateTo({
+                url: '/refund' + '?orderId=' + event.currentTarget.id
+            })
+        },
+        evaluate: function (event) {
+            wx.navigateTo({
+                url: '/evaluate' + '?orderId=' + event.currentTarget.id
+            })
+        }
+    })
+</script>
+
+<style lang="less">
+  .order-card {
+    width: 90%;
+    margin: 10px auto;
+    border: 1px solid #ccc;
+  }
+
+  .left {
+    float: left;
+    width: 65%;
+  }
+
+  .right {
+    float: right;
+    width: 35%;
+  }
+</style>

@@ -1,0 +1,10 @@
+<script type="application/json">
+  {
+    "pages": [
+      "./appointment",
+      "./myPublish",
+      "./publish",
+      "./publishDetail"
+    ]
+  }
+</script>

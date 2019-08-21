@@ -1,0 +1,11 @@
+<script type="application/json">
+  {
+    "pages": [
+      "./collection",
+      "./message",
+      "./mine",
+      "./profit",
+      "./verify"
+    ]
+  }
+</script>

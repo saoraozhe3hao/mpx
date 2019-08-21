@@ -1,0 +1,9 @@
+<script type="application/json">
+  {
+    "pages": [
+      "./home",
+      "./category",
+      "./location"
+    ]
+  }
+</script>

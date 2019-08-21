@@ -1,0 +1,46 @@
+<script type="application/json">
+  {
+    "usingComponents": {}
+  }
+</script>
+
+<template>
+  <view>
+    <view>
+      <view>
+        <slider bindchange="sliderChange" min="0" max="10" value="10"/>{{score}}分
+      </view>
+      <view>
+        <textarea auto-height placeholder="详细描述" />
+      </view>
+    </view>
+    <button bindtap="submit">提交</button>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+
+  createPage({
+    data: {
+      score: 10
+    },
+    onLoad: function (query) {
+      wx.showShareMenu();
+      wx.setNavigationBarTitle({
+        title: '评价'
+      });
+    },
+    sliderChange: function(event){
+      this.setData({
+        score: event.detail.value
+      });
+    },
+    submit: function(event){
+
+    }
+  })
+</script>
+
+<style lang="less">
+</style>

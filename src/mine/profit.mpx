@@ -1,0 +1,43 @@
+<script type="application/json">
+  {
+    "usingComponents": {}
+  }
+</script>
+
+<template>
+  <view>
+    <view>已提现金额：**</view>
+    <view>提现中金额：**</view>
+    <view>
+      <text>可提现金额：**</text>
+      <button size="mini" bindtap="withdraw">申请提现</button>
+    </view>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+
+  createPage({
+    data: {
+
+    },
+    onLoad: function(options) {
+      wx.showShareMenu();
+      wx.setNavigationBarTitle({
+        title: '收益'
+      })
+    },
+    withdraw: function(event) {
+      wx.showToast({
+        title: '一个月只能申请一次',
+        icon: 'none',
+        duration: 2000
+      })
+    }
+  })
+</script>
+
+<style lang="less">
+
+</style>
