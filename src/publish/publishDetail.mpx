@@ -16,9 +16,9 @@
     <view>套餐详情</view>
     <view>
       <text>时间：{{date}}</text>
-      <picker mode="date" value="{{date}}" start="2015-09-01" end="2020-09-01" bindchange="dateChange">
-        <button size="mini" bindtap="delay">延长时间</button>
-      </picker>
+<!--      <picker mode="date" value="{{date}}" start="2015-09-01" end="2020-09-01" bindchange="dateChange">-->
+<!--        <button size="mini" bindtap="delay">延长时间</button>-->
+<!--      </picker>-->
     </view>
     <view>地点：****</view>
     <view>标签：****</view>

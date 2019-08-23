@@ -24,6 +24,4 @@ function mock() {
     ]);
 }
 
-if (window.location && window.location.hostname === "127.0.0.1") {
-  mock();
-}
+mock();

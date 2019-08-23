@@ -11,16 +11,16 @@
       <input placeholder=""/>
     </view>
     <view>
-      <picker mode="date" value="{{startDate}}" start="2015-09-01" end="2020-09-01" bindchange="startChange">
-        <view class="picker">
-          开始日期: {{startDate}}
-        </view>
-      </picker>
-      <picker mode="date" value="{{endDate}}" start="2015-09-01" end="2020-09-01" bindchange="endChange">
-        <view class="picker">
-          结束日期: {{endDate}}
-        </view>
-      </picker>
+<!--      <picker mode="date" value="{{startDate}}" start="2015-09-01" end="2020-09-01" bindchange="startChange">-->
+<!--        <view class="picker">-->
+<!--          开始日期: {{startDate}}-->
+<!--        </view>-->
+<!--      </picker>-->
+<!--      <picker mode="date" value="{{endDate}}" start="2015-09-01" end="2020-09-01" bindchange="endChange">-->
+<!--        <view class="picker">-->
+<!--          结束日期: {{endDate}}-->
+<!--        </view>-->
+<!--      </picker>-->
     </view>
     <view>
       <text>地点：</text>

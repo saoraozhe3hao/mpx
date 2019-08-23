@@ -1,67 +1,58 @@
 <script type="application/json">
   {
-    "usingComponents": {}
+    "usingComponents": {
+      "van-area": "vant-weapp/dist/area/index",
+      "van-panel": "vant-weapp/dist/panel/index",
+      "van-button": "vant-weapp/dist/button/index"
+    }
   }
 </script>
 
 <template>
   <view>
-    <text>定位/最近访问</text>
-    <view class="recent">
-      <text id="{{item}}" wx:for="{{recents}}" bindtap="back">{{item}}</text>
-    </view>
-    <text>选择</text>
+    <van-panel title="定位/最近访问">
+      <view>
+        <van-button icon="location-o" type="default" bind:click="back(location)">{{location}}</van-button>
+        <van-button type="default" wx:for="{{recents}}" bind:click="back(item)">{{item}}</van-button>
+      </view>
+    </van-panel>
     <view>
-      <picker value="{{province}}" range="{{provinces}}" bindchange="provinceChange">
-        <view class="picker">
-          省：{{provinces[province]}}
-        </view>
-      </picker>
-    </view>
-    <view>
-      <button size="mini" id="{{item}}" wx:for="{{cities}}" bindtap="back">{{item}}</button>
+      <van-area cancel-button-text=" " area-list="{{ areaList }}" bind:confirm="choose"/>
     </view>
   </view>
 </template>
 
 <script>
-  import { createPage } from '@mpxjs/core'
+    import {createPage} from '@mpxjs/core'
+    import area from '../components/area'
 
-  createPage({
-    data: {
-      recents: ['西安','陕西','渭南'],
-      province: 0,
-      provinces: ['全国', '北京', '天津', '上海', '重庆', '河北', '山西', '辽宁', '吉林', '黑龙江', '江苏',
-        '浙江', '安徽', '福建', '江西', '山东', '河南', '湖北', '湖南', '广东', '海南', '四川', '贵州', '云南',
-        '陕西', '甘肃', '青海', '内蒙古', '广西', '西藏', '宁夏', '新疆'
-      ],
-      cities: ['宁夏', '银川', '石嘴山', '吴忠', '固原', '中卫']
-    },
-    onLoad: function() {
-      wx.showShareMenu();
-      wx.setNavigationBarTitle({
-        title: '地址'
-      })
-    },
-    provinceChange: function(event){
-      this.setData({
-        province: event.detail.value
-      })
-    },
-    back: function(event){
-      var pages = getCurrentPages();
-      var prevPage = pages[pages.length - 2];
-      prevPage.setData({
-        location: event.target.id
-      })
-      wx.navigateBack()
-
-    }
-  })
+    createPage({
+        data: {
+            recents: ['户县', '华县'],
+            location: '西安',
+            areaList: area
+        },
+        onLoad: function () {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '地址'
+            })
+        },
+        choose(event){
+            let location = event.detail.values[2];
+            this.back(location.name);
+        },
+        back: function (location) {
+            var pages = getCurrentPages();
+            var prevPage = pages[pages.length - 2];
+            prevPage.setData({
+                location: location
+            })
+            wx.navigateBack()
+        }
+    })
 </script>
 
 <style lang="less">
-  .recent text{
-    margin: 0 10px 0 0;
-  }
+
 </style>

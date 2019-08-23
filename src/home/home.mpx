@@ -1,7 +1,6 @@
 <script type="application/json">
   {
     "usingComponents": {
-      "product-card": "components/productCard",
       "van-icon": "vant-weapp/dist/icon/index",
       "van-search": "vant-weapp/dist/search/index",
       "van-row": "vant-weapp/dist/row/index",
@@ -17,8 +16,10 @@
     <view class="top">
       <van-row>
         <van-col span="4">
-          <text class="location" bindtap="locate">{{location}}</text>
-          <van-icon name="arrow-down" custom-style="vertical-align:middle"/>
+          <view class="location text-overflow" bindtap="locate">
+            <text>{{location}}</text>
+            <text class="iconfont icon-jiantouxia"></text>
+          </view>
         </van-col>
         <van-col span="20">
           <van-search placeholder="搜'播主的名称'" use-action-slot bind:search="onSearch">
@@ -45,7 +46,7 @@
         <view>野居</view>
       </view>
       <view id="buzhuo" bindtap="category">
-        <view class="iconfont icon-yu"></view>
+        <view class="iconfont icon-yu1"></view>
         <view>捕捉</view>
       </view>
       <view id="caizhai" bindtap="category">
