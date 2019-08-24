@@ -1,36 +1,91 @@
 <script type="application/json">
   {
-    "usingComponents": {}
+    "usingComponents": {
+      "van-icon": "vant-weapp/dist/icon/index",
+      "van-cell": "vant-weapp/dist/cell/index",
+      "van-cell-group": "vant-weapp/dist/cell-group/index",
+      "van-button": "vant-weapp/dist/button/index"
+    }
   }
 </script>
 
 <template>
-  <view>
-    <view>
-      <button size="mini" bindtap="verify">验证订单</button>
-      <button size="mini" bindtap="message">信息</button>
-      <button size="mini" bindtap="profit">收益</button>
+  <view class="functions">
+    <view bindtap="collection">
+      <van-icon name="like" />
+      <view>收藏</view>
     </view>
-    <button bindtap="personalInfo">个人信息</button>
-    <button bindtap="collection">收藏</button>
+    <view bindtap="profit">
+      <van-icon name="bill" />
+      <view>收益</view>
+    </view>
+    <view bindtap="verify">
+      <van-icon name="eye" />
+      <view>验证订单</view>
+    </view>
+    <view bindtap="message">
+      <van-icon name="chat" />
+      <view>消息</view>
+    </view>
+  </view>
+  <view>
+    <van-button type="default" size="large" wx:if="{{!authed}}" bind:getuserinfo="getUserInfo">点击获取用户信息</van-button>
+    <van-cell-group title="个人信息">
+      <van-cell title="昵称" value="{{userInfo.nickName}}" is-link url="/basic"/>
+      <van-cell title="地址" value="福建省三明市尤溪县" is-link  url="/basic"/>
+      <van-cell title="手机号" value="15202926290" is-link  url="/phone"/>
+      <van-cell title="自媒体号/短视频号/直播号" value="公众号/微博/B站/西瓜/抖音/斗鱼等" is-link  url="/selfMedia"/>
+      <van-cell title="姓名" value="老钟" is-link  url="/bankCard"/>
+      <van-cell title="银行卡号" value="62222222222222222" is-link  url="/bankCard"/>
+    </van-cell-group>
   </view>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
+    import store from '../components/store'
 
     createPage({
-        data: {},
+        data: {
+            nickName: '',
+            authed: false
+        },
         onLoad: function (options) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '我的'
             })
+            this.auth();
         },
         onShow() {
             this.getTabBar && this.getTabBar().setData({
                 active: 3
             })
+        },
+        computed: {
+            userInfo() {
+                return store.state.userInfo
+            }
+        },
+        auth: function() {
+            wx.getSetting({
+                success: (res) => {
+                    // 已授权
+                    if (res.authSetting['scope.userInfo']) {
+                        this.authed = true;
+                        wx.getUserInfo({
+                            success: (res)=>{
+                                this.getUserInfo({detail: res});
+                            }
+                        })
+                    }
+                }
+            })
+        },
+        getUserInfo: function (res) {
+            console.log(JSON.stringify(res));
+            store.state.userInfo = res.detail.userInfo;
+            store.commit('change')
         },
         verify: function (event) {
             wx.navigateTo({
@@ -47,11 +102,6 @@
                 url: '/profit'
             })
         },
-        personalInfo: function (event) {
-            wx.navigateTo({
-                url: '/personalInfo'
-            })
-        },
         collection: function (event) {
             wx.navigateTo({
                 url: '/collection'
@@ -61,7 +111,15 @@
 </script>
 
 <style lang="less">
-  .recent text {
-    margin: 0 10px 0 0;
+  .functions {
+    margin: 0 5vw;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    text-align: center;
+
+    > view {
+      width: 20vw;
+    }
   }
 </style>

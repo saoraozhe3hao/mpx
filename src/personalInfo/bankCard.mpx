@@ -1,44 +1,80 @@
 <script type="application/json">
   {
-    "usingComponents": {    }
+    "usingComponents": {
+      "van-cell-group": "vant-weapp/dist/cell-group/index",
+      "van-field": "vant-weapp/dist/field/index",
+      "van-button": "vant-weapp/dist/button/index"
+    }
   }
 </script>
 
 <template>
   <view>
-    <view>
-      <text>姓名：</text>
-      <input placeholder="" />
-    </view>
-    <view>
-      <text>银行卡号：</text>
-      <input placeholder="" type="number"/>
-    </view>
-    <view>
-      <text>开户行：</text>
-      <input placeholder="" />
-    </view>
-    <button bindtap="save">保存</button>
+    <van-cell-group>
+      <van-field maxlength="8" placeholder="请输入" label="真实姓名" id="realName"
+                 value="{{ realName }}" error-message="{{realNameError}}"
+                 bind:blur="inputBlur" bind:focus="inputFocus('realNameError')"/>
+      <van-field maxlength="20" placeholder="请输入" label="银行卡号" id="cardNum"
+                 value="{{ cardNum }}" error-message="{{cardNumError}}"
+                 bind:blur="inputBlur" bind:focus="inputFocus('cardNumError')"/>
+      <van-field maxlength="50" placeholder="请输入" label="开户行" id="openBank"
+                 value="{{ openBank }}" error-message="{{openBankError}}"
+                 bind:blur="inputBlur" bind:focus="inputFocus('openBankError')"/>
+    </van-cell-group>
+    <van-button size="large" bind:click="submit">提交</van-button>
   </view>
 </template>
 
 <script>
-  import { createPage } from '@mpxjs/core'
+    import {createPage} from '@mpxjs/core'
 
-  createPage({
-    data: {
-
-    },
-    onLoad: function (options) {
-      wx.showShareMenu();
-      wx.setNavigationBarTitle({
-        title: '银行卡'
-      })
-    },
-    save: function (event) {
-
-    }
-  })
+    createPage({
+        data: {
+            realName: '',
+            cardNum: '',
+            openBank: '',
+            realNameError: '',
+            cardNumError: '',
+            openBankError: ''
+        },
+        onLoad(options) {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '姓名/银行卡'
+            })
+        },
+        inputFocus(errorMessage) {
+            this[errorMessage] = '';
+        },
+        inputBlur(event) {
+            this[event.target.id] = event.detail.value;
+        },
+        validate() {
+            let promise = new Promise((resolve, reject) => {
+                if (!/^[\u3400-\u4DB5\u4E00-\u9FA5\u9FA6-\u9FBB\uF900-\uFA2D\uFA30-\uFA6A\uFA70-\uFAD9]{2,8}$/.test(this.realName)) {
+                    this.realNameError = '请输入正确的姓名';
+                    reject();
+                }
+                if (!/^[0-9]{16,19}$/.test(this.cardNum)) {
+                    this.cardNumError = '请输入正确的银行卡号';
+                    reject();
+                }
+                if (!this.openBank) {
+                    this.openBankError = '请输入正确的开户行';
+                    reject();
+                }
+                resolve();
+            });
+            return promise;
+        },
+        submit() {
+            this.validate().then(() => {
+                console.log();
+            }).catch(() => {
+                console.log();
+            })
+        }
+    })
 </script>
 
 <style lang="less">

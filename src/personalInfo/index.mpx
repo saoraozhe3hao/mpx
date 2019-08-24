@@ -3,7 +3,6 @@
     "pages": [
       "./bankCard",
       "./basic",
-      "./personalInfo",
       "./phone",
       "./selfMedia"
     ]

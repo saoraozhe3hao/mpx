@@ -1,76 +1,56 @@
 <script type="application/json">
   {
-    "usingComponents": {   }
+    "usingComponents": {
+      "van-cell-group": "vant-weapp/dist/cell-group/index",
+      "van-field": "vant-weapp/dist/field/index"
+    }
   }
 </script>
 
 <template>
   <view>
-    <view>
-      <text>抖音号：</text>
-      <input placeholder="" />
-    </view>
-    <view>
-      <text>快手号：</text>
-      <input placeholder="" />
-    </view>
-    <view>
-      <text>火山号：</text>
-      <input placeholder="" />
-    </view>
-    <view>
-      <text>西瓜号：</text>
-      <input placeholder="" />
-    </view>
-    <view>
-      <text>B站号：</text>
-      <input placeholder="" />
-    </view>
-    <view>
-      <text>美拍号：</text>
-      <input placeholder="" />
-    </view>
-    <view>
-      <text>秒拍号：</text>
-      <input placeholder="" />
-    </view>
-    <view>
-      <text>好看号：</text>
-      <input placeholder="" />
-    </view>
-    <view>
-      <text>微视号：</text>
-      <input placeholder="" />
-    </view>
-    <view>
-      <text>微博号：</text>
-      <input placeholder="" />
-    </view>
-    <view>
-      <text>公众号：</text>
-      <input placeholder="" />
-    </view>
-    <button bindtap="save">保存</button>
+    <van-cell-group>
+      <van-field maxlength="20" placeholder="请输入" label="抖音号" id="douyin"
+                 value="{{ douyin }}" bind:blur="inputBlur"/>
+      <van-field maxlength="20" placeholder="请输入" label="快手号" id="kuaishou"
+                 value="{{ kuaishou }}" bind:blur="inputBlur"/>
+      <van-field maxlength="20" placeholder="请输入" label="西瓜号" id="xigua"
+                 value="{{ xigua }}" bind:blur="inputBlur"/>
+      <van-field maxlength="20" placeholder="请输入" label="B站号" id="blibli"
+                 value="{{ blibli }}" bind:blur="inputBlur"/>
+      <van-field maxlength="20" placeholder="请输入" label="斗鱼号" id="douyu"
+                 value="{{ douyu }}" bind:blur="inputBlur"/>
+      <van-field maxlength="20" placeholder="请输入" label="微博号" id="weibo"
+                 value="{{ weibo }}" bind:blur="inputBlur"/>
+      <van-field maxlength="20" placeholder="请输入" label="微信公众号" id="gongzhong"
+                 value="{{ gongzhong }}" bind:blur="inputBlur"/>
+    </van-cell-group>
   </view>
 </template>
 
 <script>
-  import { createPage } from '@mpxjs/core'
+    import {createPage} from '@mpxjs/core'
 
-  createPage({
-    data: {
-
-    },
-    onLoad: function (options) {
-      wx.showShareMenu();
-      wx.setNavigationBarTitle({
-        title: '自媒体号'
-      })
-    },
-    save: function (event) {
-
-    }
-  })
+    createPage({
+        data: {
+            douyin: '',
+            kuaishou: '',
+            xigua: '',
+            blibli: '',
+            douyu: '',
+            weibo: '',
+            gongzhong: ''
+        },
+        onLoad: function (options) {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '自媒体号'
+            })
+        },
+        inputBlur (event) {
+            console.log(event.target.id);
+        },
+    })
 </script>
 
 <style lang="less">

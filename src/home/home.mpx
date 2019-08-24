@@ -1,7 +1,6 @@
 <script type="application/json">
   {
     "usingComponents": {
-      "van-icon": "vant-weapp/dist/icon/index",
       "van-search": "vant-weapp/dist/search/index",
       "van-row": "vant-weapp/dist/row/index",
       "van-col": "vant-weapp/dist/col/index",
@@ -15,55 +14,54 @@
   <view>
     <view class="top">
       <van-row>
-        <van-col span="4">
+        <van-col span="6">
           <view class="location text-overflow" bindtap="locate">
             <text>{{location}}</text>
             <text class="iconfont icon-jiantouxia"></text>
           </view>
         </van-col>
-        <van-col span="20">
+        <van-col span="18">
           <van-search placeholder="搜'播主的名称'" use-action-slot bind:search="onSearch">
-            <view slot="action">搜索</view>
           </van-search>
         </van-col>
       </van-row>
     </view>
     <view class="categories">
-      <view id="daye" bindtap="category">
+      <view bindtap="category('daye')">
         <view class="iconfont icon-huwai"></view>
         <view>打野</view>
       </view>
-      <view id="ganhai" bindtap="category">
+      <view bindtap="category('ganhai')">
         <view class="iconfont icon-haixian"></view>
         <view>赶海</view>
       </view>
-      <view id="yeshi" bindtap="category">
+      <view bindtap="category(yeshi)">
         <view class="iconfont icon-yinshixuanzhong"></view>
         <view>野食</view>
       </view>
-      <view id="yeju" bindtap="category">
+      <view bindtap="category(yeju)">
         <view class="iconfont icon-huwaixuanzhong"></view>
         <view>野居</view>
       </view>
-      <view id="buzhuo" bindtap="category">
+      <view bindtap="category(buzhuo)">
         <view class="iconfont icon-yu1"></view>
         <view>捕捉</view>
       </view>
-      <view id="caizhai" bindtap="category">
+      <view bindtap="category(caizhai)">
         <view class="iconfont icon-rengongcaizhai"></view>
         <view>采摘</view>
       </view>
-      <view id="minsu" bindtap="category">
+      <view bindtap="category(minsu)">
         <view class="iconfont icon-nongcungongshuigongcheng"></view>
         <view>民俗</view>
       </view>
-      <view id="tanmi" bindtap="category">
+      <view bindtap="category(tanmi)">
         <view class="iconfont icon-tansuofaxian"></view>
         <view>探秘</view>
       </view>
     </view>
     <van-card wx:for="{{products}}" wx:key="index" lazy-load="true"
-              tag="打野、民俗" price="100" desc="干塘体验一日游" title="{{ item.name }}"
+              tag="打野、民俗" price="100" desc="干塘体验一日游" title="{{ item.name }}" bindtap="productDetail(item)"
               thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
       <view slot="bottom">
         <text class="date">3月2日-4月5日</text>
@@ -95,6 +93,11 @@
                 active: 0
             })
         },
+        watch: {
+            location(newval, oldval) {
+                this.fetchProducts();
+            }
+        },
         login() {     // 登录
             wx.login({
                 success: res => {
@@ -117,10 +120,11 @@
                 }
             })
         },
-        fetchProducts: function () {
+        fetchProducts(keyWord) {
+            keyWord = keyWord || '';
             wx.request({
                 method: 'GET',
-                url: app.globalData.basePath + "/mini/product",
+                url: `${app.globalData.basePath}/mini/product?keyWord=${keyWord}`,
                 header: {
                     'Cookie': wx.getStorageSync("sessionId")
                 },
@@ -129,18 +133,23 @@
                 }
             });
         },
-        category: function (event) {
+        category (category) {
             wx.navigateTo({
-                url: '/category' + '?category=' + event.currentTarget.id
+                url: `/category?category=${category}`
             })
         },
-        locate: function () {
+        locate () {
             wx.navigateTo({
                 url: '/location'
             })
         },
-        onSearch: function (event) {
-            console.log(event.detail);
+        onSearch (event) {
+            this.fetchProducts(event.detail)
+        },
+        productDetail(item) {
+            wx.navigateTo({
+                url: `/productDetail?id=${item.id}`
+            })
         }
     })
 </script>

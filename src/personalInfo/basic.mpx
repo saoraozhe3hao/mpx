@@ -1,39 +1,78 @@
 <script type="application/json">
   {
-    "usingComponents": {    }
+    "usingComponents": {
+      "van-cell-group": "vant-weapp/dist/cell-group/index",
+      "van-field": "vant-weapp/dist/field/index",
+      "van-dialog": "vant-weapp/dist/dialog/index"
+    }
   }
 </script>
 
 <template>
   <view>
-    <view>
-      <text>昵称：</text>
-      <input placeholder="" />
-    </view>
-    <view>
-      <text>地址：</text>
-      <input placeholder="" />
-    </view>
-    <button bindtap="save">保存</button>
+    <van-cell-group>
+      <van-field required maxlength="20" placeholder="请输入昵称" label="昵称"
+                 value="{{ nick }}" error-message="{{nickError}}" bind:blur="nickNameBlur"/>
+      <van-field required maxlength="50" placeholder="请输入地址" label="地址"
+                 value="{{ address }}" error-message="{{addressError}}" bind:blur="addressBlur"/>
+    </van-cell-group>
+    <van-dialog id="van-dialog"/>
   </view>
 </template>
 
 <script>
-  import { createPage } from '@mpxjs/core'
+    import {createPage} from '@mpxjs/core'
+    import Dialog from 'vant-weapp/dist/dialog/dialog';
+    import store from '../components/store'
 
-  createPage({
-    data: {
-
-    },
-    onLoad: function(options) {
-      wx.showShareMenu();
-      wx.setNavigationBarTitle({
-        title: '基本信息'
-      })
-    },
-    save: function (event) {
-    }
-  })
+    createPage({
+        data: {
+            originNick: '',
+            nick: '',
+            nickError: '',
+            originAddress: '',
+            address: '',
+            addressError: ''
+        },
+        onLoad: function (options) {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '基本信息'
+            })
+            this.originNick = store.state.userInfo.nickName;
+            this.nick = this.originNick;
+        },
+        nickNameBlur(event) {
+            this.nick = event.detail.value;
+            if (!this.nick && this.originNick) {
+                this.nickError = '请填写昵称'
+            }
+            else{
+                this.nickError = ''
+            }
+            if (!this.nick) {
+                return;
+            }
+            Dialog.confirm({
+                title: `确定将昵称改为${this.nick}吗？`,
+                message: '请确保该名字为您所有，如恶意占用知名自媒体的名称，平台将做相应处罚'
+            }).then(() => {
+                this.originNick = this.nick;
+                store.state.userInfo.nickName = this.nick;
+            }).catch(() => {
+                this.nick = this.originNick;
+            });
+        },
+        addressBlur(event) {
+            this.address = event.detail.value;
+            if (!this.address && this.originAddress) {
+                this.addressError = '请填写地址'
+            }
+            else{
+                this.addressError = ''
+            }
+        }
+    })
 </script>
 
 <style lang="less">

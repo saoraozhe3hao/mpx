@@ -1,17 +1,25 @@
 <script type="application/json">
   {
-    "usingComponents": {}
+    "usingComponents": {
+      "van-cell": "vant-weapp/dist/cell/index",
+      "van-cell-group": "vant-weapp/dist/cell-group/index",
+      "van-panel": "vant-weapp/dist/panel/index",
+      "van-button": "vant-weapp/dist/button/index"
+    }
   }
 </script>
 
 <template>
   <view>
-    <view>已提现金额：**</view>
-    <view>提现中金额：**</view>
-    <view>
-      <text>可提现金额：**</text>
-      <button size="mini" bindtap="withdraw">申请提现</button>
-    </view>
+    <van-cell-group>
+      <van-cell title="已提现金额" value="1000" />
+      <van-cell title="提现中金额" value="100" />
+    </van-cell-group>
+    <van-panel title="可提现金额" desc="10" use-footer-slot>
+      <view slot="footer">
+        <van-button size="small" type="danger" bind:click="withdraw">提现</van-button>
+      </view>
+    </van-panel>
   </view>
 </template>
 
