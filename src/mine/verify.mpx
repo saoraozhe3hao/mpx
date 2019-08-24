@@ -1,43 +1,60 @@
 <script type="application/json">
   {
-    "usingComponents": {}
+    "usingComponents": {
+      "van-cell-group": "vant-weapp/dist/cell-group/index",
+      "van-field": "vant-weapp/dist/field/index",
+      "van-button": "vant-weapp/dist/button/index"
+    }
   }
 </script>
 
 <template>
   <view>
-    <view>
-      <input placeholder="券码" />
-      <button size="mini" bindtap="verify">验证</button>
-    </view>
-    <button size="mini" bindtap="scan">扫描</button>
+    <van-cell-group>
+      <van-field maxlength="32" placeholder="请输入" label="订单验证码"
+                 value="{{ code }}" error-message="{{codeError}}" bind:blur="codeBlur" bind:focus="codeFocus">
+        <van-button slot="button" size="small" bind:click="verify">验证</van-button>
+      </van-field>
+    </van-cell-group>
+    <van-button size="large" bind:click="scan">扫描订单二维码</van-button>
   </view>
 </template>
 
 <script>
-  import { createPage } from '@mpxjs/core'
+    import {createPage} from '@mpxjs/core'
 
-  createPage({
-    data: {
-
-    },
-    onLoad: function(options) {
-      wx.showShareMenu();
-      wx.setNavigationBarTitle({
-        title: '验证订单'
-      })
-    },
-    verify: function(event) {
-    },
-    scan: function (event) {
-      wx.scanCode({
-        onlyFromCamera: true,
-        success(res) {
-          console.log(res)
+    createPage({
+        data: {
+            code: '',
+            codeError: ''
+        },
+        onLoad: function (options) {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '验证订单'
+            })
+        },
+        codeBlur(event) {
+            this.code = event.detail.value;
+        },
+        codeFocus(event) {
+            this.codeError = "";
+        },
+        verify(event) {
+            if (!this.code) {
+                this.codeError = "请输入订单验证码";
+                return;
+            }
+        },
+        scan(event) {
+            wx.scanCode({
+                onlyFromCamera: true,
+                success(res) {
+                    console.log(res)
+                }
+            })
         }
-      })
-    }
-  })
+    })
 </script>
 
 <style lang="less">

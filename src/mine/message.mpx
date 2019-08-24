@@ -1,58 +1,63 @@
 <script type="application/json">
   {
-    "usingComponents": {}
+    "usingComponents": {
+      "van-field": "vant-weapp/dist/field/index",
+      "van-cell": "vant-weapp/dist/cell/index"
+    }
   }
 </script>
 
 <template>
-  <view>
+  <view class="message-container">
     <view>
-      <view class="receive-message">
-        客服回复：******
-      </view>
-      <view class="receive-message">
-        系统通知：******
-      </view>
-      <view class="receive-message">
-        预约通知：******
-      </view>
-      <view class="send-message">
-        ******
-      </view>
+      <van-cell title="客服回复" value="****" class="receive-message"/>
+      <van-cell title="系统通知" value="****" class="receive-message"/>
+      <van-cell title="预约通知" value="****" class="receive-message"/>
+      <van-cell title="您的留言" value="****" class="send-message"/>
     </view>
-    <input placeholder="留言" confirm-type="send" bindconfirm="send" class="leave-word" />
+    <van-field use-button-slot label="留言" type="textarea" placeholder="请输入留言" autosize
+               value="{{ message }}" class="leave-word" bind:blur="messageBlur">
+      <van-button slot="button" size="small" bind:click="send">发送</van-button>
+    </van-field>
   </view>
 </template>
 
 <script>
-  import { createPage } from '@mpxjs/core'
+    import {createPage} from '@mpxjs/core'
 
-  createPage({
-    data: {
+    createPage({
+        data: {
+            message: ''
+        },
+        onLoad: function (options) {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '消息中心'
+            })
+        },
+        messageBlur(event) {
+            this.message = event.detail.value;
+        },
+        send() {
 
-    },
-    onLoad: function(options) {
-      wx.showShareMenu();
-      wx.setNavigationBarTitle({
-        title: '信息中心'
-      })
-    },
-    send: function(event) {
-    }
-  })
+        }
+    })
 </script>
 
 <style lang="less">
-  .receive-message{
-    border: 1px solid #ccc;
-    margin: 0 50px 20px 20px;
-  }
-  .send-message{
-    border: 1px solid #ccc;
-    margin: 0 20px 20px 50px;
-  }
-  .leave-word{
-    position: absolute;
-    bottom: 0;
+  .message-container{
+    padding-bottom: 50px;
+    .receive-message {
+    }
+
+    .send-message {
+    }
+
+    .leave-word {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
   }
 </style>
