@@ -1,7 +1,6 @@
 <script type="application/json">
   {
     "usingComponents": {
-      "valuation-card": "components/valuationCard",
       "van-panel": "vant-weapp/dist/panel/index",
       "van-card": "vant-weapp/dist/card/index",
       "van-cell": "vant-weapp/dist/cell/index",
@@ -51,9 +50,6 @@
         </view>
       </van-card>
     </view>
-    <view wx:if="{{activeTab == 1}}">
-      <valuation-card></valuation-card>
-    </view>
   </view>
 </template>
 
@@ -70,7 +66,15 @@
                 title: '趣导'
             });
         },
+        onShow () {
+            this.activeTab = 0;
+        },
         tabChange(event) {
+            if(event.detail.index == 1){
+                wx.navigateTo({
+                    url: '/valuation' + '?sellerId=' + 0
+                })
+            }
             this.activeTab = event.detail.index;
         },
         productDetail(item) {
