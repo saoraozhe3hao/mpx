@@ -1,36 +1,33 @@
 <script type="application/json">
   {
-    "usingComponents": {}
+    "usingComponents": {
+      "van-tab": "vant-weapp/dist/tab/index",
+      "van-tabs": "vant-weapp/dist/tabs/index",
+      "van-card": "vant-weapp/dist/card/index",
+      "van-button": "vant-weapp/dist/button/index"
+    }
   }
 </script>
 
 <template>
   <view>
-    <view class="tabs">
-      <button size="mini" id="all" bindtap="switch">全部</button>
-      <button size="mini" id="unused" bindtap="switch">待使用</button>
-      <button size="mini" id="used" bindtap="switch">待评价</button>
-      <button size="mini" id="refund" bindtap="switch">退款</button>
-    </view>
-    <view class="order-card clearfixed" bindtap="orderDetail">
-      <view class="left">
-        <view>干塘体验</view>
+    <van-tabs active="{{ active }}" bind:change="tabChange">
+      <van-tab title="全部"></van-tab>
+      <van-tab title="待使用"></van-tab>
+      <van-tab title="待评价"></van-tab>
+      <van-tab title="退款"></van-tab>
+    </van-tabs>
+    <van-card wx:for="{{orders}}" wx:key="index" lazy-load="true"
+              tag="待使用" price="1000" desc="干塘体验一日游" title="{{ item.name }}" bindtap="orderDetail(item)"
+              thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
+      <view slot="bottom">
         <view>预约时间：2009年33月33日</view>
-        <view>人数：5</view>
-        <view>房间数：3</view>
-        <view>床位数：3</view>
-        <view>总价: 4440元</view>
       </view>
-      <view class="right">
-        <text>待使用</text>
-        <view>
-          <button size="mini" id="0" bindtap="refund">申请退款</button>
-        </view>
-        <view>
-          <button size="mini" id="0" bindtap="evaluate">评价</button>
-        </view>
+      <view slot="footer">
+        <van-button size="mini" catch:tap="evaluate">评价</van-button>  <!-- 使用小程序原生事件才能阻止冒泡 -->
+        <van-button size="mini" catch:tap="refund">申请退款</van-button>
       </view>
-    </view>
+    </van-card>
   </view>
 </template>
 
@@ -38,8 +35,18 @@
     import {createPage} from '@mpxjs/core'
 
     createPage({
-        data: {},
-        onLoad: function (options) {
+        data: {
+            activeTab: 0,
+            orders: [
+                {
+                    name: '野食小子-干塘体验'
+                },
+                {
+                    name: '野居青年-野居体验'
+                }
+            ]
+        },
+        onLoad (options) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '我的订单'
@@ -50,20 +57,20 @@
                 active: 2
             })
         },
-        switch: function (event) {
-
+        tabChange (event) {
+            this.activeTab = event.detail.index;
         },
-        orderDetail: function (event) {
+        orderDetail (item) {
             wx.navigateTo({
-                url: '/orderDetail' + '?orderId=' + event.currentTarget.id
+                url: '/orderDetail' + '?orderId=' + item.id
             })
         },
-        refund: function (event) {
+        refund (event) {
             wx.navigateTo({
                 url: '/refund' + '?orderId=' + event.currentTarget.id
             })
         },
-        evaluate: function (event) {
+        evaluate (event) {
             wx.navigateTo({
                 url: '/evaluate' + '?orderId=' + event.currentTarget.id
             })
@@ -72,19 +79,5 @@
 </script>
 
 <style lang="less">
-  .order-card {
-    width: 90%;
-    margin: 10px auto;
-    border: 1px solid #ccc;
-  }
 
-  .left {
-    float: left;
-    width: 65%;
-  }
-
-  .right {
-    float: right;
-    width: 35%;
-  }
 </style>
