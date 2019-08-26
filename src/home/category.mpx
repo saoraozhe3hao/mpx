@@ -4,7 +4,8 @@
       "van-search": "vant-weapp/dist/search/index",
       "van-row": "vant-weapp/dist/row/index",
       "van-col": "vant-weapp/dist/col/index",
-      "van-card": "vant-weapp/dist/card/index"
+      "van-card": "vant-weapp/dist/card/index",
+      "van-cell-group": "vant-weapp/dist/cell-group/index"
     }
   }
 </script>
@@ -25,18 +26,20 @@
         </van-col>
       </van-row>
     </view>
-    <van-card wx:for="{{products}}" wx:key="index" lazy-load="true"
-              tag="打野、民俗" price="100" desc="干塘体验一日游" title="{{ item.name }}" bindtap="productDetail(item)"
-              thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
-      <view slot="bottom">
-        <text class="date">3月2日-4月5日</text>
-        <text class="number">10人预约</text>
-      </view>
-      <view slot="footer">
-        <text class="distance">100km</text>
-        <text class="location">户县</text>
-      </view>
-    </van-card>
+    <van-cell-group title="野居">
+      <van-card wx:for="{{products}}" wx:key="index" lazy-load="true"
+                tag="打野、民俗" price="100" desc="干塘体验一日游" title="{{ item.name }}" bindtap="productDetail(item)"
+                thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
+        <view slot="bottom">
+          <text class="date">3月2日-4月5日</text>
+          <text class="number">10人预约</text>
+        </view>
+        <view slot="footer">
+          <text class="distance">100km</text>
+          <text class="location">户县</text>
+        </view>
+      </van-card>
+    </van-cell-group>
   </view>
 </template>
 
