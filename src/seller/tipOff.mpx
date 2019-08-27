@@ -1,54 +1,42 @@
 <script type="application/json">
   {
-    "usingComponents": {}
+    "usingComponents": {
+      "van-cell-group": "vant-weapp/dist/cell-group/index",
+      "van-field": "vant-weapp/dist/field/index",
+      "van-button": "vant-weapp/dist/button/index"
+    }
   }
 </script>
 
 <template>
   <view>
-    <view>
-      <view>
-        <text>趣导名称：</text>
-        <text>小六打野</text>
-      </view>
-      <view>
-<!--        <picker bindchange="typeChange" value="{{type}}" range="{{types}}">-->
-<!--          <view class="picker">-->
-<!--            举报类型：{{types[type]}}-->
-<!--          </view>-->
-<!--        </picker>-->
-      </view>
-      <view>
-        <textarea auto-height placeholder="详细描述" />
-      </view>
-    </view>
-    <button bindtap="submit">提交</button>
+    <van-cell-group title="投诉趣导">
+      <van-field label="详细描述" type="textarea" placeholder="请输入" autosize value="{{ detail }}"/>
+      <van-button type="default" bind:click="submit" size="large">提交</van-button>
+    </van-cell-group>
   </view>
 </template>
 
 <script>
-  import { createPage } from '@mpxjs/core'
+    import {createPage} from '@mpxjs/core'
 
-  createPage({
-    data: {
-      types: ['未提供服务','联系不上','与描述差距太大','其他'],
-      type: 0
-    },
-    onLoad: function (options) {
-      wx.showShareMenu();
-      wx.setNavigationBarTitle({
-        title: '举报趣导'
-      })
-    },
-    typeChange: function(event){
-      this.setData({
-        type: event.detail.value
-      });
-    },
-    submit: function(){
+    createPage({
+        data: {
+            detail: ''
+        },
+        onLoad: function (options) {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '举报趣导'
+            })
+        },
+        typeChange(event) {
+            this.typeIndex = event.detail.value;
+        },
+        submit () {
 
-    }
-  })
+        }
+    })
 </script>
 
 <style lang="less">

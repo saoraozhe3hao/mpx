@@ -32,7 +32,6 @@
 
     createPage({
         data: {
-            showSheet: false,
             types: ['未提供服务', '联系不上', '与描述差距太大', '其他'],
             typeIndex: 0,
             orderId: '',

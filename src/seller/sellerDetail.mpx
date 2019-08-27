@@ -42,7 +42,7 @@
       <van-tab title="趣友评价"></van-tab>
     </van-tabs>
 
-    <van-card tag="打野、民俗" price="100" desc="干塘体验一日游" title="野食小子" bindtap="productDetail(item)"
+    <van-card tag="打野、民俗" price="100" desc="干塘体验一日游" title="野食小子" bindtap="productDetail"
               thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg"
               wx:if="{{activeTab == 0}}">
       <view slot="bottom">
@@ -76,9 +76,9 @@
             }
             this.activeTab = event.detail.index;
         },
-        productDetail(item) {
+        productDetail() {
             wx.navigateTo({
-                url: `/productDetail?id=${item.id}`
+                url: `/productDetail?id=${this.id}`
             })
         },
         collect(event) {
