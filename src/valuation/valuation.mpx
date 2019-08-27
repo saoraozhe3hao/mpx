@@ -1,29 +1,68 @@
 <script type="application/json">
   {
     "usingComponents": {
-      "valuation-card": "components/valuationCard"
+      "van-button": "vant-weapp/dist/button/index",
+      "van-card": "vant-weapp/dist/card/index",
+      "van-cell-group": "vant-weapp/dist/cell-group/index",
+      "van-field": "vant-weapp/dist/field/index",
+      "van-popup": "vant-weapp/dist/popup/index"
     }
   }
 </script>
 
 <template>
-  <valuation-card></valuation-card>
+  <van-cell-group title="小六打野的用户评价">
+    <van-card wx:for="{{valuations}}" wx:key="index" lazy-load="true" currency=" "
+              tag="这位网友" title="我觉得还行，勉强合格" desc="2019年12月1日" price="3分"
+              thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
+      <view slot="bottom">
+        趣导回应：xxxxxxxxxxxxxxxxxxxxxxxx
+      </view>
+      <view slot="footer">
+        <van-button size="mini" bind:click="reply(item.id)">回应</van-button>
+      </view>
+    </van-card>
+  </van-cell-group>
+  <van-popup position="bottom" show="{{ showPopup }}" bind:close="popupClose">
+    <van-field use-button-slot label="回应" type="textarea" placeholder="请输入" autosize
+               value="{{ response }}" bind:blur="replyBlur">
+      <van-button slot="button" size="small" bind:click="submit">提交</van-button>
+    </van-field>
+  </van-popup>
 </template>
 
 <script>
-  import { createPage } from '@mpxjs/core'
+    import {createPage} from '@mpxjs/core'
 
-  createPage({
-    data: {
-
-    },
-    onLoad: function (query) {
-      wx.showShareMenu();
-      wx.setNavigationBarTitle({
-        title: '用户评价'
-      });
-    }
-  })
+    createPage({
+        data: {
+            valuations: [
+                {},
+                {}
+            ],
+            showPopup: false,
+            response: ''
+        },
+        onLoad (query) {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '用户评价'
+            });
+        },
+        reply(id){
+            this.showPopup = true;
+            this.response = '';
+        },
+        replyBlur(event) {
+            this.response = event.detail.value;
+        },
+        popupClose(){
+            this.showPopup = false;
+        },
+        submit(event) {
+            this.showPopup = false;
+        }
+    })
 </script>
 
 <style lang="less">

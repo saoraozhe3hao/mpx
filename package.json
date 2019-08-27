@@ -19,7 +19,7 @@
     "@mpxjs/api-proxy": "^2.2.0",
     "@mpxjs/core": "^2.2.17",
     "@mpxjs/mock": "^2.1.15",
-    "vant-weapp": "^0.5.19"
+    "vant-weapp": "^0.5.20"
   },
   "devDependencies": {
     "@mpxjs/webpack-plugin": "^2.2.19",

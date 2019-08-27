@@ -1,15 +1,17 @@
 {
-  "compileType": "miniprogram",
-  "setting": {
-    "newFeature": true,
-    "urlCheck": true,
-    "es6": false,
-    "postcss": true,
-    "minified": false,
-    "autoAudits": false
-  },
-  "appid": "wx1abe27b1ea58edc8",
-  "projectname": "mpx",
-  "description": "mpx",
-  "condition": {}
+	"compileType": "miniprogram",
+	"setting": {
+		"newFeature": true,
+		"urlCheck": true,
+		"es6": false,
+		"postcss": true,
+		"minified": false,
+		"autoAudits": false
+	},
+	"appid": "wx1abe27b1ea58edc8",
+	"projectname": "mpx",
+	"description": "mpx",
+	"simulatorType": "wechat",
+	"simulatorPluginLibVersion": {},
+	"condition": {}
 }
