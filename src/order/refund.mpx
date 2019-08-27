@@ -1,62 +1,57 @@
 <script type="application/json">
   {
-    "usingComponents": {}
+    "usingComponents": {
+      "van-cell-group": "vant-weapp/dist/cell-group/index",
+      "van-field": "vant-weapp/dist/field/index",
+      "van-button": "vant-weapp/dist/button/index"
+    }
   }
 </script>
 
 <template>
   <view>
-    <view>
-      <view>
-        <text>订单ID：</text>
-        <text>{{orderId}}</text>
+    <van-cell-group title="申请退款">
+      <view class="weui-cell weui-cell_select">
+        <view class="weui-cell__hd weui-cell__hd_in-select-after">
+          <view class="weui-label">退款理由</view>
+        </view>
+        <view class="weui-cell__bd">
+          <picker bindchange="typeChange" value="{{typeIndex}}" range="{{types}}">
+            <view class="weui-select weui-select_in-select-after">{{types[typeIndex]}}</view>
+          </picker>
+        </view>
       </view>
-      <view>
-        <text>服务名称：</text>
-        <text>小六打野</text>
-      </view>
-      <view>
-<!--        <picker bindchange="typeChange" value="{{type}}" range="{{types}}">-->
-<!--          <view class="picker">-->
-<!--            退款类型：{{types[type]}}-->
-<!--          </view>-->
-<!--        </picker>-->
-      </view>
-      <view>
-        <textarea auto-height placeholder="详细描述" />
-      </view>
-    </view>
-    <button bindtap="submit">提交</button>
+      <van-field label="详细描述" type="textarea" placeholder="请输入" autosize value="{{ detail }}"/>
+      <van-button type="default" bind:click="submit" size="large">提交</van-button>
+    </van-cell-group>
   </view>
 </template>
 
 <script>
-  import { createPage } from '@mpxjs/core'
+    import {createPage} from '@mpxjs/core'
 
-  createPage({
-    data: {
-      types: ['未提供服务','联系不上','与描述差距太大','其他'],
-      type: 0,
-      orderId: ''
-    },
-    onLoad: function (options) {
-      wx.showShareMenu();
-      wx.setNavigationBarTitle({
-        title: '申请退款'
-      });
-      this.setData({
-        orderId: options.orderId
-      });
-    },
-    typeChange: function(event){
-      this.setData({
-        type: event.detail.value
-      });
-    },
-    submit: function(){
+    createPage({
+        data: {
+            showSheet: false,
+            types: ['未提供服务', '联系不上', '与描述差距太大', '其他'],
+            typeIndex: 0,
+            orderId: '',
+            detail: ''
+        },
+        onLoad(options) {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '申请退款'
+            });
+            this.orderId = options.orderId
+        },
+        typeChange(event) {
+            this.typeIndex = event.detail.value;
+        },
+        submit() {
 
-    }
-  })
+        }
+    })
 </script>
 
 <style lang="less">
