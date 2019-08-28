@@ -9,7 +9,8 @@
       "van-cell-group": "vant-weapp/dist/cell-group/index",
       "van-checkbox": "vant-weapp/dist/checkbox/index",
       "van-switch-cell": "vant-weapp/dist/switch-cell/index",
-      "van-button": "vant-weapp/dist/button/index"
+      "van-button": "vant-weapp/dist/button/index",
+      "van-icon": "vant-weapp/dist/icon/index"
     }
   }
 </script>
@@ -45,7 +46,7 @@
         <text slot="right-icon">元/人</text>
       </van-field>
     </van-cell-group>
-    <van-cell-group title="住宿安排">
+    <van-cell-group title="住宿安排" border="{{ false }}">
       <van-switch-cell title="提供住宿" checked="{{ stayOver }}" bind:change="stayOverChange"/>
       <van-cell title="房间数" wx:if="{{stayOver}}">
         <van-stepper value="{{ 1 }}"/>
@@ -59,33 +60,81 @@
       <van-field label="床位价" placeholder="请输入" wx:if="{{stayOver}}">
         <text slot="right-icon">元/晚</text>
       </van-field>
-      <van-cell title="附近有酒店可以住宿" value-class="checkbox-in-cell"
+      <van-cell title="附近有酒店可以住宿" value-class="checkbox-in-cell" border="{{ false }}"
                 clickable bind:click="hotelChange({detail: !hotel})">
         <van-checkbox value="{{hotel}}" bind:change="hotelChange"/>
       </van-cell>
     </van-cell-group>
-    <view>
-      <text>活动图片：</text>
-      <button size="mini" data-type="activityImg" bindtap="chooseImg">选择</button>
-      <view wx:for="{{activityImg}}" wx:key="{{index}}">
-        <image mode="widthFix" data-type="activityImg" bindtap="preview" data-src="{{item}}" src="{{item}}"></image>
-        <text data-type="activityImg" data-index="{{index}}" bindtap="remove">删除</text>
+    <view class="weui-cell">
+      <view class="weui-cell__bd">
+        <view class="weui-uploader">
+          <view class="weui-uploader__hd">
+            <view class="weui-uploader__overview">
+              <view class="weui-uploader__title">活动图片</view>
+              <view class="weui-uploader__info">{{activityImgs.length}}/10</view>
+            </view>
+          </view>
+          <view class="weui-uploader__bd">
+            <view class="weui-uploader__files">
+              <view class="weui-uploader__file" wx:for="{{activityImgs}}" wx:key="index">
+                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
+                       bindtap="previewImage(activityImgs, item)"/>
+                <van-icon name="delete" size="1.5em" bind:click="removeImage('activityImgs', index)"/>
+              </view>
+            </view>
+            <view class="weui-uploader__input-box">
+              <view class="weui-uploader__input" bindtap="chooseImage('activityImgs')"></view>
+            </view>
+          </view>
+        </view>
       </view>
     </view>
-    <view>
-      <text>餐饮图片：</text>
-      <button size="mini" data-type="foodImg" bindtap="chooseImg">选择</button>
-      <view wx:for="{{foodImg}}" wx:key="{{index}}">
-        <image mode="widthFix" data-type="foodImg" bindtap="preview" data-src="{{item}}" src="{{item}}"></image>
-        <text data-type="foodImg" data-index="{{index}}" bindtap="remove">删除</text>
+    <view class="weui-cell">
+      <view class="weui-cell__bd">
+        <view class="weui-uploader">
+          <view class="weui-uploader__hd">
+            <view class="weui-uploader__overview">
+              <view class="weui-uploader__title">餐饮图片</view>
+              <view class="weui-uploader__info">{{foodImgs.length}}/10</view>
+            </view>
+          </view>
+          <view class="weui-uploader__bd">
+            <view class="weui-uploader__files">
+              <view class="weui-uploader__file" wx:for="{{foodImgs}}" wx:key="index">
+                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
+                       bindtap="previewImage(foodImgs, item)"/>
+                <van-icon name="delete" bind:click="removeImage('foodImgs', index)"/>
+              </view>
+            </view>
+            <view class="weui-uploader__input-box">
+              <view class="weui-uploader__input" bindtap="chooseImage('foodImgs')"></view>
+            </view>
+          </view>
+        </view>
       </view>
     </view>
-    <view>
-      <text>住宿图片：</text>
-      <button size="mini" data-type="stayOverImg" bindtap="chooseImg">选择</button>
-      <view wx:for="{{stayOverImg}}" wx:key="{{index}}">
-        <image mode="widthFix" data-type="stayOverImg" bindtap="preview" data-src="{{item}}" src="{{item}}"></image>
-        <text data-type="stayOverImg" data-index="{{index}}" bindtap="remove">删除</text>
+    <view class="weui-cell">
+      <view class="weui-cell__bd">
+        <view class="weui-uploader">
+          <view class="weui-uploader__hd">
+            <view class="weui-uploader__overview">
+              <view class="weui-uploader__title">住宿图片</view>
+              <view class="weui-uploader__info">{{stayOverImgs.length}}/10</view>
+            </view>
+          </view>
+          <view class="weui-uploader__bd">
+            <view class="weui-uploader__files">
+              <view class="weui-uploader__file" wx:for="{{stayOverImgs}}" wx:key="index">
+                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
+                       bindtap="previewImage(stayOverImgs, item)"/>
+                <van-icon name="delete" bind:click="removeImage('stayOverImgs', index)"/>
+              </view>
+            </view>
+            <view class="weui-uploader__input-box">
+              <view class="weui-uploader__input" bindtap="chooseImage('stayOverImgs')"></view>
+            </view>
+          </view>
+        </view>
       </view>
     </view>
     <van-button type="default" bind:click="submit" size="large">提交</van-button>
@@ -110,9 +159,9 @@
             endDate: new Date().getTime(),
             stayOver: true,
             hotel: true,
-            activityImg: [],
-            foodImg: [],
-            stayOverImg: []
+            activityImgs: ['https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png', 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'],
+            foodImgs: [],
+            stayOverImgs: []
         },
         onLoad(options) {
             wx.showShareMenu();
@@ -144,27 +193,25 @@
         hotelChange(event) {
             this.hotel = event.detail;
         },
-        chooseImg(event) {
+        chooseImage(group) {
             wx.chooseImage({
-                sizeType: ['compressed'],
+                sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+                sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
                 success: (res) => {
-                    let data = {};
-                    data[event.target.dataset.type] = this.data[event.target.dataset.type].concat(res.tempFilePaths)
-                    this.setData(data);
+                    // 返回选定照片的本地文件路径列表，tempFilePath可以作为img标签的src属性显示图片
+                    this[group] = this[group].concat(res.tempFilePaths);
                 }
             })
         },
-        preview(event) {
+        previewImage(group, src) {
             wx.previewImage({
-                current: event.target.dataset.src,
-                urls: this.data[event.target.dataset.type]
+                current: src, // 当前显示图片的http链接
+                urls: group // 需要预览的图片http链接列表
             })
         },
-        remove(event) {
-            let data = {};
-            this.data[event.target.dataset.type].splice(event.target.dataset.index, 1);
-            data[event.target.dataset.type] = this.data[event.target.dataset.type];
-            this.setData(data);
+        removeImage(group, index) {
+            this[group].splice(index, 1);
+            this[group] = this[group].concat([]);
         },
         submit(event) {
 
