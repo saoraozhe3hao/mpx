@@ -1,122 +1,69 @@
 <script type="application/json">
   {
-    "usingComponents": {}
+    "usingComponents": {
+      "van-field": "vant-weapp/dist/field/index",
+      "van-datetime-picker": "vant-weapp/dist/datetime-picker/index",
+      "van-popup": "vant-weapp/dist/popup/index",
+      "van-cell": "vant-weapp/dist/cell/index",
+      "van-stepper": "vant-weapp/dist/stepper/index",
+      "van-cell-group": "vant-weapp/dist/cell-group/index",
+      "van-checkbox": "vant-weapp/dist/checkbox/index",
+      "van-switch-cell": "vant-weapp/dist/switch-cell/index",
+      "van-button": "vant-weapp/dist/button/index"
+    }
   }
 </script>
 
 <template>
   <view>
-    <view>
-      <text>标题：</text>
-      <input placeholder=""/>
-    </view>
-    <view>
-<!--      <picker mode="date" value="{{startDate}}" start="2015-09-01" end="2020-09-01" bindchange="startChange">-->
-<!--        <view class="picker">-->
-<!--          开始日期: {{startDate}}-->
-<!--        </view>-->
-<!--      </picker>-->
-<!--      <picker mode="date" value="{{endDate}}" start="2015-09-01" end="2020-09-01" bindchange="endChange">-->
-<!--        <view class="picker">-->
-<!--          结束日期: {{endDate}}-->
-<!--        </view>-->
-<!--      </picker>-->
-    </view>
-    <view>
-      <text>地点：</text>
-      <input placeholder=""/>
-    </view>
-    <view>
-      <text>上午活动：</text>
-      <input placeholder=""/>
-    </view>
-    <view>
-      <text>午饭：</text>
-      <input placeholder=""/>
-    </view>
-    <view>
-      <text>下午活动：</text>
-      <input placeholder=""/>
-    </view>
-    <view>
-      <text>晚饭：</text>
-      <input placeholder=""/>
-    </view>
-    <view>
-      <text>晚上活动：</text>
-      <input placeholder=""/>
-    </view>
-    <view>
-      <text>接待上限：</text>
-      <input placeholder="" type="number"/>
-    </view>
-    <text>价格规则</text>
-    <view>
-      <text>1人：</text>
-      <input placeholder=""/>
-      <text>元</text>
-    </view>
-    <view>
-      <text>2人：</text>
-      <input placeholder=""/>
-      <text>元/人</text>
-    </view>
-    <view>
-      <text>3~5人：</text>
-      <input placeholder=""/>
-      <text>元/人</text>
-    </view>
-    <view>
-      <text>6~9人：</text>
-      <input placeholder=""/>
-      <text>元/人</text>
-    </view>
-    <view>
-      <text>10人以上：</text>
-      <input placeholder=""/>
-      <text>元/人</text>
-    </view>
-    <view>
-      <text>住宿安排：</text>
-      <radio-group bindchange="stayOverChange">
-        <label>
-          <radio value="1" checked="{{stayOver == 1}}"/>
-          <text>可以住宿</text>
-        </label>
-        <label>
-          <radio value="2" checked="{{stayOver == 2}}"/>
-          <text>无法住宿</text>
-        </label>
-      </radio-group>
-    </view>
-    <view wx:if="{{stayOver == 1}}">
-      <checkbox-group bindchange="checkboxChange">
-        <label>
-          <checkbox value="1" checked="{{hotel}}"></checkbox>
-          <text>附近酒店住宿</text>
-        </label>
-        <label>
-          <checkbox value="2" checked="{{provide}}"></checkbox>
-          <text>提供住宿</text>
-        </label>
-      </checkbox-group>
-    </view>
-    <view wx:if="{{provide}}">
-      <text>房间数：</text>
-      <input placeholder="" type="number"/>
-    </view>
-    <view wx:if="{{provide}}">
-      <text>房间价：</text>
-      <input placeholder="" type="number"/>
-    </view>
-    <view wx:if="{{provide}}">
-      <text>床位数：</text>
-      <input placeholder="" type="number"/>
-    </view>
-    <view wx:if="{{provide}}">
-      <text>床位价：</text>
-      <input placeholder="" type="number"/>
-    </view>
+    <van-field label="标题" placeholder="取一个响亮的标题"/>
+    <van-field label="详细地址" type="textarea" placeholder="精确到能找到你" autosize/>
+    <van-cell title="开始日期" is-link value="{{startDate}}" bind:click="startDateClick"/>
+    <van-cell title="结束日期" is-link value="{{endDate}}" bind:click="endDateClick"/>
+    <van-field label="上午活动" type="textarea" placeholder="活动内容" autosize/>
+    <van-field label="午饭" type="textarea" placeholder="午饭吃什么" autosize/>
+    <van-field label="下午活动" type="textarea" placeholder="活动内容" autosize/>
+    <van-field label="晚饭" type="textarea" placeholder="晚饭吃什么" autosize/>
+    <van-field label="晚上活动" type="textarea" placeholder="活动内容" autosize/>
+    <van-cell title="单天接待人数上限">
+      <van-stepper value="{{ 1 }}"/>
+    </van-cell>
+    <van-cell-group title="价格规则">
+      <van-field label="1人价格" placeholder="请输入">
+        <text slot="right-icon">元/人</text>
+      </van-field>
+      <van-field label="2人价格" placeholder="请输入">
+        <text slot="right-icon">元/人</text>
+      </van-field>
+      <van-field label="3~5人价格" placeholder="请输入">
+        <text slot="right-icon">元/人</text>
+      </van-field>
+      <van-field label="6~9人价格" placeholder="请输入">
+        <text slot="right-icon">元/人</text>
+      </van-field>
+      <van-field label="10人以上价格" placeholder="请输入">
+        <text slot="right-icon">元/人</text>
+      </van-field>
+    </van-cell-group>
+    <van-cell-group title="住宿安排">
+      <van-switch-cell title="提供住宿" checked="{{ stayOver }}" bind:change="stayOverChange"/>
+      <van-cell title="房间数" wx:if="{{stayOver}}">
+        <van-stepper value="{{ 1 }}"/>
+      </van-cell>
+      <van-field label="房间价" placeholder="请输入" wx:if="{{stayOver}}">
+        <text slot="right-icon">元/晚</text>
+      </van-field>
+      <van-cell title="床位数" wx:if="{{stayOver}}">
+        <van-stepper value="{{ 1 }}"/>
+      </van-cell>
+      <van-field label="床位价" placeholder="请输入" wx:if="{{stayOver}}">
+        <text slot="right-icon">元/晚</text>
+      </van-field>
+      <van-cell title="附近有酒店可以住宿" value-class="checkbox-in-cell"
+                clickable bind:click="hotelChange({detail: !hotel})">
+        <van-checkbox value="{{hotel}}" bind:change="hotelChange"/>
+      </van-cell>
+    </van-cell-group>
     <view>
       <text>活动图片：</text>
       <button size="mini" data-type="activityImg" bindtap="chooseImg">选择</button>
@@ -141,8 +88,14 @@
         <text data-type="stayOverImg" data-index="{{index}}" bindtap="remove">删除</text>
       </view>
     </view>
-    <button bindtap="publish">发布</button>
+    <van-button type="default" bind:click="submit" size="large">提交</van-button>
   </view>
+  <van-popup position="bottom" show="{{ showStartDate }}" bind:close="popupClose">
+    <van-datetime-picker type="date" value="{{ startDate }}" min-date="{{ minDate }}" bind:confirm="startDateConfirm"/>
+  </van-popup>
+  <van-popup position="bottom" show="{{ showEndDate }}" bind:close="popupClose">
+    <van-datetime-picker type="date" value="{{ endDate }}" min-date="{{ minDate }}" bind:confirm="endDateConfirm"/>
+  </van-popup>
 </template>
 
 <script>
@@ -150,37 +103,48 @@
 
     createPage({
         data: {
-            startDate: '2019-09-01',
-            endDate: '2019-09-01',
-            stayOver: 1,
+            minDate: new Date().getTime(),
+            showStartDate: false,
+            startDate: new Date().getTime(),
+            showEndDate: false,
+            endDate: new Date().getTime(),
+            stayOver: true,
             hotel: true,
-            provide: false,
             activityImg: [],
             foodImg: [],
             stayOverImg: []
         },
-        onLoad: function (options) {
+        onLoad(options) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '发布'
             });
         },
-        dateChange: function (event) {
-            this.setData({
-                date: event.detail.value
-            });
+        popupClose() {
+            this.showStartDate = false;
+            this.endStartDate = false;
         },
-        stayOverChange: function (event) {
-            this.setData({
-                stayOver: event.detail.value
-            });
+        startDateClick() {
+            this.showStartDate = true;
         },
-        checkboxChange: function (event) {
-            this.setData({
-                provide: event.detail.value.includes('2')
-            });
+        startDateConfirm(event) {
+            this.showStartDate = false;
+            this.startDate = event.detail;
         },
-        chooseImg: function (event) {
+        endDateClick() {
+            this.showEndDate = true;
+        },
+        endDateConfirm(event) {
+            this.showEndDate = false;
+            this.endDate = event.detail;
+        },
+        stayOverChange(event) {
+            this.stayOver = event.detail;
+        },
+        hotelChange(event) {
+            this.hotel = event.detail;
+        },
+        chooseImg(event) {
             wx.chooseImage({
                 sizeType: ['compressed'],
                 success: (res) => {
@@ -190,23 +154,26 @@
                 }
             })
         },
-        preview: function (event) {
+        preview(event) {
             wx.previewImage({
                 current: event.target.dataset.src,
                 urls: this.data[event.target.dataset.type]
             })
         },
-        remove: function (event) {
+        remove(event) {
             let data = {};
             this.data[event.target.dataset.type].splice(event.target.dataset.index, 1);
             data[event.target.dataset.type] = this.data[event.target.dataset.type];
             this.setData(data);
         },
-        publish: function (event) {
+        submit(event) {
 
         }
     })
 </script>
 
 <style lang="less">
+  .checkbox-in-cell {
+    flex: none !important;
+  }
 </style>
