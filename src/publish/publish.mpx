@@ -65,6 +65,20 @@
         <van-checkbox value="{{hotel}}" bind:change="hotelChange"/>
       </van-cell>
     </van-cell-group>
+    <van-cell-group title="打折规则">
+      <van-field label="连续预约2~4天" placeholder="打几折">
+        <text slot="right-icon">折</text>
+      </van-field>
+      <van-field label="连续预约5~9天" placeholder="打几折">
+        <text slot="right-icon">折</text>
+      </van-field>
+      <van-field label="连续预约10~30天" placeholder="打几折">
+        <text slot="right-icon">折</text>
+      </van-field>
+      <van-field label="连续预约30天以上" placeholder="打几折">
+        <text slot="right-icon">折</text>
+      </van-field>
+    </van-cell-group>
     <view class="weui-cell">
       <view class="weui-cell__bd">
         <view class="weui-uploader">
@@ -72,6 +86,9 @@
             <view class="weui-uploader__overview">
               <view class="weui-uploader__title">活动图片</view>
               <view class="weui-uploader__info">{{activityImgs.length}}/10</view>
+            </view>
+            <view class="weui-uploader__tips">
+              活动现场照片
             </view>
           </view>
           <view class="weui-uploader__bd">

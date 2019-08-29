@@ -3,8 +3,7 @@
     "pages": [
       "./appointment",
       "./myPublish",
-      "./publish",
-      "./publishDetail"
+      "./publish"
     ]
   }
 </script>

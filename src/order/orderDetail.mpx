@@ -1,7 +1,6 @@
 <script type="application/json">
   {
     "usingComponents": {
-      "product-card": "components/productCard",
       "van-card": "vant-weapp/dist/card/index",
       "van-button": "vant-weapp/dist/button/index",
       "van-cell-group": "vant-weapp/dist/cell-group/index",

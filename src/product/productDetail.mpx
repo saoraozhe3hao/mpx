@@ -1,91 +1,233 @@
 <script type="application/json">
   {
     "usingComponents": {
-      "valuation-card": "components/valuationCard"
+      "van-cell-group": "vant-weapp/dist/cell-group/index",
+      "van-cell": "vant-weapp/dist/cell/index",
+      "van-card": "vant-weapp/dist/card/index",
+      "van-rate": "vant-weapp/dist/rate/index",
+      "van-button": "vant-weapp/dist/button/index",
+      "van-tab": "vant-weapp/dist/tab/index",
+      "van-tabs": "vant-weapp/dist/tabs/index",
+      "van-tag": "vant-weapp/dist/tag/index",
+      "van-goods-action": "vant-weapp/dist/goods-action/index",
+      "van-goods-action-icon": "vant-weapp/dist/goods-action-icon/index",
+      "van-goods-action-button": "vant-weapp/dist/goods-action-button/index"
     }
   }
 </script>
 
 <template>
-  <view>
-    <view>
-      <text bindtap="seller">小六打野</text>
-      <button size="mini" open-type="share">分享</button>
-      <button size="mini" bindtap="collect">收藏</button>
+  <view class="product-detail">
+    <van-card currency=" " tag="打野、民俗" price="距您100公里" desc="福建省三明市尤溪县" title="小六打野" bindtap="guiderDetail"
+              thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
+      <view slot="bottom">
+        <van-rate value="{{ 3.5 }}" readonly allow-half="true"/>
+      </view>
+      <view slot="footer">
+        <van-button size="mini" icon="bulb-o" bind:click="tipOff">投诉</van-button>
+      </view>
+    </van-card>
+
+    <van-cell-group title="基本信息">
+      <van-cell title="名称" value="干塘体验一日游"/>
+      <van-cell title="时间" value="2019年5月1日-2019年8月12日"/>
+      <van-cell title="详细地址" value="福建省龙岩市漳平市永福镇箭竹村"/>
+      <van-cell title="标签">
+        <van-tag type="danger">捕捉</van-tag>
+        <van-tag type="danger">打野</van-tag>
+      </van-cell>
+      <van-cell title="单天接待人数上限" value="20人"/>
+    </van-cell-group>
+    <van-cell-group title="活动详情">
+      <van-cell title="上午活动" value="爬山"/>
+      <van-cell title="午饭" value="烧烤"/>
+      <van-cell title="下午" value="挖冬笋"/>
+      <van-cell title="晚饭" value="火锅"/>
+      <van-cell title="晚上" value="篝火"/>
+    </van-cell-group>
+    <van-cell-group title="价格规则">
+      <van-cell title="1人预约" value="150元每人"/>
+      <van-cell title="2人预约" value="130元每人"/>
+      <van-cell title="3~5人预约" value="120元每人"/>
+      <van-cell title="6~9人预约" value="110元每人"/>
+      <van-cell title="10人及以上预约" value="100元每人" border="{{false}}"/>
+    </van-cell-group>
+    <van-cell-group title="住宿信息">
+      <van-cell title="住宿选择 1" value="附近有酒店可以住宿"/>
+      <van-cell title="住宿选择 2" value="趣导提供住宿"/>
+      <van-cell title="趣导提供" value="2个房间 + 4个床位"/>
+      <van-cell title="房间价格" value="100元每晚"/>
+      <van-cell title="床位价格" value="40元每晚"/>
+    </van-cell-group>
+    <van-cell-group title="打折规则" border="{{false}}">
+      <van-cell title="连续预约2~4天" value="打9折"/>
+      <van-cell title="连续预约5~9天" value="打7折"/>
+      <van-cell title="连续预约10~30天" value="打6折"/>
+      <van-cell title="连续预约30天以上" value="打5折"/>
+    </van-cell-group>
+    <view class="weui-cell">
+      <view class="weui-cell__bd">
+        <view class="weui-uploader">
+          <view class="weui-uploader__hd">
+            <view class="weui-uploader__overview">
+              <view class="weui-uploader__title">活动图片</view>
+            </view>
+            <view class="weui-uploader__tips">
+              活动现场照片
+            </view>
+          </view>
+          <view class="weui-uploader__bd">
+            <view class="weui-uploader__files">
+              <view class="weui-uploader__file" wx:for="{{activityImgs}}" wx:key="index">
+                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
+                       bindtap="previewImage(activityImgs, item)"/>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
     </view>
-    <text>干塘体验一日游</text>
-    <progress percent="20" color="#f8f806" />
-    <view>时间：2019年5月1日-2019年8月12日</view>
-    <view>地点：福建省龙岩市漳平市永福镇箭竹村</view>
-    <view>标签：****</view>
-    <text>套餐详情</text>
-    <view>上午：爬山</view>
-    <view>午饭：烧烤</view>
-    <view>下午：挖冬笋</view>
-    <view>晚饭：火锅</view>
-    <view>晚上：篝火</view>
-    <view>住宿：附近酒店住宿</view>
-    <view>接待上限：20人</view>
-    <view>住宿上限：2个房间 + 4个床位</view>
-    <view>价格规则：</view>
-    <view>1人预约：150元每人</view>
-    <view>2人预约：130元每人</view>
-    <view>3~5人预约：120元每人</view>
-    <view>6~9人预约：110元每人</view>
-    <view>10人及以上预约：100元每人</view>
-    <view>房间：100元每间</view>
-    <view>床位：40元每个</view>
-    <image mode="widthFix" data-src="https://developers.weixin.qq.com/miniprogram/dev/image/cat/0.jpg?t=19032511"  src="https://developers.weixin.qq.com/miniprogram/dev/image/cat/0.jpg?t=19032511" bindtap="preview"></image>
-    <image mode="widthFix" data-src="https://developers.weixin.qq.com/miniprogram/dev/image/cat/0.jpg?t=19032512"  src="https://developers.weixin.qq.com/miniprogram/dev/image/cat/0.jpg?t=19032512" bindtap="preview"></image>
-    <text>用户评价</text>
-    <valuation-card></valuation-card>
-    <text bindtap="valuation">更多评价</text>
-    <view>
-      <text>100$</text>
-      <button size="mini" bindtap="bespeak">立即预约</button>
+    <view class="weui-cell">
+      <view class="weui-cell__bd">
+        <view class="weui-uploader">
+          <view class="weui-uploader__hd">
+            <view class="weui-uploader__overview">
+              <view class="weui-uploader__title">餐饮图片</view>
+            </view>
+          </view>
+          <view class="weui-uploader__bd">
+            <view class="weui-uploader__files">
+              <view class="weui-uploader__file" wx:for="{{foodImgs}}" wx:key="index">
+                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
+                       bindtap="previewImage(foodImgs, item)"/>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
     </view>
+    <view class="weui-cell">
+      <view class="weui-cell__bd">
+        <view class="weui-uploader">
+          <view class="weui-uploader__hd">
+            <view class="weui-uploader__overview">
+              <view class="weui-uploader__title">住宿图片</view>
+            </view>
+          </view>
+          <view class="weui-uploader__bd">
+            <view class="weui-uploader__files">
+              <view class="weui-uploader__file" wx:for="{{stayOverImgs}}" wx:key="index">
+                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
+                       bindtap="previewImage(stayOverImgs, item)"/>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    <van-tabs active="{{ activeTab }}" bind:change="tabChange">
+      <van-tab title="本月预约概览"></van-tab>
+      <van-tab title="趣友评论"></van-tab>
+    </van-tabs>
+    <van-cell-group title="8月份预约统计" border="{{false}}">
+      <van-cell title="预约人次" value="100人*次"/>
+      <van-cell title="预约人天" value="100人*天"/>
+      <van-cell title="预约房间数*天数" value="10间*天"/>
+      <van-cell title="预约床位数*天数" value="12个*天"/>
+      <van-cell title="订单数" value="100个"/>
+      <van-cell title="订单总额" value="10000元"/>
+    </van-cell-group>
+    <van-goods-action wx:if="{{!isGuider}}">
+      <van-goods-action-icon icon="share" text="分享" open-type="share"/>
+      <van-goods-action-icon icon="like" text="收藏" bind:click="collect"/>
+      <van-goods-action-button text="立即预约" bind:click="bespeak"/>
+    </van-goods-action>
+    <van-goods-action wx:if="{{isGuider}}">
+      <van-goods-action-icon icon="plus" text="复制" bind:click="copy"/>
+      <van-goods-action-icon icon="arrow-down" text="下架" bind:click="down"/>
+      <van-goods-action-button text="预约详情" bind:click="appointment"/>
+    </van-goods-action>
   </view>
 </template>
 
 <script>
-  import { createPage } from '@mpxjs/core'
+    import {createPage} from '@mpxjs/core'
 
-  createPage({
-    data: {
-      id: ''
-    },
-    onLoad: function (query) {
-      wx.showShareMenu();
-      wx.setNavigationBarTitle({
-        title: '服务'
-      });
-    },
-    collect: function(event){
+    createPage({
+        data: {
+            id: '',
+            activityImgs: ['https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png', 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'],
+            foodImgs: [],
+            stayOverImgs: [],
+            activeTab: 0,
+            isGuider: false
+        },
+        onLoad(query) {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '服务'
+            });
+        },
+        onShow() {
+            this.activeTab = 0;
+        },
+        guiderDetail(item) {
+            wx.navigateTo({
+                url: `/sellerDetail?id=${this.id}`
+            })
+        },
+        collect(event) {
 
-    },
-    seller: function (event) {
-      wx.navigateTo({
-        url: '/sellerDetail' + '?sellerId=' + 0
-      })
-    },
-    preview: function(event){
-      wx.previewImage({
-        current: event.target.dataset.src, // 当前显示图片的http链接
-        urls: ["https://developers.weixin.qq.com/miniprogram/dev/image/cat/0.jpg?t=19032511","https://developers.weixin.qq.com/miniprogram/dev/image/cat/0.jpg?t=19032512"]
-      })
-    },
-    valuation: function(event){
-      wx.navigateTo({
-        url: '/valuation' + '?productId=' + this.options.id
-      })
-    },
-    bespeak: function(event){
-      wx.navigateTo({
-        url: '/bespeak' + '?productId=' + this.options.id
-      })
-    }
-  })
+        },
+        tipOff(event) {
+            wx.navigateTo({
+                url: '/tipOff' + '?sellerId=' + 0
+            })
+        },
+        copy() {
+
+        },
+        down() {
+
+        },
+        seller(event) {
+            wx.navigateTo({
+                url: '/sellerDetail' + '?sellerId=' + 0
+            })
+        },
+        previewImage(group, src) {
+            wx.previewImage({
+                current: src, // 当前显示图片的http链接
+                urls: group // 需要预览的图片http链接列表
+            })
+        },
+        tabChange(event) {
+            if (event.detail.index == 1) {
+                wx.navigateTo({
+                    url: '/valuation' + '?productId=' + 0
+                })
+            }
+            this.activeTab = event.detail.index;
+        },
+        bespeak(event) {
+            wx.navigateTo({
+                url: '/bespeak' + '?productId=' + this.id
+            })
+        },
+        appointment() {
+            wx.navigateTo({
+                url: '/appointment' + '?productId=' + this.id
+            })
+        }
+    })
 </script>
 
 <style lang="less">
+  .product-detail {
+    padding-bottom: 50px;
+
+    .van-goods-action {
+      z-index: 1;
+    }
+  }
 </style>
