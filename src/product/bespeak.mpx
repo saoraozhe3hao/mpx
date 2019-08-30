@@ -27,6 +27,16 @@
     </van-card>
     <van-cell-group title=" ">
       <van-cell title="预约开始日期" is-link label="可选范围：3月2日-4月5日" value="{{startDate}}" bind:click="startDateClick"/>
+      <van-cell title="预约天数" use-label-slot>
+        <van-stepper value="{{ 1 }}"/>
+        <view slot="label">
+          <view>还可预约300天</view>
+          <view>连续预约2~4天, 打9折</view>
+          <view>连续预约5~9天, 打7折</view>
+          <view>连续预约10~30天, 打6折</view>
+          <view>连续预约30天以上, 打5折</view>
+        </view>
+      </van-cell>
       <van-cell title="预约人数" use-label-slot>
         <van-stepper value="{{ 1 }}"/>
         <view slot="label">
@@ -50,16 +60,6 @@
         <view slot="label">
           <view>还剩3个床位</view>
           <view>100元每晚</view>
-        </view>
-      </van-cell>
-      <van-cell title="预约天数" use-label-slot>
-        <van-stepper value="{{ 1 }}"/>
-        <view slot="label">
-          <view>还可预约300天</view>
-          <view>连续预约2~4天, 打9折</view>
-          <view>连续预约5~9天, 打7折</view>
-          <view>连续预约10~30天, 打6折</view>
-          <view>连续预约30天以上, 打5折</view>
         </view>
       </van-cell>
       <van-field label="联系电话" placeholder="请输入"></van-field>

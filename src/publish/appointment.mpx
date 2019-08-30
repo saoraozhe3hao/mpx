@@ -1,57 +1,114 @@
 <script type="application/json">
   {
-    "usingComponents": {}
+    "usingComponents": {
+      "van-tab": "vant-weapp/dist/tab/index",
+      "van-tabs": "vant-weapp/dist/tabs/index",
+      "van-datetime-picker": "vant-weapp/dist/datetime-picker/index",
+      "van-popup": "vant-weapp/dist/popup/index",
+      "van-cell-group": "vant-weapp/dist/cell-group/index",
+      "van-cell": "vant-weapp/dist/cell/index",
+      "van-card": "vant-weapp/dist/card/index",
+      "van-button": "vant-weapp/dist/button/index",
+      "van-icon": "vant-weapp/dist/icon/index"
+    }
   }
 </script>
 
 <template>
   <view>
-    <view>
-<!--      <picker mode="date" value="{{date}}" start="2015-09-01" end="2020-09-01" bindchange="dateChange">-->
-<!--        <view class="picker">-->
-<!--          日期: {{date}}-->
-<!--        </view>-->
-<!--      </picker>-->
-    </view>
-    <text>总览</text>
-    <view>预约人数：3人</view>
-    <view>预定房间数：3间</view>
-    <view>预定床位数：3个</view>
-    <text>详情</text>
-    <view class="order-item">
-      <view>用户名：顶顶顶顶</view>
-      <view>联系电话：15202926290</view>
-      <view>人数：6</view>
-      <view>房间数：3</view>
-      <view>床位数：4</view>
-      <view>状态：已使用</view>
-    </view>
+    <van-tabs active="{{ activeTab }}" bind:change="tabChange">
+      <van-tab title="按天"></van-tab>
+      <van-tab title="按月"></van-tab>
+    </van-tabs>
+    <van-cell title="日期" is-link value="{{date}}" bind:click="dateClick" wx:if="{{activeTab == 0}}"/>
+    <van-cell title="月份" is-link value="{{month}}" bind:click="monthClick" wx:if="{{activeTab == 1}}"/>
+    <van-cell-group title="预约统计" border="{{false}}">
+      <van-cell title="预约人次" value="100人*次"/>
+      <van-cell title="预约人天" value="100人*天"/>
+      <van-cell title="预约房间数*天数" value="10间*天"/>
+      <van-cell title="预约床位数*天数" value="12个*天"/>
+      <van-cell title="订单数" value="100个"/>
+      <van-cell title="订单总额" value="10000元"/>
+    </van-cell-group>
+    <van-cell-group title="订单列表" border="{{false}}">
+      <van-card wx:for="{{orders}}" wx:key="index" lazy-load="true" bindtap="orderDetail(item)"
+                tag="待使用" title="我就是我" price="1000" desc="2020年3月3日-2020年4月3日"
+                thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
+        <view slot="bottom">
+          6人，3房间，4床位
+        </view>
+        <view slot="footer" catch:tap="phoneCall">
+          <text>15202926290</text>
+          <van-icon name="phone"/>
+        </view>
+      </van-card>
+    </van-cell-group>
   </view>
+  <van-popup position="bottom" show="{{ showDate }}" bind:close="popupClose">
+    <van-datetime-picker type="date" value="{{ date }}" min-date="{{ minDate }}" bind:confirm="dateConfirm"/>
+  </van-popup>
+  <van-popup position="bottom" show="{{ showMonth }}" bind:close="popupClose">
+    <van-datetime-picker type="year-month" value="{{ month }}" min-date="{{ minDate }}"
+                         bind:confirm="monthConfirm"/>
+  </van-popup>
 </template>
 
 <script>
-  import { createPage } from '@mpxjs/core'
+    import {createPage} from '@mpxjs/core'
 
-  createPage({
-    data: {
-      date: '2019-09-01'
-    },
-    onLoad: function (options) {
-      wx.showShareMenu();
-      wx.setNavigationBarTitle({
-        title: '预约情况'
-      });
-    },
-    dateChange: function (event) {
-      this.setData({
-        date: event.detail.value
-      });
-    }
-  })
+    createPage({
+        data: {
+            activeTab: 0,
+            minDate: new Date().getTime(),
+            date: new Date().getTime(),
+            showDate: false,
+            month: new Date().getTime(),
+            showMonth: false,
+            orders: [
+                {},
+                {}
+            ]
+        },
+        onLoad(options) {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '预约情况'
+            });
+        },
+        tabChange(event) {
+            this.activeTab = event.detail.index;
+        },
+        popupClose() {
+            this.showDate = false;
+            this.showMonth = false;
+        },
+        dateClick() {
+            this.showDate = true;
+        },
+        dateConfirm(event) {
+            this.showDate = false;
+            this.date = event.detail;
+        },
+        monthClick() {
+            this.showMonth = true;
+        },
+        monthConfirm(event) {
+            this.showMonth = false;
+            this.month = event.detail;
+        },
+        orderDetail (item) {
+            wx.navigateTo({
+                url: '/orderDetail' + '?orderId=' + item.id
+            })
+        },
+        phoneCall(){
+            wx.makePhoneCall({
+                phoneNumber: '15202926290'
+            })
+        }
+    })
 </script>
 
 <style lang="less">
-  .order-item{
-    border: 1px solid #ccc;
-  }
+
 </style>

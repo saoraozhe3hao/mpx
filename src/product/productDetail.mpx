@@ -143,8 +143,8 @@
       <van-goods-action-button text="立即预约" bind:click="bespeak"/>
     </van-goods-action>
     <van-goods-action wx:if="{{isGuider}}">
-      <van-goods-action-icon icon="plus" text="复制" bind:click="copy"/>
-      <van-goods-action-icon icon="arrow-down" text="下架" bind:click="down"/>
+      <van-goods-action-icon icon="points" text="复制" bind:click="copy"/>
+      <van-goods-action-icon icon="descending" text="下架" bind:click="down"/>
       <van-goods-action-button text="预约详情" bind:click="appointment"/>
     </van-goods-action>
   </view>
@@ -160,7 +160,7 @@
             foodImgs: [],
             stayOverImgs: [],
             activeTab: 0,
-            isGuider: false
+            isGuider: true
         },
         onLoad(query) {
             wx.showShareMenu();
