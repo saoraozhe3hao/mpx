@@ -1,7 +1,8 @@
 <script type="application/json">
   {
     "pages": [
-      "./productDetail"
+      "./productDetail",
+      "./bespeak"
     ]
   }
 </script>
