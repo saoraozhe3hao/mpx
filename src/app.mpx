@@ -69,72 +69,22 @@
     })
 </script>
 
-<style src="./weui.wxss"></style>
-<style>
-  @font-face {
-    font-family: 'iconfont';  /* project id 1359337 */
-    src: url('//at.alicdn.com/t/font_1359337_ypv176al6ef.eot');
-    src: url('//at.alicdn.com/t/font_1359337_ypv176al6ef.eot?#iefix') format('embedded-opentype'),
-    url('//at.alicdn.com/t/font_1359337_ypv176al6ef.woff2') format('woff2'),
-    url('//at.alicdn.com/t/font_1359337_ypv176al6ef.woff') format('woff'),
-    url('//at.alicdn.com/t/font_1359337_ypv176al6ef.ttf') format('truetype'),
-    url('//at.alicdn.com/t/font_1359337_ypv176al6ef.svg#iconfont') format('svg');
-  }
-
-  .iconfont {
-    font-family: "iconfont" !important;
-    font-size: 16px;
-    font-style: normal;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  .icon-tansuofaxian:before {
-    content: "\e714";
-  }
-
-  .icon-huwai:before {
-    content: "\e7b0";
-  }
-
-  .icon-nongcungongshuigongcheng:before {
-    content: "\e634";
-  }
-
-  .icon-jiantouxia:before {
-    content: "\e62d";
-  }
-
-  .icon-rengongcaizhai:before {
-    content: "\e614";
-  }
-
-  .icon-yu1:before {
-    content: "\e66a";
-  }
-
-  .icon-huwaixuanzhong:before {
-    content: "\e74a";
-  }
-
-  .icon-yinshixuanzhong:before {
-    content: "\e74b";
-  }
-
-  .icon-haixian:before {
-    content: "\e645";
-  }
-
+<style lang="less">
+  @import "./iconfont.css";
+  @import "./weui.css";
   page {
     font-size: 16px;
     line-height: 22px;
   }
+
+  /* 通用样式 */
   .text-overflow {
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
   .clearfix:after {
     display: block;
     clear: both;
@@ -145,5 +95,21 @@
 
   .clearfix {
     zoom: 1;
+  }
+
+  /* vant weapp 定制 */
+  .card-item {
+    margin-bottom: 2vw;
+  }
+  button.card-btn {
+    margin-left: 2vw;
+  }
+  button.submit-btn{
+    width: 90%;
+    margin-left: 5%;
+    background: linear-gradient(to right, #FFD000, #FFBD00);
+    border-radius: 10px;
+    position: absolute;
+    bottom: 40px;
   }
 </style>

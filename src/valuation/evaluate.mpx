@@ -2,6 +2,7 @@
   {
     "usingComponents": {
       "van-rate": "vant-weapp/dist/rate/index",
+      "van-cell": "vant-weapp/dist/cell/index",
       "van-cell-group": "vant-weapp/dist/cell-group/index",
       "van-field": "vant-weapp/dist/field/index",
       "van-button": "vant-weapp/dist/button/index"
@@ -12,10 +13,12 @@
 <template>
   <view>
     <van-cell-group title="对野食小子-干塘一日游的评价">
-      <van-rate allow-half custom-class="rate" size="40" value="{{ rate }}" bind:change="rateChange"/>
+      <van-cell title="评分" label="{{rate}}分">
+        <van-rate allow-half custom-class="rate" size="30" value="{{ rate }}" bind:change="rateChange"/>
+      </van-cell>
       <van-field label="评论" type="textarea" placeholder="请输入评论" autosize value="{{ comment }}"/>
-      <van-button type="default" bind:click="submit" size="large">提交</van-button>
     </van-cell-group>
+    <van-button custom-class="submit-btn" bind:click="submit" size="large">提交</van-button>
   </view>
 </template>
 
@@ -43,7 +46,5 @@
 </script>
 
 <style lang="less" scoped>
-  .rate{
-    text-align: center;
-  }
+
 </style>

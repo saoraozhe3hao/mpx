@@ -20,7 +20,7 @@
       <van-field required maxlength="50" placeholder="请输入短信验证码" label="验证码"
                  error-message="{{codeError}}" bind:blur="codeBlur"/>
     </van-cell-group>
-    <van-button size="large" bind:click="submit">提交</van-button>
+    <van-button size="large" custom-class="submit-btn" bind:click="submit">提交</van-button>
   </view>
 </template>
 

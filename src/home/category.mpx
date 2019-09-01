@@ -5,13 +5,14 @@
       "van-row": "vant-weapp/dist/row/index",
       "van-col": "vant-weapp/dist/col/index",
       "van-card": "vant-weapp/dist/card/index",
+      "van-rate": "vant-weapp/dist/rate/index",
       "van-cell-group": "vant-weapp/dist/cell-group/index"
     }
   }
 </script>
 
 <template>
-  <view>
+  <view class="category">
     <view class="top">
       <van-row>
         <van-col span="6">
@@ -21,22 +22,20 @@
           </view>
         </van-col>
         <van-col span="18">
-          <van-search placeholder="搜'播主的名称'" use-action-slot bind:search="onSearch">
+          <van-search placeholder="搜'播主的名称'" background="inherit" bind:search="onSearch">
           </van-search>
         </van-col>
       </van-row>
     </view>
     <van-cell-group title="野居">
-      <van-card wx:for="{{products}}" wx:key="index" lazy-load="true"
+      <van-card wx:for="{{products}}" wx:key="index" lazy-load="true" custom-class="card-item"
                 tag="打野、民俗" price="100" desc="干塘体验一日游" title="{{ item.name }}" bindtap="productDetail(item)"
                 thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
         <view slot="bottom">
-          <text class="date">3月2日-4月5日</text>
-          <text class="number">10人预约</text>
+          <van-rate value="{{ 3.5 }}" readonly allow-half="true"/>
         </view>
         <view slot="footer">
-          <text class="distance">100km</text>
-          <text class="location">户县</text>
+          <text class="location">陕西省西安市鄠邑区，距您100公里</text>
         </view>
       </van-card>
     </van-cell-group>
@@ -95,13 +94,20 @@
 </script>
 
 <style lang="less">
+
   .top {
-    width: 90vw;
-    margin: 0 auto 10px;
+    padding: 0 5vw;
+    background: linear-gradient(#FEC806, #FFF) no-repeat;
+    background-size: 100% 150%;
 
     .location {
       vertical-align: middle;
       line-height: 54px;
+    }
+
+    .icon-jiantouxia {
+      font-size: 14px;
+      padding-left: 5px;
     }
   }
 </style>

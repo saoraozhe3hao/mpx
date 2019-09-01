@@ -21,7 +21,7 @@
                  value="{{ openBank }}" error-message="{{openBankError}}"
                  bind:blur="inputBlur" bind:focus="inputFocus('openBankError')"/>
     </van-cell-group>
-    <van-button size="large" bind:click="submit">提交</van-button>
+    <van-button size="large" custom-class="submit-btn" bind:click="submit">提交</van-button>
   </view>
 </template>
 

@@ -9,7 +9,7 @@
 </script>
 
 <template>
-  <van-tabbar active="{{ active }}" bind:change="onChange">
+  <van-tabbar active="{{ active }}" bind:change="onChange" active-color="#FDD03F">
     <van-tabbar-item wx:for="{{ list }}" wx:key="index" icon="{{ item.icon }}">{{ item.text }}</van-tabbar-item>
   </van-tabbar>
 </template>

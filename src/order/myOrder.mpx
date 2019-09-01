@@ -17,15 +17,15 @@
       <van-tab title="待评价"></van-tab>
       <van-tab title="退款"></van-tab>
     </van-tabs>
-    <van-card wx:for="{{orders}}" wx:key="index" lazy-load="true"
+    <van-card wx:for="{{orders}}" wx:key="index" lazy-load="true" custom-class="card-item"
               tag="待使用" price="1000" desc="干塘体验一日游" title="{{ item.name }}" bindtap="orderDetail(item)"
               thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
       <view slot="bottom">
         <view>预约时间：2009年33月33日</view>
       </view>
       <view slot="footer">
-        <van-button size="mini" catch:tap="evaluate">评价</van-button>  <!-- 使用小程序原生事件才能阻止冒泡 -->
-        <van-button size="mini" catch:tap="refund">申请退款</van-button>
+        <van-button size="mini" catch:tap="evaluate" custom-class="card-btn">评价</van-button>  <!-- 使用小程序原生事件才能阻止冒泡 -->
+        <van-button size="mini" catch:tap="refund" custom-class="card-btn">申请退款</van-button>
       </view>
     </van-card>
   </view>

@@ -12,7 +12,7 @@
 
 <template>
   <van-cell-group title="小六打野的用户评价">
-    <van-card wx:for="{{valuations}}" wx:key="index" lazy-load="true" currency=" "
+    <van-card wx:for="{{valuations}}" wx:key="index" lazy-load="true" currency=" " custom-class="card-item"
               tag="这位网友" title="我觉得还行，勉强合格" desc="2019年12月1日" price="3分"
               thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
       <view slot="bottom">

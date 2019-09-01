@@ -31,15 +31,15 @@
       <van-cell title="订单总额" value="10000元"/>
     </van-cell-group>
     <van-cell-group title="订单列表" border="{{false}}">
-      <van-card wx:for="{{orders}}" wx:key="index" lazy-load="true" bindtap="orderDetail(item)"
+      <van-card wx:for="{{orders}}" wx:key="index" custom-class="card-item" lazy-load="true" bindtap="orderDetail(item)"
                 tag="待使用" title="我就是我" price="1000" desc="2020年3月3日-2020年4月3日"
                 thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
         <view slot="bottom">
           6人，3房间，4床位
         </view>
         <view slot="footer" catch:tap="phoneCall">
-          <text>15202926290</text>
-          <van-icon name="phone"/>
+          <view class="card-footer-text">15202926290</view>
+          <van-icon class="card-footer-icon" name="phone" size="2em" color="#FDD03F"/>
         </view>
       </van-card>
     </van-cell-group>
@@ -110,5 +110,12 @@
 </script>
 
 <style lang="less">
-
+  .card-footer-icon{
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .card-footer-text{
+    display: inline-block;
+    vertical-align: middle;
+  }
 </style>

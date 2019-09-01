@@ -16,8 +16,8 @@
     <van-cell-group title="申请退款">
       <van-cell title="退款理由" is-link value="{{types[typeIndex]}}" bind:click="typeClick"/>
       <van-field label="详细描述" type="textarea" placeholder="请输入" autosize value="{{ detail }}"/>
-      <van-button type="default" bind:click="submit" size="large">提交</van-button>
     </van-cell-group>
+    <van-button type="default" custom-class="submit-btn" bind:click="submit" size="large">提交</van-button>
   </view>
   <van-popup position="bottom" show="{{ showPopup }}" bind:close="popupClose">
     <van-picker show-toolbar columns="{{ types }}" bind:cancel="typeCancel" bind:confirm="typeConfirm"/>

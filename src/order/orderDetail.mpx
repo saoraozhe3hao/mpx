@@ -19,8 +19,7 @@
         <van-rate value="{{ 3.5 }}" readonly allow-half="true"/>
       </view>
       <view slot="footer">
-        <text class="distance">100km</text>
-        <text class="location">户县</text>
+        <text class="text">陕西省西安市临潼区</text>
       </view>
     </van-card>
     <van-cell-group title="订单信息">

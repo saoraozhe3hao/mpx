@@ -16,7 +16,7 @@
         <van-button slot="button" size="small" bind:click="verify">验证</van-button>
       </van-field>
     </van-cell-group>
-    <van-button size="large" bind:click="scan">扫描订单二维码</van-button>
+    <van-button icon="scan" custom-class="submit-btn" bind:click="scan">扫描订单二维码</van-button>
   </view>
 </template>
 

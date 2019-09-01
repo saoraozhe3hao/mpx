@@ -12,7 +12,7 @@
 </script>
 
 <template>
-  <view>
+  <view class="home">
     <view class="top">
       <van-row>
         <van-col span="6">
@@ -22,55 +22,54 @@
           </view>
         </van-col>
         <van-col span="18">
-          <van-search placeholder="搜'播主的名称'" use-action-slot bind:search="onSearch">
+          <van-search placeholder="搜'播主的名称'" background="inherit" bind:search="onSearch" >
           </van-search>
         </van-col>
       </van-row>
     </view>
     <view class="categories">
       <view bindtap="category('daye')">
-        <view class="iconfont icon-huwai"></view>
-        <view>打野</view>
+        <view class="iconfont icon-huwai" style="color: #19BEAE"></view>
+        <view class="name">打野</view>
       </view>
       <view bindtap="category('ganhai')">
-        <view class="iconfont icon-haixian"></view>
-        <view>赶海</view>
+        <view class="iconfont icon-haixian" style="color:#11AAF1"></view>
+        <view class="name">赶海</view>
       </view>
       <view bindtap="category(yeshi)">
-        <view class="iconfont icon-yinshixuanzhong"></view>
-        <view>野食</view>
-      </view>
-      <view bindtap="category(yeju)">
-        <view class="iconfont icon-huwaixuanzhong"></view>
-        <view>野居</view>
-      </view>
-      <view bindtap="category(buzhuo)">
-        <view class="iconfont icon-yu1"></view>
-        <view>捕捉</view>
-      </view>
-      <view bindtap="category(caizhai)">
-        <view class="iconfont icon-rengongcaizhai"></view>
-        <view>采摘</view>
-      </view>
-      <view bindtap="category(minsu)">
-        <view class="iconfont icon-nongcungongshuigongcheng"></view>
-        <view>民俗</view>
+        <view class="iconfont icon-yinshixuanzhong" style="color:#FCCB26"></view>
+        <view class="name">野食</view>
       </view>
       <view bindtap="category(tanmi)">
-        <view class="iconfont icon-tansuofaxian"></view>
-        <view>探秘</view>
+        <view class="iconfont icon-tansuofaxian" style="color:#FE4C07"></view>
+        <view class="name">探秘</view>
+      </view>
+      <view bindtap="category(buzhuo)">
+        <view class="iconfont icon-yu1" style="color:#FB5995"></view>
+        <view class="name">捕捉</view>
+      </view>
+      <view bindtap="category(minsu)">
+        <view class="iconfont icon-nongcungongshuigongcheng" style="color:#FDBD07"></view>
+        <view class="name">民俗</view>
+      </view>
+      <view bindtap="category(caizhai)">
+        <view class="iconfont icon-rengongcaizhai" style="color:#04C2A0"></view>
+        <view class="name">采摘</view>
+      </view>
+      <view bindtap="category(yeju)">
+        <view class="iconfont icon-huwaixuanzhong" style="color:#A16948"></view>
+        <view class="name">野居</view>
       </view>
     </view>
     <van-cell-group title="推荐">
-      <van-card wx:for="{{products}}" wx:key="index" lazy-load="true"
+      <van-card wx:for="{{products}}" wx:key="index" lazy-load="true" custom-class="card-item"
                 tag="打野、民俗" price="100" desc="干塘体验一日游" title="{{ item.name }}" bindtap="productDetail(item)"
                 thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
         <view slot="bottom">
           <van-rate value="{{ 3.5 }}" readonly allow-half="true"/>
         </view>
         <view slot="footer">
-          <text class="distance">100km</text>
-          <text class="location">户县</text>
+          <text class="location">陕西省西安市鄠邑区，距您100公里</text>
         </view>
       </van-card>
     </van-cell-group>
@@ -89,7 +88,7 @@
         onLoad: function () {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
-                title: '首页'
+                title: '野趣小圈-首页'
             });
             this.login();
         },
@@ -159,7 +158,11 @@
     })
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
+  .home{
+    background: linear-gradient(#FEC806, #FFF) no-repeat;
+    background-size: 100% 200px;
+  }
   .top {
     width: 90vw;
     margin: 0 auto 10px;
@@ -167,6 +170,11 @@
     .location {
       vertical-align: middle;
       line-height: 54px;
+    }
+
+    .icon-jiantouxia {
+      font-size: 14px;
+      padding-left: 5px;
     }
   }
 
@@ -176,13 +184,21 @@
     flex-wrap: wrap;
     justify-content: space-between;
     text-align: center;
+    background: #FFF;
+    border-radius: 20px;
+    padding: 4vw 0;
 
     > view {
       width: 20vw;
+      margin-bottom: 4vw;
 
       .iconfont {
         font-size: 30px;
-        color: #FFA41F;
+      }
+
+      .name {
+        font-size: 12px;
+        padding-top: 4px;
       }
     }
   }

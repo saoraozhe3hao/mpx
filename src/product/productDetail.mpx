@@ -33,8 +33,8 @@
       <van-cell title="时间" value="2019年5月1日-2019年8月12日"/>
       <van-cell title="详细地址" value="福建省龙岩市漳平市永福镇箭竹村"/>
       <van-cell title="标签">
-        <van-tag type="danger">捕捉</van-tag>
-        <van-tag type="danger">打野</van-tag>
+        <van-tag type="danger" custom-class="tag">捕捉</van-tag>
+        <van-tag type="danger" custom-class="tag">打野</van-tag>
       </van-cell>
       <van-cell title="单天接待人数上限" value="20人"/>
     </van-cell-group>
@@ -137,12 +137,12 @@
       <van-cell title="订单数" value="100个"/>
       <van-cell title="订单总额" value="10000元"/>
     </van-cell-group>
-    <van-goods-action wx:if="{{!isGuider}}">
+    <van-goods-action wx:if="{{!isGuider}}" custom-class="goods-action">
       <van-goods-action-icon icon="share" text="分享" open-type="share"/>
       <van-goods-action-icon icon="like" text="收藏" bind:click="collect"/>
       <van-goods-action-button text="立即预约" bind:click="bespeak"/>
     </van-goods-action>
-    <van-goods-action wx:if="{{isGuider}}">
+    <van-goods-action wx:if="{{isGuider}}" custom-class="goods-action">
       <van-goods-action-icon icon="points" text="复制" bind:click="copy"/>
       <van-goods-action-icon icon="descending" text="下架" bind:click="down"/>
       <van-goods-action-button text="预约详情" bind:click="appointment"/>
@@ -160,7 +160,7 @@
             foodImgs: [],
             stayOverImgs: [],
             activeTab: 0,
-            isGuider: true
+            isGuider: false
         },
         onLoad(query) {
             wx.showShareMenu();
@@ -226,7 +226,11 @@
   .product-detail {
     padding-bottom: 50px;
 
-    .van-goods-action {
+    .tag {
+      margin-right: 5px;
+    }
+
+    .goods-action {
       z-index: 1;
     }
   }

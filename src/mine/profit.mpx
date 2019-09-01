@@ -3,7 +3,6 @@
     "usingComponents": {
       "van-cell": "vant-weapp/dist/cell/index",
       "van-cell-group": "vant-weapp/dist/cell-group/index",
-      "van-panel": "vant-weapp/dist/panel/index",
       "van-button": "vant-weapp/dist/button/index"
     }
   }
@@ -14,12 +13,9 @@
     <van-cell-group>
       <van-cell title="已提现金额" value="1000" />
       <van-cell title="提现中金额" value="100" />
+      <van-cell title="可提现金额" value="100" />
     </van-cell-group>
-    <van-panel title="可提现金额" desc="10" use-footer-slot>
-      <view slot="footer">
-        <van-button size="small" type="danger" bind:click="withdraw">提现</van-button>
-      </view>
-    </van-panel>
+    <van-button custom-class="submit-btn" bind:click="withdraw">提现</van-button>
   </view>
 </template>
 

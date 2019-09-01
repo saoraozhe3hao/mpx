@@ -16,7 +16,7 @@
 </script>
 
 <template>
-  <view>
+  <view class="publish">
     <van-field label="标题" placeholder="取一个响亮的标题"/>
     <van-field label="详细地址" type="textarea" placeholder="精确到能找到你" autosize/>
     <van-cell title="开始日期" is-link value="{{startDate}}" bind:click="startDateClick"/>
@@ -47,7 +47,7 @@
       </van-field>
     </van-cell-group>
     <van-cell-group title="住宿安排" border="{{ false }}">
-      <van-switch-cell title="提供住宿" checked="{{ stayOver }}" bind:change="stayOverChange"/>
+      <van-switch-cell title="提供住宿" active-color="#FDD03F" checked="{{ stayOver }}" bind:change="stayOverChange"/>
       <van-cell title="房间数" wx:if="{{stayOver}}">
         <van-stepper value="{{ 1 }}"/>
       </van-cell>
@@ -60,9 +60,9 @@
       <van-field label="床位价" placeholder="请输入" wx:if="{{stayOver}}">
         <text slot="right-icon">元/晚</text>
       </van-field>
-      <van-cell title="附近有酒店可以住宿" value-class="checkbox-in-cell" border="{{ false }}"
-                clickable bind:click="hotelChange({detail: !hotel})">
-        <van-checkbox value="{{hotel}}" bind:change="hotelChange"/>
+      <van-cell title="附近有酒店可以住宿" clickable value-class="checkbox-in-cell"
+                border="{{ false }}" bind:click="hotelChange({detail: !hotel})">
+        <van-checkbox checked-color="#FDD03F" value="{{hotel}}" bind:change="hotelChange"/>
       </van-cell>
     </van-cell-group>
     <van-cell-group title="打折规则">
@@ -96,7 +96,7 @@
               <view class="weui-uploader__file" wx:for="{{activityImgs}}" wx:key="index">
                 <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
                        bindtap="previewImage(activityImgs, item)"/>
-                <van-icon name="delete" size="1.5em" bind:click="removeImage('activityImgs', index)"/>
+                <van-icon name="delete" color="#F54403" size="1.2em" bind:click="removeImage('activityImgs', index)"/>
               </view>
             </view>
             <view class="weui-uploader__input-box">
@@ -154,7 +154,7 @@
         </view>
       </view>
     </view>
-    <van-button type="default" bind:click="submit" size="large">提交</van-button>
+    <van-button type="default" custom-class="submit-btn" bind:click="submit" size="large">提交</van-button>
   </view>
   <van-popup position="bottom" show="{{ showStartDate }}" bind:close="popupClose">
     <van-datetime-picker type="date" value="{{ startDate }}" min-date="{{ minDate }}" bind:confirm="startDateConfirm"/>
@@ -237,7 +237,12 @@
 </script>
 
 <style lang="less">
-  .checkbox-in-cell {
-    flex: none !important;
+  .publish {
+    position: relative;
+    padding-bottom: calc(10vw + 70px);
+
+    .checkbox-in-cell {
+      flex: none !important;
+    }
   }
 </style>

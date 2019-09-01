@@ -12,8 +12,8 @@
   <view>
     <van-cell-group title="投诉趣导">
       <van-field label="详细描述" type="textarea" placeholder="请输入" autosize value="{{ detail }}"/>
-      <van-button type="default" bind:click="submit" size="large">提交</van-button>
     </van-cell-group>
+    <van-button custom-class="submit-btn" bind:click="submit" size="large">提交</van-button>
   </view>
 </template>
 

@@ -10,34 +10,46 @@
 </script>
 
 <template>
-  <view class="functions">
-    <view bindtap="collection">
-      <van-icon name="like" />
-      <view>收藏</view>
+  <view class="mine">
+    <van-cell custom-class="avatar-row" value-class="avatar-right" value=" " border="{{ false }}">
+      <view slot="title">
+        <view class="avatar" bindtap="chooseImage"
+              style="background-image: url('http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg');">
+        </view>
+        <view class="name">{{userInfo.nickName}}</view>
+      </view>
+      <view slot="right-icon" bindtap="basic">
+        <van-icon name="setting-o"/>
+      </view>
+    </van-cell>
+    <view class="functions">
+      <view bindtap="collection">
+        <van-icon name="like-o"/>
+        <view>收藏</view>
+      </view>
+      <view bindtap="profit">
+        <van-icon name="balance-pay"/>
+        <view>收益</view>
+      </view>
+      <view bindtap="verify">
+        <van-icon name="scan"/>
+        <view>验证订单</view>
+      </view>
+      <view bindtap="message">
+        <van-icon name="chat-o"/>
+        <view>消息</view>
+      </view>
     </view>
-    <view bindtap="profit">
-      <van-icon name="bill" />
-      <view>收益</view>
+    <view class="info">
+      <van-cell-group title="个人信息">
+        <van-cell title="地址" value="福建省三明市尤溪县" is-link url="/basic"/>
+        <van-cell title="手机号" value="15202926290" is-link url="/phone"/>
+        <van-cell title="自媒体号/短视频号/直播号" value="公众号/微博/B站/西瓜/抖音/斗鱼等" is-link url="/selfMedia"/>
+        <van-cell title="姓名" value="老钟" is-link url="/bankCard"/>
+        <van-cell title="银行卡号" value="62222222222222222" is-link url="/bankCard"/>
+      </van-cell-group>
     </view>
-    <view bindtap="verify">
-      <van-icon name="eye" />
-      <view>验证订单</view>
-    </view>
-    <view bindtap="message">
-      <van-icon name="chat" />
-      <view>消息</view>
-    </view>
-  </view>
-  <view>
-    <van-button type="default" size="large" wx:if="{{!authed}}" bind:getuserinfo="getUserInfo">点击获取用户信息</van-button>
-    <van-cell-group title="个人信息">
-      <van-cell title="昵称" value="{{userInfo.nickName}}" is-link url="/basic"/>
-      <van-cell title="地址" value="福建省三明市尤溪县" is-link  url="/basic"/>
-      <van-cell title="手机号" value="15202926290" is-link  url="/phone"/>
-      <van-cell title="自媒体号/短视频号/直播号" value="公众号/微博/B站/西瓜/抖音/斗鱼等" is-link  url="/selfMedia"/>
-      <van-cell title="姓名" value="老钟" is-link  url="/bankCard"/>
-      <van-cell title="银行卡号" value="62222222222222222" is-link  url="/bankCard"/>
-    </van-cell-group>
+    <van-button custom-class="submit-btn" wx:if="{{!authed}}" bind:getuserinfo="getUserInfo">点击获取用户信息</van-button>
   </view>
 </template>
 
@@ -50,7 +62,7 @@
             nickName: '',
             authed: false
         },
-        onLoad: function (options) {
+        onLoad(options) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '我的'
@@ -67,14 +79,14 @@
                 return store.state.userInfo
             }
         },
-        auth: function() {
+        auth() {
             wx.getSetting({
                 success: (res) => {
                     // 已授权
                     if (res.authSetting['scope.userInfo']) {
                         this.authed = true;
                         wx.getUserInfo({
-                            success: (res)=>{
+                            success: (res) => {
                                 this.getUserInfo({detail: res});
                             }
                         })
@@ -82,44 +94,103 @@
                 }
             })
         },
-        getUserInfo: function (res) {
+        getUserInfo(res) {
             console.log(JSON.stringify(res));
             store.state.userInfo = res.detail.userInfo;
             store.commit('change')
         },
-        verify: function (event) {
+        basic(event) {
+            wx.navigateTo({
+                url: '/basic'
+            })
+        },
+        verify(event) {
             wx.navigateTo({
                 url: '/verify'
             })
         },
-        message: function (event) {
+        message(event) {
             wx.navigateTo({
                 url: '/message'
             })
         },
-        profit: function (event) {
+        profit(event) {
             wx.navigateTo({
                 url: '/profit'
             })
         },
-        collection: function (event) {
+        collection(event) {
             wx.navigateTo({
                 url: '/collection'
             })
-        }
+        },
+        chooseImage() {
+            wx.chooseImage({
+                sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+                sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+                success: (res) => {
+                    // 返回选定照片的本地文件路径列表，tempFilePath可以作为img标签的src属性显示图片
+                }
+            })
+        },
     })
 </script>
 
 <style lang="less">
-  .functions {
-    margin: 0 5vw;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    text-align: center;
+  .mine {
+    background: linear-gradient(#FEC806, #FFF) no-repeat;
+    background-size: 100% ~"400rpx";  /* ~"" 是less 提供的语法，rpx不是css的单位，~""可以防止代码格式化时出错 */
 
-    > view {
-      width: 20vw;
+    button.submit-btn {
+      bottom: 70px;
+    }
+
+    .avatar-row {
+      background: inherit;
+
+      .avatar {
+        width: ~"100rpx";
+        height: ~"100rpx";
+        border-radius: ~"50rpx";
+        display: inline-block;
+        vertical-align: middle;
+        background-size: 100% 100%;
+      }
+
+      .name {
+        display: inline-block;
+        line-height: ~"100rpx";
+        vertical-align: middle;
+        margin-left: 4vw;
+      }
+
+      van-icon {
+        display: inline-block;
+        line-height: ~"100rpx";
+        font-size: 1.5em;
+      }
+    }
+
+    .functions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      text-align: center;
+      margin: 4vw 0;
+      font-size: 12px;
+
+      > view {
+        width: 20vw;
+
+        van-icon {
+          font-size: 2em;
+        }
+      }
+    }
+
+    .info {
+      background: #FFF;
+      border-radius: 20px;
     }
   }
 </style>

@@ -2,20 +2,20 @@
   {
     "usingComponents": {
       "van-area": "vant-weapp/dist/area/index",
-      "van-panel": "vant-weapp/dist/panel/index",
-      "van-button": "vant-weapp/dist/button/index"
+      "van-button": "vant-weapp/dist/button/index",
+      "van-cell": "vant-weapp/dist/cell/index"
     }
   }
 </script>
 
 <template>
   <view>
-    <van-panel title="定位/最近访问">
-      <view>
-        <van-button icon="location-o" type="default" bind:click="back(location)">{{location}}</van-button>
-        <van-button type="default" wx:for="{{recents}}" bind:click="back(item)">{{item}}</van-button>
+    <van-cell title="定位/最近访问" use-label-slot custom-class="location-cell">
+      <view slot="label" class="location-btns">
+        <van-button icon="location" type="default" custom-class="location-btn" bind:click="back(location)">{{location}}</van-button>
+        <van-button type="default" wx:for="{{recents}}" custom-class="location-btn" bind:click="back(item)">{{item}}</van-button>
       </view>
-    </van-panel>
+    </van-cell>
     <view>
       <van-area cancel-button-text=" " area-list="{{ areaList }}" bind:confirm="choose"/>
     </view>
@@ -28,7 +28,7 @@
 
     createPage({
         data: {
-            recents: ['户县', '华县'],
+            recents: ['户县', '华县的士大夫撒旦'],
             location: '西安',
             areaList: area
         },
@@ -54,5 +54,15 @@
 </script>
 
 <style lang="less">
+  .location-cell{
+    background: linear-gradient(#FEC806, #FFF) no-repeat;
+    background-size: 100% 200%;
+  }
+  .location-btns{
+    margin-top: 10px;
+    .location-btn{
+      margin: 0 10px 10px 0;
+    }
+  }
 
 </style>
