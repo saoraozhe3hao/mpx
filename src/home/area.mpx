@@ -40,13 +40,13 @@
         },
         choose(event){
             let location = event.detail.values[2];
-            this.back(location.name);
+            this.back(area.name);
         },
         back: function (location) {
             var pages = getCurrentPages();
             var prevPage = pages[pages.length - 2];
             prevPage.setData({
-                location: location
+                location: area
             })
             wx.navigateBack()
         }

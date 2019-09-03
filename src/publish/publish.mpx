@@ -18,7 +18,7 @@
 <template>
   <view class="publish">
     <van-field label="标题" placeholder="取一个响亮的标题"/>
-    <van-field label="详细地址" type="textarea" placeholder="精确到能找到你" autosize/>
+    <van-cell title="详细地址" is-link value="{{location.name || '当前地址'}}" bind:click="locationClick"/>
     <van-cell title="开始日期" is-link value="{{startDate}}" bind:click="startDateClick"/>
     <van-cell title="结束日期" is-link value="{{endDate}}" bind:click="endDateClick"/>
     <van-field label="上午活动" type="textarea" placeholder="活动内容" autosize/>
@@ -79,6 +79,33 @@
         <text slot="right-icon">折</text>
       </van-field>
     </van-cell-group>
+    <view class="weui-cell">
+      <view class="weui-cell__bd">
+        <view class="weui-uploader">
+          <view class="weui-uploader__hd">
+            <view class="weui-uploader__overview">
+              <view class="weui-uploader__title">封面</view>
+              <view class="weui-uploader__info">{{coverImgs.length}}/1</view>
+            </view>
+            <view class="weui-uploader__tips">
+              封面照片
+            </view>
+          </view>
+          <view class="weui-uploader__bd">
+            <view class="weui-uploader__files">
+              <view class="weui-uploader__file" wx:for="{{coverImgs}}" wx:key="index">
+                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
+                       bindtap="previewImage(coverImgs, item)"/>
+                <van-icon name="delete" color="#F54403" size="1.2em" bind:click="removeImage('coverImgs', index)"/>
+              </view>
+            </view>
+            <view class="weui-uploader__input-box">
+              <view class="weui-uploader__input" bindtap="chooseImage('coverImgs')"></view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
     <view class="weui-cell">
       <view class="weui-cell__bd">
         <view class="weui-uploader">
@@ -169,6 +196,7 @@
 
     createPage({
         data: {
+            location: {},
             minDate: new Date().getTime(),
             showStartDate: false,
             startDate: new Date().getTime(),
@@ -176,6 +204,7 @@
             endDate: new Date().getTime(),
             stayOver: true,
             hotel: true,
+            coverImgs: '',
             activityImgs: ['https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png', 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'],
             foodImgs: [],
             stayOverImgs: []
@@ -189,6 +218,13 @@
         popupClose() {
             this.showStartDate = false;
             this.endStartDate = false;
+        },
+        locationClick() {
+            wx.chooseLocation({
+                success: (res) => {
+                    this.location = res;
+                }
+            })
         },
         startDateClick() {
             this.showStartDate = true;

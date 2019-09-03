@@ -15,6 +15,8 @@
                  value="{{ nick }}" error-message="{{nickError}}" bind:blur="nickNameBlur"/>
       <van-field required maxlength="50" placeholder="请输入地址" label="地址"
                  value="{{ address }}" error-message="{{addressError}}" bind:blur="addressBlur"/>
+      <van-field maxlength="50" placeholder="没有则不填" label="平台联系人编号"
+                 value="{{ contact }}" error-message="{{contactError}}" bind:blur="contactBlur"/>
     </van-cell-group>
     <van-dialog id="van-dialog"/>
   </view>
@@ -32,7 +34,9 @@
             nickError: '',
             originAddress: '',
             address: '',
-            addressError: ''
+            addressError: '',
+            contact: '',
+            contactError: '',
         },
         onLoad: function (options) {
             wx.showShareMenu();
@@ -71,6 +75,9 @@
             else{
                 this.addressError = ''
             }
+        },
+        contactBlur(event) {
+            this.contact = event.detail.value;
         }
     })
 </script>

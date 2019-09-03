@@ -3,7 +3,7 @@
     "pages": [
       "./home",
       "./category",
-      "./location"
+      "./area"
     ]
   }
 </script>

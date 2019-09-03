@@ -70,6 +70,28 @@
         <view class="weui-uploader">
           <view class="weui-uploader__hd">
             <view class="weui-uploader__overview">
+              <view class="weui-uploader__title">封面图片</view>
+            </view>
+            <view class="weui-uploader__tips">
+              封面照片
+            </view>
+          </view>
+          <view class="weui-uploader__bd">
+            <view class="weui-uploader__files">
+              <view class="weui-uploader__file" wx:for="{{coverImgs}}" wx:key="index">
+                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
+                       bindtap="previewImage(coverImgs, item)"/>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="weui-cell">
+      <view class="weui-cell__bd">
+        <view class="weui-uploader">
+          <view class="weui-uploader__hd">
+            <view class="weui-uploader__overview">
               <view class="weui-uploader__title">活动图片</view>
             </view>
             <view class="weui-uploader__tips">
@@ -156,6 +178,7 @@
     createPage({
         data: {
             id: '',
+            coverImgs: [],
             activityImgs: ['https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png', 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'],
             foodImgs: [],
             stayOverImgs: [],
