@@ -28,43 +28,43 @@
       </van-row>
     </view>
     <view class="categories">
-      <view bindtap="category('daye')">
+      <view bindtap="category('打野')">
         <view class="iconfont icon-huwai" style="color: #19BEAE"></view>
         <view class="name">打野</view>
       </view>
-      <view bindtap="category('ganhai')">
+      <view bindtap="category('赶海')">
         <view class="iconfont icon-haixian" style="color:#11AAF1"></view>
         <view class="name">赶海</view>
       </view>
-      <view bindtap="category(yeshi)">
+      <view bindtap="category('野食')">
         <view class="iconfont icon-yinshixuanzhong" style="color:#FCCB26"></view>
         <view class="name">野食</view>
       </view>
-      <view bindtap="category(tanmi)">
+      <view bindtap="category('探秘')">
         <view class="iconfont icon-tansuofaxian" style="color:#FE4C07"></view>
         <view class="name">探秘</view>
       </view>
-      <view bindtap="category(buzhuo)">
+      <view bindtap="category('捕捉')">
         <view class="iconfont icon-yu1" style="color:#FB5995"></view>
         <view class="name">捕捉</view>
       </view>
-      <view bindtap="category(minsu)">
+      <view bindtap="category('民俗')">
         <view class="iconfont icon-nongcungongshuigongcheng" style="color:#FDBD07"></view>
         <view class="name">民俗</view>
       </view>
-      <view bindtap="category(caizhai)">
+      <view bindtap="category('采摘')">
         <view class="iconfont icon-rengongcaizhai" style="color:#04C2A0"></view>
         <view class="name">采摘</view>
       </view>
-      <view bindtap="category(yeju)">
+      <view bindtap="category('野居')">
         <view class="iconfont icon-huwaixuanzhong" style="color:#A16948"></view>
         <view class="name">野居</view>
       </view>
     </view>
     <van-cell-group title="推荐">
-      <van-card wx:for="{{products}}" wx:key="index" lazy-load="true" custom-class="card-item"
+      <van-card wx:for="{{products}}" wx:key="index" wx:if="{{products.length}}" lazy-load="true" custom-class="card-item"
                 tag="{{item.tags}}" title="{{ item.merchantName }}" desc="{{ item.name }}" price="{{item.singlePrice}}"
-                bindtap="productDetail(item)" thumb="{{item.coverPhoto}}">
+                thumb="{{item.coverPhoto}}" bindtap="productDetail(item)">
         <view slot="bottom">
           <van-rate value="{{ item.rate }}" readonly allow-half="true"/>
         </view>
@@ -72,7 +72,10 @@
           <text>{{item.address}}，距您{{item.distance}}公里</text>
         </view>
       </van-card>
+      <view class="empty-data" wx:if="{{!products.length}}"></view>
     </van-cell-group>
+    <text wx:if="{{false}}">{{isLogin}}</text>
+    <text wx:if="{{false}}">{{location}}</text>
   </view>
 </template>
 <script>
@@ -85,41 +88,56 @@
             area: '全国',
             products: []
         },
-        watch: {
-        },
-        computed: {
-            location(){
-                return store.state.location;
-            }
-        },
         onLoad: function () {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '野趣小圈-首页'
             });
-            // this.login();
         },
         onShow() {
             this.getTabBar && this.getTabBar().setData({
                 active: 0
             })
         },
+        computed: {
+            isLogin(){    // computed store里的变量(并且独占一个元素)，必须在template使用了该变量，computed才能有效
+                return store.state.isLogin;
+            },
+            location() {
+                return store.state.location;
+            }
+        },
         watch: {
+            isLogin(val) {
+                let pages = getCurrentPages();
+                let curPage = pages[pages.length - 1];
+                if(val && curPage.route == 'home/home'){
+                    this.fetchProducts();
+                }
+            },
             area(newval, oldval) {
                 this.fetchProducts();
             }
         },
         fetchProducts(keyWord) {
             keyWord = keyWord || '';
-            let url = `${app.globalData.basePath}/weapp/product`
+            let url = `${app.globalData.basePath}/weapp/product?`;
+            url = `${url}&pageNum=1&pageSize=10&search=${keyWord}`
+            url = this.location.longitude ? `${url}&longitude=${this.location.longitude}&latitude=${this.location.latitude}` : url;
             wx.request({
                 method: 'GET',
-                url: `${url}?pageNum=1&pageSize=10&search=${keyWord}&longitude=${this.location.longitude}&latitude=${this.location.latitude}`,
+                url: url,
                 header: {
                     'Cookie': wx.getStorageSync("sessionId")
                 },
                 success: (res) => {
-                    this.products = res.data.data.list;
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.products = res.data.list;
+                    }
+                    else if(res.code == 401){
+                        app.login();
+                    }
                 }
             });
         },

@@ -18,8 +18,8 @@
     ],
     "window": {
       "backgroundTextStyle": "light",
-      "navigationBarBackgroundColor": "#fff",
-      "navigationBarTitleText": "WeChat",
+      "navigationBarBackgroundColor": "#FEC806",
+      "navigationBarTitleText": "野趣小圈",
       "navigationBarTextStyle": "black"
     },
     "usingComponents": {
@@ -68,13 +68,15 @@
 
     createApp({
         globalData: {
-            userInfo: null,
             basePath: "https://127.0.0.1:8443"
         },
-        onShow () {
+        onShow() {
             this.login();
         },
         login() {     // 登录
+            store.state.isLogin = false;
+            store.commit("change");
+
             wx.login({
                 success: res => {
                     wx.request({
@@ -107,6 +109,11 @@
                             scope: 'scope.userLocation',
                             success: () => {
                                 this.getLocation();
+                            },
+                            fail: () => {
+                                store.state.isLogin = true;
+                                store.state.location = {};
+                                store.commit("change");
                             }
                         })
                     }
@@ -117,7 +124,14 @@
             wx.getLocation({
                 type: 'wgs84',
                 success: (res) => {
-                    store.commit("setLocation", res);
+                    store.state.isLogin = true;
+                    store.state.location = res;
+                    store.commit("change");
+                },
+                fail: () => {
+                    store.state.isLogin = true;
+                    store.state.location = {};
+                    store.commit("change");
                 }
             })
         }
@@ -125,8 +139,8 @@
 </script>
 
 <style lang="less">
-  @import "./iconfont.css";
-  @import "./weui.css";
+  @import "assets/iconfont.css";
+  @import "assets/weui.css";
 
   page {
     font-size: 16px;
@@ -151,6 +165,14 @@
 
   .clearfix {
     zoom: 1;
+  }
+
+  .empty-data{
+    width: ~"600rpx";
+    height: ~"618rpx";
+    margin: 0 auto;
+    background: url("./assets/empty-data.png");
+    background-size: 100% 100%;
   }
 
   /* vant weapp 定制 */
