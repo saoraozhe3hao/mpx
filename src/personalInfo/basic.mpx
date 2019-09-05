@@ -13,8 +13,6 @@
     <van-cell-group>
       <van-field required maxlength="20" placeholder="请输入昵称" label="昵称"
                  value="{{ nick }}" error-message="{{nickError}}" bind:blur="nickNameBlur"/>
-      <van-field required maxlength="50" placeholder="请输入地址" label="地址"
-                 value="{{ address }}" error-message="{{addressError}}" bind:blur="addressBlur"/>
       <van-field maxlength="50" placeholder="没有则不填" label="平台联系人编号"
                  value="{{ contact }}" error-message="{{contactError}}" bind:blur="contactBlur"/>
     </van-cell-group>
@@ -32,9 +30,6 @@
             originNick: '',
             nick: '',
             nickError: '',
-            originAddress: '',
-            address: '',
-            addressError: '',
             contact: '',
             contactError: '',
         },
@@ -66,15 +61,6 @@
             }).catch(() => {
                 this.nick = this.originNick;
             });
-        },
-        addressBlur(event) {
-            this.address = event.detail.value;
-            if (!this.address && this.originAddress) {
-                this.addressError = '请填写地址'
-            }
-            else{
-                this.addressError = ''
-            }
         },
         contactBlur(event) {
             this.contact = event.detail.value;

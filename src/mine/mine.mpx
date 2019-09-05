@@ -42,7 +42,6 @@
     </view>
     <view class="info">
       <van-cell-group title="个人信息">
-        <van-cell title="地址" value="福建省三明市尤溪县" is-link url="/basic"/>
         <van-cell title="手机号" value="15202926290" is-link url="/phone"/>
         <van-cell title="自媒体号/短视频号/直播号" value="公众号/微博/B站/西瓜/抖音/斗鱼等" is-link url="/selfMedia"/>
         <van-cell title="姓名" value="老钟" is-link url="/bankCard"/>

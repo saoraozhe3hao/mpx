@@ -71,6 +71,7 @@
             basePath: "https://127.0.0.1:8443"
         },
         onShow() {
+            store.state.systemInfo = wx.getSystemInfoSync();
             this.login();
         },
         login() {     // 登录
@@ -137,10 +138,9 @@
         }
     })
 </script>
-
+<style src="../node_modules/weui-miniprogram/miniprogram_dist/weui-wxss/dist/style/weui.wxss"></style>
 <style lang="less">
   @import "assets/iconfont.css";
-  @import "assets/weui.css";
 
   page {
     font-size: 16px;

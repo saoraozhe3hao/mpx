@@ -6,7 +6,8 @@
       "van-col": "vant-weapp/dist/col/index",
       "van-card": "vant-weapp/dist/card/index",
       "van-rate": "vant-weapp/dist/rate/index",
-      "van-cell-group": "vant-weapp/dist/cell-group/index"
+      "van-cell-group": "vant-weapp/dist/cell-group/index",
+      "mp-loading": "weui-miniprogram/miniprogram_dist/loading/loading"
     }
   }
 </script>
@@ -15,8 +16,8 @@
   <view class="home">
     <view class="top">
       <van-row>
-        <van-col span="6">
-          <view class="area text-overflow" bindtap="locate">
+        <van-col span="6" bindtap="locate">
+          <view class="area text-overflow">
             <text>{{area}}</text>
             <text class="iconfont icon-jiantouxia"></text>
           </view>
@@ -62,9 +63,9 @@
       </view>
     </view>
     <van-cell-group title="推荐">
-      <van-card wx:for="{{products}}" wx:key="index" wx:if="{{products.length}}" lazy-load="true" custom-class="card-item"
-                tag="{{item.tags}}" title="{{ item.merchantName }}" desc="{{ item.name }}" price="{{item.singlePrice}}"
-                thumb="{{item.coverPhoto}}" bindtap="productDetail(item)">
+      <van-card wx:for="{{products}}" wx:key="index" wx:if="{{products.length}}" lazy-load="true"
+                custom-class="card-item" tag="{{item.tags}}" title="{{ item.merchantName }}" desc="{{ item.name }}"
+                price="{{item.singlePrice}}" thumb="{{item.coverPhoto}}" bindtap="productDetail(item)">
         <view slot="bottom">
           <van-rate value="{{ item.rate }}" readonly allow-half="true"/>
         </view>
@@ -76,22 +77,45 @@
     </van-cell-group>
     <text wx:if="{{false}}">{{isLogin}}</text>
     <text wx:if="{{false}}">{{location}}</text>
+    <mp-loading type="circle" show="{{showLoading}}" class="loading"></mp-loading>
   </view>
 </template>
 <script>
     import {createPage} from '@mpxjs/core'
     import store from '../components/store'
+    import BMapWX from '../components/bmap-wx'
 
     let app = getApp();
     createPage({
         data: {
-            area: '全国',
-            products: []
+            pageNum: 1,
+            products: [],
+            showLoading: false,
+            requesting: false  // 是否正在请求
         },
-        onLoad: function () {
+        onLoad() {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '野趣小圈-首页'
+            });
+            // 这里只是定义查询规则，后面的 exec() 才真正查询
+            this.query = this.createSelectorQuery();
+            this.query.select('.loading').boundingClientRect();
+
+            let bmap = new BMapWX({
+                ak: 'kMO0MIxzQensA8hNHIQGhiLXVb4y19Sa'
+            });
+            // 逆地址解析，即当前经纬度 -> 地址信息
+            bmap.regeocoding({
+                fail: (data) => {
+                    console.log(data);
+                },
+                success: (data) => {
+                    let address = data.originalData.result.addressComponent;
+                    store.state.area = [address.province, address.city, address.district].join('-');
+                    store.state.address = address;
+                    store.commit("change");
+                }
             });
         },
         onShow() {
@@ -100,44 +124,75 @@
             })
         },
         computed: {
-            isLogin(){    // computed store里的变量(并且独占一个元素)，必须在template使用了该变量，computed才能有效
+            isLogin() {    // computed store里的变量(并且独占一个元素)，必须在template使用了该变量，computed才能有效
                 return store.state.isLogin;
             },
             location() {
                 return store.state.location;
+            },
+            area() {
+                let area = store.state.area.split('-');
+                return area[area.length-1];
             }
         },
         watch: {
             isLogin(val) {
                 let pages = getCurrentPages();
                 let curPage = pages[pages.length - 1];
-                if(val && curPage.route == 'home/home'){
+                if (val && curPage.route == 'home/home') {
+                    this.products = [];
                     this.fetchProducts();
                 }
             },
             area(newval, oldval) {
-                this.fetchProducts();
+                if (oldval !== "全国") {  // 第一次变化 不拉数据，因为监听isLogin的地方已经拉了数据
+                    this.products = [];
+                    this.fetchProducts();
+                }
             }
+        },
+        onPageScroll() {
+            // 正在查询元素，正在请求数据，没有更多数据
+            if (this.requesting || !this.showLoading) {
+                return;
+            }
+            this.query.exec((res) => {
+                if (!this.requesting && res[0].top < store.state.systemInfo.windowHeight - 50) {
+                    this.pageNum++;
+                    this.fetchProducts();
+                }
+            })
         },
         fetchProducts(keyWord) {
             keyWord = keyWord || '';
-            let url = `${app.globalData.basePath}/weapp/product?`;
-            url = `${url}&pageNum=1&pageSize=10&search=${keyWord}`
-            url = this.location.longitude ? `${url}&longitude=${this.location.longitude}&latitude=${this.location.latitude}` : url;
+            this.requesting = true;
             wx.request({
-                method: 'GET',
-                url: url,
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/product?`,
                 header: {
                     'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    pageNum: this.pageNum,
+                    pageSize: 10,
+                    search: keyWord,
+                    longitude: this.location.longitude || null,
+                    latitude: this.location.latitude || null,
+                    area: this.area == '全国' ? '' : store.state.area.split('-').join('')
                 },
                 success: (res) => {
                     res = res.data;
                     if (res.code == 0) {
-                        this.products = res.data.list;
-                    }
-                    else if(res.code == 401){
+                        this.products = this.products.concat(res.data.list);
+                        this.showLoading = res.data.hasNextPage;
+                        this.requesting = false;
+                        this.onPageScroll();  // 怕没滚动时，加载图标就出现了，主动触发一次滚动响应
+                    } else if (res.code == 401) {
                         app.login();
                     }
+                },
+                complete: () => {
+                    this.requesting = false;
                 }
             });
         },
@@ -152,6 +207,7 @@
             })
         },
         onSearch(event) {
+            this.products = [];
             this.fetchProducts(event.detail)
         },
         productDetail(item) {
@@ -166,6 +222,7 @@
   .home {
     background: linear-gradient(#FEC806, #FFF) no-repeat;
     background-size: 100% 200px;
+    padding-bottom: 50px;
   }
 
   .top {

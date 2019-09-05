@@ -10,7 +10,9 @@
       "van-checkbox": "vant-weapp/dist/checkbox/index",
       "van-switch-cell": "vant-weapp/dist/switch-cell/index",
       "van-button": "vant-weapp/dist/button/index",
-      "van-icon": "vant-weapp/dist/icon/index"
+      "van-icon": "vant-weapp/dist/icon/index",
+      "mp-uploader": "weui-miniprogram/miniprogram_dist/uploader/uploader",
+      "mp-cell": "weui-miniprogram/miniprogram_dist/cell/cell"
     }
   }
 </script>
@@ -18,7 +20,7 @@
 <template>
   <view class="publish">
     <van-field label="标题" placeholder="取一个响亮的标题"/>
-    <van-cell title="详细地址" is-link value="{{location.name || '当前地址'}}" bind:click="locationClick"/>
+    <van-cell title="详细地址" is-link value="{{location.address}}" bind:click="locationClick"/>
     <van-cell title="开始日期" is-link value="{{startDate}}" bind:click="startDateClick"/>
     <van-cell title="结束日期" is-link value="{{endDate}}" bind:click="endDateClick"/>
     <van-field label="上午活动" type="textarea" placeholder="活动内容" autosize/>
@@ -79,108 +81,26 @@
         <text slot="right-icon">折</text>
       </van-field>
     </van-cell-group>
-    <view class="weui-cell">
-      <view class="weui-cell__bd">
-        <view class="weui-uploader">
-          <view class="weui-uploader__hd">
-            <view class="weui-uploader__overview">
-              <view class="weui-uploader__title">封面</view>
-              <view class="weui-uploader__info">{{coverImgs.length}}/1</view>
-            </view>
-            <view class="weui-uploader__tips">
-              封面照片
-            </view>
-          </view>
-          <view class="weui-uploader__bd">
-            <view class="weui-uploader__files">
-              <view class="weui-uploader__file" wx:for="{{coverImgs}}" wx:key="index">
-                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
-                       bindtap="previewImage(coverImgs, item)"/>
-                <van-icon name="delete" color="#F54403" size="1.2em" bind:click="removeImage('coverImgs', index)"/>
-              </view>
-            </view>
-            <view class="weui-uploader__input-box">
-              <view class="weui-uploader__input" bindtap="chooseImage('coverImgs')"></view>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view>
-    <view class="weui-cell">
-      <view class="weui-cell__bd">
-        <view class="weui-uploader">
-          <view class="weui-uploader__hd">
-            <view class="weui-uploader__overview">
-              <view class="weui-uploader__title">活动图片</view>
-              <view class="weui-uploader__info">{{activityImgs.length}}/10</view>
-            </view>
-            <view class="weui-uploader__tips">
-              活动现场照片
-            </view>
-          </view>
-          <view class="weui-uploader__bd">
-            <view class="weui-uploader__files">
-              <view class="weui-uploader__file" wx:for="{{activityImgs}}" wx:key="index">
-                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
-                       bindtap="previewImage(activityImgs, item)"/>
-                <van-icon name="delete" color="#F54403" size="1.2em" bind:click="removeImage('activityImgs', index)"/>
-              </view>
-            </view>
-            <view class="weui-uploader__input-box">
-              <view class="weui-uploader__input" bindtap="chooseImage('activityImgs')"></view>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view>
-    <view class="weui-cell">
-      <view class="weui-cell__bd">
-        <view class="weui-uploader">
-          <view class="weui-uploader__hd">
-            <view class="weui-uploader__overview">
-              <view class="weui-uploader__title">餐饮图片</view>
-              <view class="weui-uploader__info">{{foodImgs.length}}/10</view>
-            </view>
-          </view>
-          <view class="weui-uploader__bd">
-            <view class="weui-uploader__files">
-              <view class="weui-uploader__file" wx:for="{{foodImgs}}" wx:key="index">
-                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
-                       bindtap="previewImage(foodImgs, item)"/>
-                <van-icon name="delete" bind:click="removeImage('foodImgs', index)"/>
-              </view>
-            </view>
-            <view class="weui-uploader__input-box">
-              <view class="weui-uploader__input" bindtap="chooseImage('foodImgs')"></view>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view>
-    <view class="weui-cell">
-      <view class="weui-cell__bd">
-        <view class="weui-uploader">
-          <view class="weui-uploader__hd">
-            <view class="weui-uploader__overview">
-              <view class="weui-uploader__title">住宿图片</view>
-              <view class="weui-uploader__info">{{stayOverImgs.length}}/10</view>
-            </view>
-          </view>
-          <view class="weui-uploader__bd">
-            <view class="weui-uploader__files">
-              <view class="weui-uploader__file" wx:for="{{stayOverImgs}}" wx:key="index">
-                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
-                       bindtap="previewImage(stayOverImgs, item)"/>
-                <van-icon name="delete" bind:click="removeImage('stayOverImgs', index)"/>
-              </view>
-            </view>
-            <view class="weui-uploader__input-box">
-              <view class="weui-uploader__input" bindtap="chooseImage('stayOverImgs')"></view>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view>
+    <mp-cell>
+      <mp-uploader max-count="1" title="封面图片" files="{{coverImgs}}"
+                   bindselect="chooseImage('coverImgs', $event)"
+                   binddelete="removeImage('coverImgs', $event)"></mp-uploader>
+    </mp-cell>
+    <mp-cell>
+      <mp-uploader max-count="10" title="活动图片" tips="活动现场照片" files="{{activityImgs}}"
+                   bindselect="chooseImage('activityImgs', $event)"
+                   binddelete="removeImage('activityImgs', $event)"></mp-uploader>
+    </mp-cell>
+    <mp-cell>
+      <mp-uploader max-count="10" title="餐饮图片" tips="吃的啥" files="{{foodImgs}}"
+                   bindselect="chooseImage('foodImgs', $event)"
+                   binddelete="removeImage('foodImgs', $event)"></mp-uploader>
+    </mp-cell>
+    <mp-cell>
+      <mp-uploader max-count="10" title="住宿图片" tips="住的啥" files="{{stayOverImgs}}"
+                   bindselect="chooseImage('stayOverImgs', $event)"
+                   binddelete="removeImage('stayOverImgs', $event)"></mp-uploader>
+    </mp-cell>
     <van-button type="default" custom-class="submit-btn" bind:click="submit" size="large">提交</van-button>
   </view>
   <van-popup position="bottom" show="{{ showStartDate }}" bind:close="popupClose">
@@ -204,8 +124,19 @@
             endDate: new Date().getTime(),
             stayOver: true,
             hotel: true,
-            coverImgs: '',
-            activityImgs: ['https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png', 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'],
+            coverImgs: [
+                {
+                    url: 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'
+                }
+            ],
+            activityImgs: [
+                {
+                    url: 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'
+                },
+                {
+                    url: 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'
+                }
+            ],
             foodImgs: [],
             stayOverImgs: []
         },
@@ -223,8 +154,47 @@
             wx.chooseLocation({
                 success: (res) => {
                     this.location = res;
+                    this.addressHandler();
                 }
             })
+        },
+        addressHandler() {
+            let address = this.location.address;
+            if (this.location.address.includes('地区')) {
+                address = this.location.address.split('地区')[1];
+            }
+            else if (this.location.address.includes('自治区')) {
+                address = this.location.addres.split('自治区')[1];
+            }
+            // 从address中提取出县级
+            if (address.split('县区').length > 1) {
+                address = address.split('县区')[0] + '县区';
+            } else if (address.split('市区').length > 1) {
+                address = address.split('市区')[0] + '市区';
+            } else if (address.split('县市').length > 1) {
+                address = address.split('县市')[0] + '县市';
+            } else if (address.split('旗县').length > 1) {
+                address = address.split('旗县')[0] + '旗县';
+            } else if (address.split('旗区').length > 1) {
+                address = address.split('旗区')[0] + '旗区';
+            } else if (address.split('县').length > 1) {
+                address = address.split('县')[0] + '县';
+            } else if (address.split('旗').length > 1) {
+                address = address.split('旗')[0] + '旗';
+            } else if (address.split('区').length > 1) {
+                address = address.split('区')[0] + '区';
+            } else if (address.split('市').length >= 3) {   // 县级市
+                address = address.split('市')[0] + '市' + address.split('市')[1] + '市';
+            } else if (address.split('市').length < 3) {
+                address = address.split('市')[0] + '市';
+            }
+            if (this.location.address.includes('地区')) {
+                address = this.location.addres.split('地区')[0] + '地区' + address;
+            }
+            else if (this.location.address.includes('自治区')) {
+                address = this.location.addres.split('自治区')[0] + '自治区' + address;
+            }
+            this.location.address = address + '-' + this.location.name;
         },
         startDateClick() {
             this.showStartDate = true;
@@ -246,24 +216,16 @@
         hotelChange(event) {
             this.hotel = event.detail;
         },
-        chooseImage(group) {
-            wx.chooseImage({
-                sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
-                sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
-                success: (res) => {
-                    // 返回选定照片的本地文件路径列表，tempFilePath可以作为img标签的src属性显示图片
-                    this[group] = this[group].concat(res.tempFilePaths);
+        chooseImage(group, event) {
+            let paths = event.detail.tempFilePaths.map((item) => {
+                return {
+                    url: item
                 }
             })
+            this[group] = this[group].concat(paths);
         },
-        previewImage(group, src) {
-            wx.previewImage({
-                current: src, // 当前显示图片的http链接
-                urls: group // 需要预览的图片http链接列表
-            })
-        },
-        removeImage(group, index) {
-            this[group].splice(index, 1);
+        removeImage(group, event) {
+            this[group].splice(event.detail.index, 1);
             this[group] = this[group].concat([]);
         },
         submit(event) {

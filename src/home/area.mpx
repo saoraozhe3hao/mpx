@@ -12,55 +12,104 @@
   <view>
     <van-cell title="定位/最近访问" use-label-slot custom-class="location-cell">
       <view slot="label" class="location-btns">
-        <van-button icon="location" type="default" custom-class="location-btn" bind:click="back(location)">{{location}}</van-button>
-        <van-button type="default" wx:for="{{recents}}" custom-class="location-btn" bind:click="back(item)">{{item}}</van-button>
+        <van-button icon="location" custom-class="location-btn" v-if="address.district"
+                    bind:click="select([address.province,address.city,address.district])">
+          {{address.district}}
+        </van-button>
+        <van-button icon="location" custom-class="location-btn" v-if="address.city"
+                    bind:click="select([address.province,address.city])">
+          {{address.city}}
+        </van-button>
+        <van-button icon="location" custom-class="location-btn" bind:click="select([address.province])"
+                    v-if="address.province">
+          {{address.province}}
+        </van-button>
+        <van-button wx:for="{{recentArray}}" wx:key="{{index}}" custom-class="location-btn" bind:click="select(item)"
+                    wx:if="{{item[item.length - 1] != address.province && item[item.length - 1] != address.city && item[item.length - 1] != address.district}}">
+          {{item[item.length - 1]}}
+        </van-button>
       </view>
     </van-cell>
     <view>
-      <van-area cancel-button-text=" " area-list="{{ areaList }}" bind:confirm="choose"/>
+      <van-area cancel-button-text=" " value="110000" area-list="{{ areaList }}" bind:confirm="choose"/>
     </view>
   </view>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
-    import area from '../components/area'
+    import areaData from '../components/area'
+    import store from '../components/store'
+
+    let cityKeys = Object.keys(areaData.city_list);
+    cityKeys.forEach((item) => {
+        areaData.county_list[item] = '不限';
+    });
+    let provinceKeys = Object.keys(areaData.province_list);
+    provinceKeys.forEach((item) => {
+        areaData.city_list[item] = '不限';
+    });
 
     createPage({
         data: {
-            recents: ['户县', '华县的士大夫撒旦'],
-            location: '西安',
-            areaList: area
+            recentList: [],
+            areaList: areaData
         },
-        onLoad: function () {
+        onLoad() {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '地址'
-            })
+            });
+            let recentList = wx.getStorageSync("recentList") || '';
+            this.recentList = recentList ? recentList.split(',') : [];
         },
-        choose(event){
-            let location = event.detail.values[2];
-            this.back(area.name);
+        computed: {
+            address() {
+                return store.state.address;
+            },
+            recentArray() {
+                return this.recentList.map((item) => {
+                    return item.split('-');
+                });
+            }
         },
-        back: function (location) {
-            let pages = getCurrentPages();
-            let prevPage = pages[pages.length - 2];
-            prevPage.setData({
-                location: area
-            })
-            wx.navigateBack()
+        choose(event) {
+            let values = event.detail.values;
+            let area = [values[0].name];  // 省级
+            if (values[1] && values[1].name && values[1].name != "不限") {
+                area.push(values[1].name);  // 市级
+            }
+            if (values[2] && values[2].name && values[2].name != "不限") {
+                area.push(values[2].name);  // 县级
+            }
+            this.select(area);
+        },
+        select(area) {
+            area = area.join('-');
+            if (!this.recentList.includes(area)) {
+                this.recentList.unshift(area);
+                if (this.recentList.length > 5) {
+                    this.recentList.pop();
+                }
+                wx.setStorageSync("recentList", this.recentList.join(','));
+            }
+            store.state.area = area;
+            store.commit("change");
+            wx.navigateBack();
         }
     })
 </script>
 
 <style lang="less">
-  .location-cell{
+  .location-cell {
     background: linear-gradient(#FEC806, #FFF) no-repeat;
     background-size: 100% 200%;
   }
-  .location-btns{
+
+  .location-btns {
     margin-top: 10px;
-    .location-btn{
+
+    .location-btn {
       margin: 0 10px 10px 0;
     }
   }

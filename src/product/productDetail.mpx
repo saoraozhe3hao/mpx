@@ -11,7 +11,9 @@
       "van-tag": "vant-weapp/dist/tag/index",
       "van-goods-action": "vant-weapp/dist/goods-action/index",
       "van-goods-action-icon": "vant-weapp/dist/goods-action-icon/index",
-      "van-goods-action-button": "vant-weapp/dist/goods-action-button/index"
+      "van-goods-action-button": "vant-weapp/dist/goods-action-button/index",
+      "mp-uploader": "weui-miniprogram/miniprogram_dist/uploader/uploader",
+      "mp-cell": "weui-miniprogram/miniprogram_dist/cell/cell"
     }
   }
 </script>
@@ -65,88 +67,18 @@
       <van-cell title="连续预约10~30天" value="打6折"/>
       <van-cell title="连续预约30天以上" value="打5折"/>
     </van-cell-group>
-    <view class="weui-cell">
-      <view class="weui-cell__bd">
-        <view class="weui-uploader">
-          <view class="weui-uploader__hd">
-            <view class="weui-uploader__overview">
-              <view class="weui-uploader__title">封面图片</view>
-            </view>
-            <view class="weui-uploader__tips">
-              封面照片
-            </view>
-          </view>
-          <view class="weui-uploader__bd">
-            <view class="weui-uploader__files">
-              <view class="weui-uploader__file" wx:for="{{coverImgs}}" wx:key="index">
-                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
-                       bindtap="previewImage(coverImgs, item)"/>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view>
-    <view class="weui-cell">
-      <view class="weui-cell__bd">
-        <view class="weui-uploader">
-          <view class="weui-uploader__hd">
-            <view class="weui-uploader__overview">
-              <view class="weui-uploader__title">活动图片</view>
-            </view>
-            <view class="weui-uploader__tips">
-              活动现场照片
-            </view>
-          </view>
-          <view class="weui-uploader__bd">
-            <view class="weui-uploader__files">
-              <view class="weui-uploader__file" wx:for="{{activityImgs}}" wx:key="index">
-                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
-                       bindtap="previewImage(activityImgs, item)"/>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view>
-    <view class="weui-cell">
-      <view class="weui-cell__bd">
-        <view class="weui-uploader">
-          <view class="weui-uploader__hd">
-            <view class="weui-uploader__overview">
-              <view class="weui-uploader__title">餐饮图片</view>
-            </view>
-          </view>
-          <view class="weui-uploader__bd">
-            <view class="weui-uploader__files">
-              <view class="weui-uploader__file" wx:for="{{foodImgs}}" wx:key="index">
-                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
-                       bindtap="previewImage(foodImgs, item)"/>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view>
-    <view class="weui-cell">
-      <view class="weui-cell__bd">
-        <view class="weui-uploader">
-          <view class="weui-uploader__hd">
-            <view class="weui-uploader__overview">
-              <view class="weui-uploader__title">住宿图片</view>
-            </view>
-          </view>
-          <view class="weui-uploader__bd">
-            <view class="weui-uploader__files">
-              <view class="weui-uploader__file" wx:for="{{stayOverImgs}}" wx:key="index">
-                <image class="weui-uploader__img" mode="aspectFill" src="{{item}}"
-                       bindtap="previewImage(stayOverImgs, item)"/>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view>
+    <mp-cell>
+      <mp-uploader max-count="0" title="封面图片" files="{{coverImgs}}" ></mp-uploader>
+    </mp-cell>
+    <mp-cell>
+      <mp-uploader max-count="0" title="活动图片" tips="活动现场照片" files="{{activityImgs}}" ></mp-uploader>
+    </mp-cell>
+    <mp-cell>
+      <mp-uploader max-count="0" title="餐饮图片" tips="吃的啥" files="{{foodImgs}}" ></mp-uploader>
+    </mp-cell>
+    <mp-cell>
+      <mp-uploader max-count="0" title="住宿图片" tips="住的啥" files="{{stayOverImgs}}" ></mp-uploader>
+    </mp-cell>
     <van-tabs active="{{ activeTab }}" bind:change="tabChange">
       <van-tab title="本月预约概览"></van-tab>
       <van-tab title="趣友评论"></van-tab>
@@ -178,8 +110,19 @@
     createPage({
         data: {
             id: '',
-            coverImgs: [],
-            activityImgs: ['https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png', 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'],
+            coverImgs: [
+                {
+                    url: 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'
+                }
+            ],
+            activityImgs: [
+                {
+                    url: 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'
+                },
+                {
+                    url: 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'
+                }
+            ],
             foodImgs: [],
             stayOverImgs: [],
             activeTab: 0,
@@ -218,12 +161,6 @@
                 url: '/sellerDetail' + '?sellerId=' + 0
             })
         },
-        previewImage(group, src) {
-            wx.previewImage({
-                current: src, // 当前显示图片的http链接
-                urls: group // 需要预览的图片http链接列表
-            })
-        },
         tabChange(event) {
             if (event.detail.index == 1) {
                 wx.navigateTo({
@@ -255,6 +192,9 @@
 
     .goods-action {
       z-index: 1;
+    }
+    .weui-gallery__del{ /* 隐藏删除按钮 */
+      display: none;
     }
   }
 </style>
