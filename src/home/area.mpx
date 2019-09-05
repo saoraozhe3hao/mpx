@@ -43,10 +43,16 @@
 
     let cityKeys = Object.keys(areaData.city_list);
     cityKeys.forEach((item) => {
+        if(['省直辖县','自治区直辖县级'].includes(areaData.city_list[item])){
+            return;
+        }
         areaData.county_list[item] = '不限';
     });
     let provinceKeys = Object.keys(areaData.province_list);
     provinceKeys.forEach((item) => {
+        if(['北京市','天津市','上海市','重庆市'].includes(areaData.province_list[item])){
+            return;
+        }
         areaData.city_list[item] = '不限';
     });
 
@@ -75,7 +81,10 @@
         },
         choose(event) {
             let values = event.detail.values;
-            let area = [values[0].name];  // 省级
+            let area = [];
+            if (!['北京市','天津市','上海市','重庆市'].includes(values[0].name)) {
+                area.push(values[0].name);  // 省级
+            }
             if (values[1] && values[1].name && values[1].name != "不限") {
                 area.push(values[1].name);  // 市级
             }

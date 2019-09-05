@@ -39,11 +39,11 @@
           <text>{{item.address}}，距您{{item.distance}}公里</text>
         </view>
       </van-card>
-      <view class="empty-data" wx:if="{{!products.length}}"></view>
     </van-cell-group>
     <text wx:if="{{false}}">{{isLogin}}</text>
     <text wx:if="{{false}}">{{location}}</text>
-    <mp-loading type="circle" show="{{showLoading}}" class="loading"></mp-loading>
+    <view class="empty-data" wx:if="{{!products.length && !requesting}}"></view>
+    <mp-loading type="circle" show="{{hasNext || requesting}}" class="loading"></mp-loading>
   </view>
 </template>
 
@@ -58,7 +58,7 @@
             category: '',
             pageNum: 1,
             products: [],
-            showLoading: false,
+            hasNext: false,
             requesting: false  // 是否正在请求
         },
         onLoad(query) {
@@ -97,7 +97,7 @@
         },
         onPageScroll() {
             // 正在查询元素，正在请求数据，没有更多数据
-            if (this.requesting || !this.showLoading) {
+            if (this.requesting || !this.hasNext) {
                 return;
             }
             this.query.exec((res) => {
@@ -134,7 +134,7 @@
                     res = res.data;
                     if (res.code == 0) {
                         this.products = this.products.concat(res.data.list);
-                        this.showLoading = res.data.hasNextPage;
+                        this.hasNext = res.data.hasNextPage;
                         this.requesting = false;
                         this.onPageScroll();  // 怕没滚动时，加载图标就出现了，主动触发一次滚动响应
                     } else if (res.code == 401) {
