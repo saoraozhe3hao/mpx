@@ -68,36 +68,44 @@
 
     createApp({
         globalData: {
-            basePath: "https://127.0.0.1:8443"
+            basePath: "http://127.0.0.1:8443"
         },
-        onShow() {
+        onLaunch() {  // 如果用onShow的话，上传图片时会被触发一次
             store.state.systemInfo = wx.getSystemInfoSync();
-            this.login();
+            this.loginWx();
         },
-        login() {     // 登录
+        loginWx() {     // 登录
             store.state.isLogin = false;
             store.commit("change");
 
             wx.login({
                 success: res => {
-                    wx.request({
-                        method: 'POST',
-                        url: this.globalData.basePath + "/login",
-                        header: {
-                            "content-type": 'application/x-www-form-urlencoded'
-                        },
-                        data: {
-                            code: res.code
-                        },
-                        success: (res) => {
-                            console.log(res);
-                            wx.removeStorageSync('sessionId');
-                            wx.setStorageSync("sessionId", res.header && res.header["Set-Cookie"]);
-                            this.locationAuth();
-                        }
-                    });
+                    this.loginServer(res);
                 }
             })
+        },
+        loginServer(res){
+            wx.request({
+                method: 'POST',
+                url: this.globalData.basePath + "/login",
+                header: {
+                    "content-type": 'application/x-www-form-urlencoded'
+                },
+                data: {
+                    code: res.code
+                },
+                success: (res) => {
+                    wx.removeStorageSync('sessionId');
+                    wx.setStorageSync("sessionId", res.header && res.header["Set-Cookie"]);
+                    res = res.data;
+                    if(res.code != 0){
+                        return;
+                    }
+                    store.state.customerInfo = res.data;
+                    store.commit("change");
+                    this.locationAuth();
+                }
+            });
         },
         locationAuth() {
             wx.getSetting({

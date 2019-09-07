@@ -3,7 +3,9 @@
     "usingComponents": {
       "van-cell-group": "vant-weapp/dist/cell-group/index",
       "van-field": "vant-weapp/dist/field/index",
-      "van-dialog": "vant-weapp/dist/dialog/index"
+      "van-dialog": "vant-weapp/dist/dialog/index",
+      "van-notify": "vant-weapp/dist/notify/index",
+      "van-toast": "vant-weapp/dist/toast/index"
     }
   }
 </script>
@@ -11,59 +13,141 @@
 <template>
   <view>
     <van-cell-group>
-      <van-field required maxlength="20" placeholder="请输入昵称" label="昵称"
+      <van-field required maxlength="20" placeholder="请输入昵称" label="昵称" bind:focus="inputFocus('nickError')"
                  value="{{ nick }}" error-message="{{nickError}}" bind:blur="nickNameBlur"/>
-      <van-field maxlength="50" placeholder="没有则不填" label="平台联系人编号"
-                 value="{{ contact }}" error-message="{{contactError}}" bind:blur="contactBlur"/>
+      <van-field maxlength="12" placeholder="没有则不填" label="平台联系人编号" type="number"
+                 bind:focus="inputFocus('promoterError')" value="{{ promoter }}" error-message="{{promoterError}}"
+                 bind:blur="promoterBlur" disabled="{{!!originPromoter}}"/>
     </van-cell-group>
-    <van-dialog id="van-dialog"/>
   </view>
+  <van-dialog id="van-dialog"/>
+  <van-notify id="van-notify"/>
+  <van-toast id="van-toast"/>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
-    import Dialog from 'vant-weapp/dist/dialog/dialog';
+    import Dialog from 'vant-weapp/dist/dialog/dialog'
     import store from '../components/store'
+    import Notify from 'vant-weapp/dist/notify/notify'
+    import Toast from 'vant-weapp/dist/toast/toast'
 
+    let app = getApp();
     createPage({
         data: {
-            originNick: '',
             nick: '',
             nickError: '',
-            contact: '',
-            contactError: '',
+            promoter: '',
+            promoterError: '',
         },
-        onLoad: function (options) {
+        onLoad(options) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '基本信息'
             })
-            this.originNick = store.state.userInfo.nickName;
             this.nick = this.originNick;
+            this.promoter = this.originPromoter;
+        },
+        computed: {
+            originNick() {
+                return store.state.customerInfo.nickname || store.state.userInfo.nickName;
+            },
+            originPromoter() {
+                return store.state.merchantInfo.promoter;
+            }
+        },
+        inputFocus(errorMessage) {
+            this[errorMessage] = '';
         },
         nickNameBlur(event) {
-            this.nick = event.detail.value;
-            if (!this.nick && this.originNick) {
-                this.nickError = '请填写昵称'
-            }
-            else{
-                this.nickError = ''
-            }
+            this.nick = event.detail.value.trim();
+            this.nickError = '';
             if (!this.nick) {
+                this.nickError = '请填写昵称';
+                return;
+            }
+            if (!/^[a-zA-Z\u3400-\u4DB5\u4E00-\u9FA5\u9FA6-\u9FBB\uF900-\uFA2D\uFA30-\uFA6A\uFA70-\uFAD9]{1,20}$/.test(this.nick)) {
+                this.nickError = '昵称不能包含符号';
+                return;
+            }
+            if (this.nick == this.originNick) {
                 return;
             }
             Dialog.confirm({
                 title: `确定将昵称改为${this.nick}吗？`,
                 message: '请确保该名字为您所有，如恶意占用知名自媒体的名称，平台将做相应处罚'
             }).then(() => {
-                this.originNick = this.nick;
-                store.state.userInfo.nickName = this.nick;
+                this.updateNick();
             }).catch(() => {
                 this.nick = this.originNick;
             });
         },
-        contactBlur(event) {
-            this.contact = event.detail.value;
+        updateNick() {
+            wx.request({
+                method: 'PUT',
+                url: `${app.globalData.basePath}/weapp/customer/nick`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    nickname: this.nick
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        store.state.customerInfo.nickname = this.nick;
+                        store.commit("change");
+                        Toast.success('操作成功');
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    } else if (res.code == 1062) {
+                        this.nickError = `'${this.nick}'已被占用，如果您是才是${this.nick}，请在本小程序中找到${this.nick}的主页进行投诉`;
+                    }
+                }
+            });
+        },
+        promoterBlur(event) {
+            this.promoter = event.detail.value;
+            this.promoterError = '';
+            if (!this.promoter) {
+                return;
+            }
+            if (!/^[0-9]{0,12}$/.test(this.promoter)) {
+                this.promoterError = '只能包含数字';
+                return;
+            }
+            Dialog.confirm({
+                title: `确定${this.promoter}是您的平台联系人编号吗？`,
+                message: '平台联系人编号只能填写一次，请确保填写正确'
+            }).then(() => {
+                this.updatePromoter();
+            }).catch(() => {
+
+            });
+        },
+        updatePromoter() {
+            wx.request({
+                method: 'PUT',
+                url: `${app.globalData.basePath}/weapp/merchant/promoter`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    promoter: this.promoter
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        store.state.merchantInfo.promoter = this.promoter;
+                        store.commit("change");
+                        Toast.success('操作成功');
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    } else if (res.code == 1452) {
+                        Notify("该编号不存在");
+                    }
+                }
+            });
         }
     })
 </script>

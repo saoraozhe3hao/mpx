@@ -168,7 +168,7 @@
             this.requesting = true;
             wx.request({
                 method: 'POST',
-                url: `${app.globalData.basePath}/weapp/product?`,
+                url: `${app.globalData.basePath}/weapp/product/recommend`,
                 header: {
                     'Cookie': wx.getStorageSync("sessionId")
                 },
@@ -188,7 +188,7 @@
                         this.requesting = false;
                         this.onPageScroll();  // 怕没滚动时，加载图标就出现了，主动触发一次滚动响应
                     } else if (res.code == 401) {
-                        app.login();
+                        app.loginWx();
                     }
                 },
                 complete: () => {

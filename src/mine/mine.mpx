@@ -13,10 +13,9 @@
   <view class="mine">
     <van-cell custom-class="avatar-row" value-class="avatar-right" value=" " border="{{ false }}">
       <view slot="title">
-        <view class="avatar" bindtap="chooseImage"
-              style="background-image: url('http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg');">
+        <view class="avatar" bindtap="chooseImage" wx:style="{{avatar}}">
         </view>
-        <view class="name">{{userInfo.nickName}}</view>
+        <view class="name">{{customerInfo.nickname || userInfo.nickName}}</view>
       </view>
       <view slot="right-icon" bindtap="basic">
         <van-icon name="setting-o"/>
@@ -42,13 +41,14 @@
     </view>
     <view class="info">
       <van-cell-group title="个人信息">
-        <van-cell title="手机号" value="15202926290" is-link url="/phone"/>
+        <van-cell title="手机号" value="{{customerInfo.mobile}}" is-link url="/phone"/>
         <van-cell title="自媒体号/短视频号/直播号" value="公众号/微博/B站/西瓜/抖音/斗鱼等" is-link url="/selfMedia"/>
-        <van-cell title="姓名" value="老钟" is-link url="/bankCard"/>
-        <van-cell title="银行卡号" value="62222222222222222" is-link url="/bankCard"/>
+        <van-cell title="姓名" value="{{merchantInfo.realName}}" is-link url="/bankCard"/>
+        <van-cell title="银行卡号" value="{{merchantInfo.bankNum ? '已提交':'未提交'}}" is-link url="/bankCard"/>
       </van-cell-group>
     </view>
-    <van-button custom-class="submit-btn" wx:if="{{!authed}}" bind:getuserinfo="getUserInfo">点击获取用户信息</van-button>
+    <van-button custom-class="submit-btn" wx:if="{{!userInfo.nickName}}" bind:getuserinfo="getUserInfo">点击获取用户信息
+    </van-button>
   </view>
 </template>
 
@@ -56,17 +56,18 @@
     import {createPage} from '@mpxjs/core'
     import store from '../components/store'
 
+    let app = getApp();
     createPage({
         data: {
-            nickName: '',
-            authed: false
+            nickName: ''
         },
         onLoad(options) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '我的'
             })
-            this.auth();
+            this.userInfoAuth();
+            this.fetchMerchant();
         },
         onShow() {
             this.getTabBar && this.getTabBar().setData({
@@ -75,15 +76,26 @@
         },
         computed: {
             userInfo() {
-                return store.state.userInfo
+                return store.state.userInfo;
+            },
+            customerInfo() {
+                return store.state.customerInfo;
+            },
+            merchantInfo() {
+                return store.state.merchantInfo;
+            },
+            avatar() {
+                let avatarUrl = this.customerInfo.avatar ? "http://yqxq.oss-cn-hangzhou.aliyuncs.com/" + this.customerInfo.avatar : this.userInfo.avatarUrl;
+                return {
+                    backgroundImage: `url('${avatarUrl}')`
+                }
             }
         },
-        auth() {
+        userInfoAuth() {
             wx.getSetting({
                 success: (res) => {
                     // 已授权
                     if (res.authSetting['scope.userInfo']) {
-                        this.authed = true;
                         wx.getUserInfo({
                             success: (res) => {
                                 this.getUserInfo({detail: res});
@@ -97,6 +109,24 @@
             console.log(JSON.stringify(res));
             store.state.userInfo = res.detail.userInfo;
             store.commit('change')
+        },
+        fetchMerchant() {
+            wx.request({
+                method: 'GET',
+                url: `${app.globalData.basePath}/weapp/merchant/mine`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        store.state.merchantInfo = res.data;
+                        store.commit('change');
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
         },
         basic(event) {
             wx.navigateTo({
@@ -125,20 +155,37 @@
         },
         chooseImage() {
             wx.chooseImage({
-                sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+                count: 1,
+                sizeType: ['compressed'], // 可以指定是原图还是压缩图
                 sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
                 success: (res) => {
-                    // 返回选定照片的本地文件路径列表，tempFilePath可以作为img标签的src属性显示图片
+                    let tempPath = res.tempFilePaths[0];
+                    this.uploadImage(tempPath);
                 }
             })
         },
+        uploadImage(tempPath) {
+            wx.uploadFile({
+                url: `${app.globalData.basePath}/weapp/customer/avatar`,
+                filePath: tempPath,
+                name: 'file',
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success(res) {
+                    store.state.customerInfo.avatar = res.data + "?" + Math.random();
+                    store.state.customerInfo = Object.assign({}, store.state.customerInfo);
+                    store.commit("change");
+                }
+            })
+        }
     })
 </script>
 
 <style lang="less">
   .mine {
     background: linear-gradient(#FEC806, #FFF) no-repeat;
-    background-size: 100% ~"400rpx";  /* ~"" 是less 提供的语法，rpx不是css的单位，~""可以防止代码格式化时出错 */
+    background-size: 100% ~"400rpx"; /* ~"" 是less 提供的语法，rpx不是css的单位，~""可以防止代码格式化时出错 */
 
     button.submit-btn {
       bottom: 70px;

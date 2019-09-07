@@ -2,7 +2,10 @@
   {
     "usingComponents": {
       "van-cell-group": "vant-weapp/dist/cell-group/index",
-      "van-field": "vant-weapp/dist/field/index"
+      "van-field": "vant-weapp/dist/field/index",
+      "van-dialog": "vant-weapp/dist/dialog/index",
+      "van-notify": "vant-weapp/dist/notify/index",
+      "van-toast": "vant-weapp/dist/toast/index"
     }
   }
 </script>
@@ -10,46 +13,97 @@
 <template>
   <view>
     <van-cell-group>
-      <van-field maxlength="20" placeholder="请输入" label="抖音号" id="douyin"
-                 value="{{ douyin }}" bind:blur="inputBlur"/>
-      <van-field maxlength="20" placeholder="请输入" label="快手号" id="kuaishou"
-                 value="{{ kuaishou }}" bind:blur="inputBlur"/>
-      <van-field maxlength="20" placeholder="请输入" label="西瓜号" id="xigua"
-                 value="{{ xigua }}" bind:blur="inputBlur"/>
-      <van-field maxlength="20" placeholder="请输入" label="B站号" id="blibli"
-                 value="{{ blibli }}" bind:blur="inputBlur"/>
-      <van-field maxlength="20" placeholder="请输入" label="斗鱼号" id="douyu"
-                 value="{{ douyu }}" bind:blur="inputBlur"/>
-      <van-field maxlength="20" placeholder="请输入" label="微博号" id="weibo"
-                 value="{{ weibo }}" bind:blur="inputBlur"/>
-      <van-field maxlength="20" placeholder="请输入" label="微信公众号" id="gongzhong"
-                 value="{{ gongzhong }}" bind:blur="inputBlur"/>
+      <van-field maxlength="20" placeholder="请输入" label="抖音号"
+                 value="{{ selfMedia.douyin }}" bind:blur="inputBlur('douyin', $event)"/>
+      <van-field maxlength="20" placeholder="请输入" label="快手号"
+                 value="{{ selfMedia.kuaishou }}" bind:blur="inputBlur('kuaishou', $event)"/>
+      <van-field maxlength="20" placeholder="请输入" label="西瓜号"
+                 value="{{ selfMedia.xigua }}" bind:blur="inputBlur('xigua', $event)"/>
+      <van-field maxlength="20" placeholder="请输入" label="B站号"
+                 value="{{ selfMedia.blibli }}" bind:blur="inputBlur('blibli', $event)"/>
+      <van-field maxlength="20" placeholder="请输入" label="斗鱼号"
+                 value="{{ selfMedia.douyu }}" bind:blur="inputBlur('douyu', $event)"/>
+      <van-field maxlength="20" placeholder="请输入" label="微博号"
+                 value="{{ selfMedia.weibo }}" bind:blur="inputBlur('weibo', $event)"/>
+      <van-field maxlength="20" placeholder="请输入" label="微信公众号"
+                 value="{{ selfMedia.gongzhong }}" bind:blur="inputBlur('gongzhong', $event)"/>
     </van-cell-group>
+    <van-notify id="van-notify"/>
+    <van-dialog id="van-dialog"/>
+    <van-toast id="van-toast" />
   </view>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
+    import store from '../components/store'
+    import Notify from 'vant-weapp/dist/notify/notify'
+    import Dialog from 'vant-weapp/dist/dialog/dialog'
+    import Toast from 'vant-weapp/dist/toast/toast'
 
+    let app = getApp();
     createPage({
         data: {
-            douyin: '',
-            kuaishou: '',
-            xigua: '',
-            blibli: '',
-            douyu: '',
-            weibo: '',
-            gongzhong: ''
+            selfMedia: {}
         },
-        onLoad: function (options) {
+        onLoad(options) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '自媒体号'
-            })
+            });
+            this.selfMedia = this.originSelfMedia;
         },
-        inputBlur (event) {
-            console.log(event.target.id);
+        computed: {
+            originSelfMedia() {
+                let selfMedia = store.state.merchantInfo.selfMedia;
+                return selfMedia ? JSON.parse(selfMedia) : {};
+            }
         },
+        inputBlur(platform, event) {
+            let value = event.detail.value.trim();
+            if (!/^[0-9a-zA-Z\u3400-\u4DB5\u4E00-\u9FA5\u9FA6-\u9FBB\uF900-\uFA2D\uFA30-\uFA6A\uFA70-\uFAD9]{0,20}$/.test(value)) {
+                Notify('不能包含符号');
+                this.selfMedia[platform] = "";
+                this.selfMedia = Object.assign({}, this.selfMedia);
+                return;
+            }
+            // 相等 或 都无值('',undefined,null)
+            if (value == this.originSelfMedia[platform] || !value == !this.originSelfMedia[platform]) {
+                return;
+            }
+            this.selfMedia[platform] = value;
+            Dialog.confirm({
+                title: value ? `确定将该自媒体号改为${value}吗？` : `确定删除该自媒体号吗？`,
+                message: value ? '请确保该自媒体号为您所有，如恶意使用别人的自媒体号，平台将做相应处罚' : ''
+            }).then(() => {
+                this.updateSelfMedia();
+            }).catch(() => {
+                this.selfMedia[platform] = this.originSelfMedia[platform] || "";
+                this.selfMedia = Object.assign({}, this.selfMedia);
+            });
+        },
+        updateSelfMedia() {
+            wx.request({
+                method: 'PUT',
+                url: `${app.globalData.basePath}/weapp/merchant/selfMedia`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    selfMedia: JSON.stringify(this.selfMedia)
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        store.state.merchantInfo.selfMedia = JSON.stringify(this.selfMedia);
+                        store.commit("change");
+                        Toast.success('操作成功');
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        }
     })
 </script>
 

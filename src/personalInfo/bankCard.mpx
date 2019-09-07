@@ -3,7 +3,8 @@
     "usingComponents": {
       "van-cell-group": "vant-weapp/dist/cell-group/index",
       "van-field": "vant-weapp/dist/field/index",
-      "van-button": "vant-weapp/dist/button/index"
+      "van-button": "vant-weapp/dist/button/index",
+      "van-toast": "vant-weapp/dist/toast/index"
     }
   }
 </script>
@@ -11,43 +12,55 @@
 <template>
   <view>
     <van-cell-group>
-      <van-field maxlength="8" placeholder="请输入" label="真实姓名" id="realName"
+      <van-field maxlength="8" placeholder="请输入" label="真实姓名"
                  value="{{ realName }}" error-message="{{realNameError}}"
-                 bind:blur="inputBlur" bind:focus="inputFocus('realNameError')"/>
-      <van-field maxlength="20" placeholder="请输入" label="银行卡号" id="cardNum"
-                 value="{{ cardNum }}" error-message="{{cardNumError}}"
-                 bind:blur="inputBlur" bind:focus="inputFocus('cardNumError')"/>
-      <van-field maxlength="50" placeholder="请输入" label="开户行" id="openBank"
+                 bind:blur="inputBlur('realName', $event)" bind:focus="inputFocus('realNameError')"/>
+      <van-field maxlength="19" placeholder="请输入" label="银行卡号" type="number"
+                 value="{{ bankNum }}" error-message="{{bankNumError}}"
+                 bind:blur="inputBlur('bankNum', $event)" bind:focus="inputFocus('bankNumError')"/>
+      <van-field maxlength="50" placeholder="请输入" label="开户行"
                  value="{{ openBank }}" error-message="{{openBankError}}"
-                 bind:blur="inputBlur" bind:focus="inputFocus('openBankError')"/>
+                 bind:blur="inputBlur('openBank', $event)" bind:focus="inputFocus('openBankError')"/>
     </van-cell-group>
     <van-button size="large" custom-class="submit-btn" bind:click="submit">提交</van-button>
   </view>
+  <van-toast id="van-toast"/>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
+    import Toast from 'vant-weapp/dist/toast/toast'
+    import store from '../components/store'
 
+    let app = getApp();
     createPage({
         data: {
             realName: '',
-            cardNum: '',
+            bankNum: '',
             openBank: '',
             realNameError: '',
-            cardNumError: '',
+            bankNumError: '',
             openBankError: ''
         },
         onLoad(options) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '姓名/银行卡'
-            })
+            });
+            this.realName = this.merchantInfo.realName;
+            this.bankNum = this.merchantInfo.bankNum;
+            this.openBank = this.merchantInfo.openBank;
+        },
+        computed: {
+            merchantInfo() {
+                return store.state.merchantInfo;
+            }
         },
         inputFocus(errorMessage) {
             this[errorMessage] = '';
         },
-        inputBlur(event) {
-            this[event.target.id] = event.detail.value;
+        inputBlur(field, event) {
+            this[field] = event.detail.value;
         },
         validate() {
             let promise = new Promise((resolve, reject) => {
@@ -55,8 +68,8 @@
                     this.realNameError = '请输入正确的姓名';
                     reject();
                 }
-                if (!/^[0-9]{16,19}$/.test(this.cardNum)) {
-                    this.cardNumError = '请输入正确的银行卡号';
+                if (!/^[0-9]{16,19}$/.test(this.bankNum)) {
+                    this.bankNumError = '请输入正确的银行卡号';
                     reject();
                 }
                 if (!this.openBank) {
@@ -69,10 +82,40 @@
         },
         submit() {
             this.validate().then(() => {
-                console.log();
+                this.updateRealName();
             }).catch(() => {
-                console.log();
             })
+        },
+        updateRealName() {
+            let data = {
+                realName: this.realName,
+                bankNum: this.bankNum,
+                openBank: this.openBank
+            };
+            wx.request({
+                method: 'PUT',
+                url: `${app.globalData.basePath}/weapp/merchant/realName`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: data,
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        Object.assign(store.state.merchantInfo, data);
+                        store.commit("change");
+                        Toast.success({
+                            message: '操作成功',
+                            duration: 1000,
+                            onClose(){
+                                wx.navigateBack();
+                            }
+                        });
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
         }
     })
 </script>
