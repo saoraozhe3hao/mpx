@@ -4,7 +4,8 @@
       "van-icon": "vant-weapp/dist/icon/index",
       "van-cell": "vant-weapp/dist/cell/index",
       "van-cell-group": "vant-weapp/dist/cell-group/index",
-      "van-button": "vant-weapp/dist/button/index"
+      "van-button": "vant-weapp/dist/button/index",
+      "van-toast": "vant-weapp/dist/toast/index"
     }
   }
 </script>
@@ -41,7 +42,14 @@
     </view>
     <view class="info">
       <van-cell-group title="个人信息">
-        <van-cell title="手机号" value="{{customerInfo.mobile}}" is-link url="/phone"/>
+        <van-cell title="手机号">
+          <view>
+            <text class="mobile" wx:if="{{customerInfo.mobile}}">{{customerInfo.mobile}}</text>
+            <van-button size="mini" open-type="getPhoneNumber" bind:getphonenumber="getMobileFromWx">
+              {{customerInfo.mobile ? "重新获取": "点击获取"}}
+            </van-button>
+          </view>
+        </van-cell>
         <van-cell title="自媒体号/短视频号/直播号" value="公众号/微博/B站/西瓜/抖音/斗鱼等" is-link url="/selfMedia"/>
         <van-cell title="姓名" value="{{merchantInfo.realName}}" is-link url="/bankCard"/>
         <van-cell title="银行卡号" value="{{merchantInfo.bankNum ? '已提交':'未提交'}}" is-link url="/bankCard"/>
@@ -50,11 +58,13 @@
     <van-button custom-class="submit-btn" wx:if="{{!userInfo.nickName}}" bind:getuserinfo="getUserInfo">点击获取用户信息
     </van-button>
   </view>
+  <van-toast id="van-toast"/>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
     import store from '../components/store'
+    import Toast from 'vant-weapp/dist/toast/toast'
 
     let app = getApp();
     createPage({
@@ -178,6 +188,35 @@
                     store.commit("change");
                 }
             })
+        },
+        getMobileFromWx(e) {
+            console.log(e.detail.errMsg);
+            if (e.detail.iv) {
+                this.getMobileFromServer(e.detail.iv, e.detail.encryptedData);
+            }
+        },
+        getMobileFromServer(iv, encryptedData) {
+            wx.request({
+                method: 'PUT',
+                url: `${app.globalData.basePath}/weapp/customer/mobile`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    iv, encryptedData
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        store.state.customerInfo.mobile = this.data;
+                        store.state.customerInfo = Object.assign({}, store.state.customerInfo)
+                        store.commit("change");
+                        Toast.success('操作成功');
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
         }
     })
 </script>
@@ -237,6 +276,11 @@
     .info {
       background: #FFF;
       border-radius: 20px;
+
+      .mobile {
+        vertical-align: middle;
+        margin-right: 10px;
+      }
     }
   }
 </style>
