@@ -11,73 +11,99 @@
       "van-switch-cell": "vant-weapp/dist/switch-cell/index",
       "van-button": "vant-weapp/dist/button/index",
       "van-icon": "vant-weapp/dist/icon/index",
+      "van-notify": "vant-weapp/dist/notify/index",
+      "van-toast": "vant-weapp/dist/toast/index",
       "mp-uploader": "weui-miniprogram/miniprogram_dist/uploader/uploader",
-      "mp-cell": "weui-miniprogram/miniprogram_dist/cell/cell"
+      "mp-cell": "weui-miniprogram/miniprogram_dist/cell/cell",
+      "mp-checkbox-group": "weui-miniprogram/miniprogram_dist/checkbox-group/checkbox-group",
+      "mp-checkbox": "weui-miniprogram/miniprogram_dist/checkbox/checkbox",
+      "mp-cells": "weui-miniprogram/miniprogram_dist/cells/cells"
     }
   }
 </script>
 
 <template>
   <view class="publish">
-    <van-field label="标题" placeholder="取一个响亮的标题"/>
-    <van-cell title="详细地址" is-link value="{{location.address}}" bind:click="locationClick"/>
-    <van-cell title="开始日期" is-link value="{{startDate}}" bind:click="startDateClick"/>
-    <van-cell title="结束日期" is-link value="{{endDate}}" bind:click="endDateClick"/>
-    <van-field label="上午活动" type="textarea" placeholder="活动内容" autosize/>
-    <van-field label="午饭" type="textarea" placeholder="午饭吃什么" autosize/>
-    <van-field label="下午活动" type="textarea" placeholder="活动内容" autosize/>
-    <van-field label="晚饭" type="textarea" placeholder="晚饭吃什么" autosize/>
-    <van-field label="晚上活动" type="textarea" placeholder="活动内容" autosize/>
-    <van-cell title="单天接待人数上限">
-      <van-stepper value="{{ 1 }}"/>
+    <van-field required maxlength="20" label="标题" placeholder="取一个响亮的标题" bind:blur="inputBlur('title', $event)"/>
+    <van-cell required title="详细地址" is-link value="{{location.address || '在地图上选择'}}" bind:click="locationClick"/>
+    <van-cell required title="开始日期" is-link value="{{friendlyStartDate}}" bind:click="popupShow('showStartDate')"/>
+    <van-cell required title="结束日期" is-link value="{{friendlyEndDate}}" bind:click="popupShow('showEndDate')"/>
+    <van-field required maxlength="100" label="上午活动" type="textarea" placeholder="活动内容" autosize
+               bind:blur="inputBlur('morningActivity', $event)"/>
+    <van-field required maxlength="100" label="午饭" type="textarea" placeholder="午饭吃什么" autosize
+               bind:blur="inputBlur('lunch', $event)"/>
+    <van-field required maxlength="100" label="下午活动" type="textarea" placeholder="活动内容" autosize
+               bind:blur="inputBlur('afternoonActivity', $event)"/>
+    <van-field required maxlength="100" label="晚饭" type="textarea" placeholder="晚饭吃什么" autosize
+               bind:blur="inputBlur('dinner', $event)"/>
+    <van-field required maxlength="100" label="晚上活动" type="textarea" placeholder="活动内容" autosize
+               bind:blur="inputBlur('eveningActivity', $event)"/>
+    <van-cell required title="单天接待人数上限">
+      <van-stepper max="100" integer="{{true}}" value="{{ topLimit }}" bind:change="fieldChange('topLimit', $event)"/>
     </van-cell>
+
+    <mp-cells title="标签">
+      <mp-checkbox-group prop="checkbox" multi="{{true}}" bindchange="inputBlur('tags',$event)">
+        <mp-checkbox label="打野" value="打野"></mp-checkbox>
+        <mp-checkbox label="赶海" value="赶海"></mp-checkbox>
+        <mp-checkbox label="野食" value="野食"></mp-checkbox>
+        <mp-checkbox label="探秘" value="探秘"></mp-checkbox>
+        <mp-checkbox label="捕捉" value="捕捉"></mp-checkbox>
+        <mp-checkbox label="民俗" value="民俗"></mp-checkbox>
+        <mp-checkbox label="采摘" value="采摘"></mp-checkbox>
+        <mp-checkbox label="野居" value="野居"></mp-checkbox>
+      </mp-checkbox-group>
+    </mp-cells>
+
     <van-cell-group title="价格规则">
-      <van-field label="1人价格" placeholder="请输入">
+      <van-field required maxlength="7" label="1人价格" placeholder="请输入" bind:blur="inputBlur('singlePrice', $event)">
         <text slot="right-icon">元/人</text>
       </van-field>
-      <van-field label="2人价格" placeholder="请输入">
+      <van-field maxlength="7" label="2人价格" placeholder="可以不填" bind:blur="inputBlur('doublePrice', $event)">
         <text slot="right-icon">元/人</text>
       </van-field>
-      <van-field label="3~5人价格" placeholder="请输入">
+      <van-field maxlength="7" label="3~5人价格" placeholder="可以不填" bind:blur="inputBlur('treblePrice', $event)">
         <text slot="right-icon">元/人</text>
       </van-field>
-      <van-field label="6~9人价格" placeholder="请输入">
+      <van-field maxlength="7" label="6~9人价格" placeholder="可以不填" bind:blur="inputBlur('sextuplePrice', $event)">
         <text slot="right-icon">元/人</text>
       </van-field>
-      <van-field label="10人以上价格" placeholder="请输入">
+      <van-field maxlength="7" label="10人以上价格" placeholder="可以不填" bind:blur="inputBlur('decuplePrice', $event)">
         <text slot="right-icon">元/人</text>
       </van-field>
     </van-cell-group>
     <van-cell-group title="住宿安排" border="{{ false }}">
-      <van-switch-cell title="提供住宿" active-color="#FDD03F" checked="{{ stayOver }}" bind:change="stayOverChange"/>
-      <van-cell title="房间数" wx:if="{{stayOver}}">
-        <van-stepper value="{{ 1 }}"/>
+      <van-switch-cell title="提供住宿" active-color="#FDD03F" checked="{{ stayOver }}"
+                       bind:change="fieldChange('stayOver',$event)"/>
+      <van-cell required title="房间数" wx:if="{{stayOver}}">
+        <van-stepper max="100" integer="{{true}}" value="{{ roomNum }}" bind:change="fieldChange('roomNum', $event)"/>
       </van-cell>
-      <van-field label="房间价" placeholder="请输入" wx:if="{{stayOver}}">
+      <van-field required maxlength="7" label="房间价" placeholder="请输入" wx:if="{{stayOver}}"
+                 bind:blur="inputBlur('roomPrice', $event)">
         <text slot="right-icon">元/晚</text>
       </van-field>
-      <van-cell title="床位数" wx:if="{{stayOver}}">
-        <van-stepper value="{{ 1 }}"/>
+      <van-cell required title="床位数" wx:if="{{stayOver}}">
+        <van-stepper max="100" integer="{{true}}" value="{{ bedNum }}" bind:change="fieldChange('bedNum', $event)"/>
       </van-cell>
-      <van-field label="床位价" placeholder="请输入" wx:if="{{stayOver}}">
+      <van-field required maxlength="7" label="床位价" placeholder="请输入" wx:if="{{stayOver}}"
+                 bind:blur="inputBlur('bedPrice', $event)">
         <text slot="right-icon">元/晚</text>
       </van-field>
-      <van-cell title="附近有酒店可以住宿" clickable value-class="checkbox-in-cell"
-                border="{{ false }}" bind:click="hotelChange({detail: !hotel})">
-        <van-checkbox checked-color="#FDD03F" value="{{hotel}}" bind:change="hotelChange"/>
+      <van-cell title="附近有酒店可以住宿" value-class="checkbox-in-cell" border="{{ false }}">
+        <van-checkbox checked-color="#FDD03F" value="{{nearbyHotel}}" bind:change="fieldChange('nearbyHotel', $event)"/>
       </van-cell>
     </van-cell-group>
     <van-cell-group title="打折规则">
-      <van-field label="连续预约2~4天" placeholder="打几折">
+      <van-field maxlength="4" label="连续预约2~4天" placeholder="不填则不打折" bind:blur="inputBlur('daysDiscount', $event)">
         <text slot="right-icon">折</text>
       </van-field>
-      <van-field label="连续预约5~9天" placeholder="打几折">
+      <van-field maxlength="4" label="连续预约5~9天" placeholder="不填则跟上方一样" bind:blur="inputBlur('weekDiscount', $event)">
         <text slot="right-icon">折</text>
       </van-field>
-      <van-field label="连续预约10~30天" placeholder="打几折">
+      <van-field maxlength="4" label="连续预约10~30天" placeholder="不填则跟上方一样" bind:blur="inputBlur('monthDiscount', $event)">
         <text slot="right-icon">折</text>
       </van-field>
-      <van-field label="连续预约30天以上" placeholder="打几折">
+      <van-field maxlength="4" label="连续预约30天以上" placeholder="不填则跟上方一样" bind:blur="inputBlur('seasonDiscount', $event)">
         <text slot="right-icon">折</text>
       </van-field>
     </van-cell-group>
@@ -104,41 +130,63 @@
     <van-button type="default" custom-class="submit-btn" bind:click="submit" size="large">提交</van-button>
   </view>
   <van-popup position="bottom" show="{{ showStartDate }}" bind:close="popupClose">
-    <van-datetime-picker type="date" value="{{ startDate }}" min-date="{{ minDate }}" bind:confirm="startDateConfirm"/>
+    <van-datetime-picker type="date" value="{{ startDate }}" min-date="{{ minDate }}"
+                         bind:confirm="dateConfirm('startDate', $event)"/>
   </van-popup>
   <van-popup position="bottom" show="{{ showEndDate }}" bind:close="popupClose">
-    <van-datetime-picker type="date" value="{{ endDate }}" min-date="{{ minDate }}" bind:confirm="endDateConfirm"/>
+    <van-datetime-picker type="date" value="{{ endDate }}" min-date="{{ minDate }}"
+                         bind:confirm="dateConfirm('endDate', $event)"/>
   </van-popup>
+  <van-notify id="van-notify"/>
+  <van-toast id="van-toast"/>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
+    import Notify from 'vant-weapp/dist/notify/notify'
+    import Moment from 'moment'
+    import Toast from 'vant-weapp/dist/toast/toast';
 
+    let today = new Date().getTime();
+    let priceReg = /(^[1-9]\d*(\.\d{1,2})?$)|(^0(\.\d{1,2})?$)|(^$)/;
+    let discountReg = /(^[1-9](\.\d{1,2})?$)|(^0(\.\d{1,2})?$)|(^$)/;
+    let app = getApp();
     createPage({
         data: {
+            title: '',
             location: {},
-            minDate: new Date().getTime(),
+            minDate: today,
             showStartDate: false,
-            startDate: new Date().getTime(),
+            startDate: today,
             showEndDate: false,
-            endDate: new Date().getTime(),
+            endDate: today,
+            morningActivity: '',
+            lunch: '',
+            afternoonActivity: '',
+            dinner: '',
+            eveningActivity: '',
+            topLimit: 1,
+            tags: [],
+            singlePrice: '',
+            doublePrice: '',
+            treblePrice: '',
+            sextuplePrice: '',
+            decuplePrice: '',
+            daysDiscount: '',
+            weekDiscount: '',
+            monthDiscount: '',
+            seasonDiscount: '',
             stayOver: true,
-            hotel: true,
-            coverImgs: [
-                {
-                    url: 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'
-                }
-            ],
-            activityImgs: [
-                {
-                    url: 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'
-                },
-                {
-                    url: 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'
-                }
-            ],
+            roomNum: 1,
+            roomPrice: '',
+            bedNum: 1,
+            bedPrice: '',
+            nearbyHotel: true,
+            coverImgs: [],
+            activityImgs: [],
             foodImgs: [],
-            stayOverImgs: []
+            stayOverImgs: [],
+            uploadedImgs: {}
         },
         onLoad(options) {
             wx.showShareMenu();
@@ -146,9 +194,30 @@
                 title: '发布'
             });
         },
+        computed: {
+            friendlyStartDate() {
+                return Moment(this.startDate).format("YYYY-MM-DD");
+            },
+            friendlyEndDate() {
+                return Moment(this.endDate).format("YYYY-MM-DD");
+            }
+        },
+        inputBlur(field, event) {
+            this[field] = event.detail.value;
+        },
+        fieldChange(field, event) {
+            this[field] = event.detail;
+        },
         popupClose() {
             this.showStartDate = false;
-            this.endStartDate = false;
+            this.showEndDate = false;
+        },
+        popupShow(popupShow) {
+            this[popupShow] = true;
+        },
+        dateConfirm(field, event) {
+            this[field] = event.detail;
+            this.popupClose();
         },
         locationClick() {
             wx.chooseLocation({
@@ -162,8 +231,7 @@
             let address = this.location.address;
             if (this.location.address.includes('地区')) {
                 address = this.location.address.split('地区')[1];
-            }
-            else if (this.location.address.includes('自治区')) {
+            } else if (this.location.address.includes('自治区')) {
                 address = this.location.addres.split('自治区')[1];
             }
             // 从address中提取出县级
@@ -190,31 +258,10 @@
             }
             if (this.location.address.includes('地区')) {
                 address = this.location.addres.split('地区')[0] + '地区' + address;
-            }
-            else if (this.location.address.includes('自治区')) {
+            } else if (this.location.address.includes('自治区')) {
                 address = this.location.addres.split('自治区')[0] + '自治区' + address;
             }
             this.location.address = address + '-' + this.location.name;
-        },
-        startDateClick() {
-            this.showStartDate = true;
-        },
-        startDateConfirm(event) {
-            this.showStartDate = false;
-            this.startDate = event.detail;
-        },
-        endDateClick() {
-            this.showEndDate = true;
-        },
-        endDateConfirm(event) {
-            this.showEndDate = false;
-            this.endDate = event.detail;
-        },
-        stayOverChange(event) {
-            this.stayOver = event.detail;
-        },
-        hotelChange(event) {
-            this.hotel = event.detail;
         },
         chooseImage(group, event) {
             let paths = event.detail.tempFilePaths.map((item) => {
@@ -228,8 +275,253 @@
             this[group].splice(event.detail.index, 1);
             this[group] = this[group].concat([]);
         },
-        submit(event) {
-
+        validate() {
+            let promise = new Promise((resolve, reject) => {
+                if (!/^[0-9a-zA-Z\u3400-\u4DB5\u4E00-\u9FA5\u9FA6-\u9FBB\uF900-\uFA2D\uFA30-\uFA6A\uFA70-\uFAD9]{1,20}$/.test(this.title)) {
+                    reject(this.title ? '标题不能包含特色字符' : '标题不能为空');
+                    return;
+                }
+                if (!this.location.address) {
+                    reject('您还没提供详细地址');
+                    return;
+                }
+                if (this.startDate > this.endDate) {
+                    reject('结束日期不能早于开始日期');
+                    return;
+                }
+                if (!this.morningActivity) {
+                    reject('请填写上午活动');
+                    return;
+                }
+                if (!this.lunch) {
+                    reject('请填写午饭内容');
+                    return;
+                }
+                if (!this.afternoonActivity) {
+                    reject('请填写下午活动');
+                    return;
+                }
+                if (!this.dinner) {
+                    reject('请填写晚饭内容');
+                    return;
+                }
+                if (!this.eveningActivity) {
+                    reject('请填写晚上活动');
+                    return;
+                }
+                if (!/^[0-9]{1,3}$/.test(this.topLimit)) {
+                    reject('单天接待人数上限 必须为整数');
+                    return;
+                }
+                if (!this.singlePrice) {
+                    reject('单人价格必须填写');
+                    return;
+                }
+                if (!priceReg.test(this.singlePrice) || !priceReg.test(this.doublePrice) || !priceReg.test(this.treblePrice) ||
+                    !priceReg.test(this.sextuplePrice) || !priceReg.test(this.decuplePrice)) {
+                    reject('请输入正确的价格');
+                    return;
+                }
+                if (!discountReg.test(this.daysDiscount) || !discountReg.test(this.weekDiscount) ||
+                    !discountReg.test(this.monthDiscount) || !discountReg.test(this.seasonDiscount)) {
+                    reject('请输入正确的折扣');
+                    return;
+                }
+                if (this.stayOver && !/^[0-9]{1,3}$/.test(this.roomNum)) {
+                    reject('房间数 必须为整数');
+                    return;
+                }
+                if (this.stayOver && (!this.roomPrice || !priceReg.test(this.roomPrice))) {
+                    reject(this.roomPrice ? '请填写正确的房间价格' : '请填写房间价格');
+                    return;
+                }
+                if (this.stayOver && !/^[0-9]{1,3}$/.test(this.bedNum)) {
+                    reject('床位数 必须为整数');
+                    return;
+                }
+                if (this.stayOver && (!this.bedPrice || !priceReg.test(this.bedPrice))) {
+                    reject(this.bedPrice ? '请输入正确的床位价格' : '请填写床位价格');
+                    return;
+                }
+                if (!this.coverImgs.length) {
+                    reject('请添加封面图片');
+                    return;
+                }
+                if (!this.activityImgs.length) {
+                    reject('请添加活动图片');
+                    return;
+                }
+                if (!this.foodImgs.length) {
+                    reject('请添加餐饮图片');
+                    return;
+                }
+                if (!this.stayOverImgs.length) {
+                    reject('请添加住宿图片');
+                    return;
+                }
+                resolve();
+            });
+            return promise;
+        },
+        uploadImage(filePath) {
+            return new Promise((resolve, reject) => {
+                wx.uploadFile({
+                    url: `${app.globalData.basePath}/weapp/product/image`,
+                    filePath: filePath,
+                    name: 'file',
+                    header: {
+                        'Cookie': wx.getStorageSync("sessionId")
+                    },
+                    success(res) {
+                        res = JSON.parse(res.data);
+                        if (res.code == 0) {
+                            resolve(res.data)
+                        } else if (res.code == 401) {
+                            reject();
+                            app.loginWx();
+                        } else {
+                            reject();
+                        }
+                    },
+                    fail(res) {
+                        reject();
+                    }
+                })
+            });
+        },
+        uploadImages(category, images, index, resolve, reject) {
+            let promise = this.uploadImage(images[index].url);
+            promise.then((res) => {
+                this.uploadedImgs[category].push(res);
+                if (index == images.length - 1) {
+                    resolve();
+                } else {
+                    this.uploadImages(category, images, index + 1, resolve, reject)
+                }
+            }).catch(() => {
+                reject();
+            })
+        },
+        uploadCover() {
+            let promise = new Promise((resolve, reject) => {
+                this.uploadImages('cover', this.coverImgs, 0, resolve, reject);
+            });
+            promise.then(() => {
+                this.uploadActivity();
+            }).catch(() => {
+                Toast.clear();
+                Notify("图片上传失败");
+            })
+        },
+        uploadActivity() {
+            let promise = new Promise((resolve, reject) => {
+                this.uploadImages('activity', this.activityImgs, 0, resolve, reject);
+            });
+            promise.then(() => {
+                this.uploadFood();
+            }).catch(() => {
+                Toast.clear();
+                Notify("图片上传失败");
+            })
+        },
+        uploadFood() {
+            let promise = new Promise((resolve, reject) => {
+                this.uploadImages('food', this.foodImgs, 0, resolve, reject);
+            });
+            promise.then(() => {
+                this.uploadStayOver();
+            }).catch(() => {
+                Toast.clear();
+                Notify("图片上传失败");
+            })
+        },
+        uploadStayOver() {
+            let promise = new Promise((resolve, reject) => {
+                this.uploadImages('stayOver', this.stayOverImgs, 0, resolve, reject);
+            });
+            promise.then(() => {
+                this.publish();
+            }).catch(() => {
+                Toast.clear();
+                Notify("图片上传失败");
+            })
+        },
+        submit() {
+            this.validate().then(() => {
+                Toast.loading({
+                    message: "正在提交",
+                    forbidClick: true,
+                    duration: 0
+                });
+                this.uploadedImgs = {
+                    cover: [],
+                    activity: [],
+                    food: [],
+                    stayOver: []
+                }
+                this.uploadCover();
+            }).catch((res) => {
+                Notify(res);
+            })
+        },
+        publish() {
+            console.log(this.uploadedImgs);
+            let data = {
+                title: this.title,
+                address: this.location.address,
+                longitude: this.location.longitude,
+                latitude: this.location.latitude,
+                startDate: this.friendlyStartDate,
+                endDate: this.friendlyEndDate,
+                topLimit: this.topLimit,
+                tags: this.tags.join(','),
+                morningActivity: this.morningActivity,
+                lunch: this.lunch,
+                afternoonActivity: this.afternoonActivity,
+                dinner: this.dinner,
+                eveningActivity: this.eveningActivity,
+                singlePrice: this.singlePrice,
+                doublePrice: this.doublePrice || null,
+                treblePrice: this.treblePrice || null,
+                sextuplePrice: this.sextuplePrice || null,
+                decuplePrice: this.decuplePrice || null,
+                daysDiscount: this.daysDiscount || null,
+                weekDiscount: this.weekDiscount || null,
+                monthDiscount: this.monthDiscount || null,
+                seasonDiscount: this.seasonDiscount || null,
+                roomNum: this.stayOver ? this.roomNum : 0,
+                roomPrice: this.stayOver ? this.roomPrice : 0,
+                bedNum: this.stayOver ? this.bedNum : 0,
+                bedPrice: this.stayOver ? this.bedPrice : 0,
+                nearbyHotel: this.nearbyHotel,
+                coverPhoto: this.uploadedImgs.cover[0],
+                activityPhotos: this.uploadedImgs.activity.join(','),
+                foodPhotos: this.uploadedImgs.food.join(','),
+                stayOverPhotos: this.uploadedImgs.stayOver.join(',')
+            };
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/product`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: data,
+                success: (res) => {
+                    Toast.clear();
+                    res = res.data;
+                    if (res.code == 0) {
+                        Toast.success({
+                            message: '操作成功',
+                            duration: 1000,
+                            onClose() {
+                                wx.navigateBack();
+                            }
+                        });
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
         }
     })
 </script>

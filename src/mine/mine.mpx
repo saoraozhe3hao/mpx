@@ -69,7 +69,8 @@
     let app = getApp();
     createPage({
         data: {
-            nickName: ''
+            nickName: '',
+            avatarVersion: wx.getStorageSync("avatarVersion") || 0
         },
         onLoad(options) {
             wx.showShareMenu();
@@ -97,7 +98,7 @@
             avatar() {
                 let avatarUrl = this.customerInfo.avatar ? "http://yqxq.oss-cn-hangzhou.aliyuncs.com/" + this.customerInfo.avatar : this.userInfo.avatarUrl;
                 return {
-                    backgroundImage: `url('${avatarUrl}')`
+                    backgroundImage: `url('${avatarUrl}?${this.avatarVersion}')`
                 }
             }
         },
@@ -182,10 +183,16 @@
                 header: {
                     'Cookie': wx.getStorageSync("sessionId")
                 },
-                success(res) {
-                    store.state.customerInfo.avatar = res.data + "?" + Math.random();
-                    store.state.customerInfo = Object.assign({}, store.state.customerInfo);
-                    store.commit("change");
+                success:(res)=> {
+                    res = JSON.parse(res.data);
+                    if (res.code == 0) {
+                        wx.setStorageSync("avatarVersion", ++this.avatarVersion)
+                        store.state.customerInfo.avatar = res.data;
+                        store.state.customerInfo = Object.assign({}, store.state.customerInfo);
+                        store.commit("change");
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
                 }
             })
         },
