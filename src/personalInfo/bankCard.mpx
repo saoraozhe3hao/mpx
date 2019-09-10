@@ -29,8 +29,8 @@
 
 <script>
     import {createPage} from '@mpxjs/core'
-    import Toast from 'vant-weapp/dist/toast/toast'
     import store from '../components/store'
+    import Toast from 'vant-weapp/dist/toast/toast'
 
     let app = getApp();
     createPage({

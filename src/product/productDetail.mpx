@@ -13,17 +13,21 @@
       "van-goods-action-icon": "vant-weapp/dist/goods-action-icon/index",
       "van-goods-action-button": "vant-weapp/dist/goods-action-button/index",
       "mp-uploader": "weui-miniprogram/miniprogram_dist/uploader/uploader",
-      "mp-cell": "weui-miniprogram/miniprogram_dist/cell/cell"
+      "mp-cell": "weui-miniprogram/miniprogram_dist/cell/cell",
+      "van-popup": "vant-weapp/dist/popup/index",
+      "van-datetime-picker": "vant-weapp/dist/datetime-picker/index",
+      "van-toast": "vant-weapp/dist/toast/index"
     }
   }
 </script>
 
 <template>
   <view class="product-detail">
-    <van-card currency=" " tag="打野、民俗" price="距您100公里" desc="福建省三明市尤溪县" title="小六打野" bindtap="guiderDetail"
-              thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
+    <van-card currency=" " title="{{merchant.nickName}}" desc="{{product.title}}"
+              price="{{'距您 '+product.distance+' 公里'}}"
+              bindtap="guiderDetail" thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+merchant.avatar}}">
       <view slot="bottom">
-        <van-rate value="{{ 3.5 }}" readonly allow-half="true"/>
+        <van-rate value="{{ merchant.rate }}" readonly allow-half="true"/>
       </view>
       <view slot="footer">
         <van-button size="mini" icon="bulb-o" bind:click="tipOff">投诉</van-button>
@@ -31,53 +35,53 @@
     </van-card>
 
     <van-cell-group title="基本信息">
-      <van-cell title="名称" value="干塘体验一日游"/>
-      <van-cell title="时间" value="2019年5月1日-2019年8月12日"/>
-      <van-cell title="详细地址" value="福建省龙岩市漳平市永福镇箭竹村"/>
+      <van-cell title="时间" value="{{product.startDate + ' 到 ' + product.endDate}}"/>
+      <van-cell title="详细地址" value="{{product.address}}"/>
       <van-cell title="标签">
-        <van-tag type="danger" custom-class="tag">捕捉</van-tag>
-        <van-tag type="danger" custom-class="tag">打野</van-tag>
+        <van-tag type="danger" custom-class="tag" wx:for="{{product.tags}}" wx:key="index">{{item}}</van-tag>
       </van-cell>
-      <van-cell title="单天接待人数上限" value="20人"/>
+      <van-cell title="单天接待人数上限" value="{{product.topLimit + '人'}}"/>
     </van-cell-group>
     <van-cell-group title="活动详情">
-      <van-cell title="上午活动" value="爬山"/>
-      <van-cell title="午饭" value="烧烤"/>
-      <van-cell title="下午" value="挖冬笋"/>
-      <van-cell title="晚饭" value="火锅"/>
-      <van-cell title="晚上" value="篝火"/>
+      <van-cell title="上午活动" value="{{product.morningActivity}}"/>
+      <van-cell title="午饭" value="{{product.lunch}}"/>
+      <van-cell title="下午" value="{{product.afternoonActivity}}"/>
+      <van-cell title="晚饭" value="{{product.dinner}}"/>
+      <van-cell title="晚上" value="{{product.eveningActivity}}"/>
     </van-cell-group>
     <van-cell-group title="价格规则">
-      <van-cell title="1人预约" value="150元每人"/>
-      <van-cell title="2人预约" value="130元每人"/>
-      <van-cell title="3~5人预约" value="120元每人"/>
-      <van-cell title="6~9人预约" value="110元每人"/>
-      <van-cell title="10人及以上预约" value="100元每人" border="{{false}}"/>
+      <van-cell title="1人预约" value="{{product.singlePrice + ' 元'}}"/>
+      <van-cell title="2人预约" wx:if="{{product.doublePrice}}" value="{{product.doublePrice + ' 元每人'}}"/>
+      <van-cell title="3~5人预约" wx:if="{{product.treblePrice}}" value="{{product.treblePrice + ' 元每人'}}"/>
+      <van-cell title="6~9人预约" wx:if="{{product.sextuplePrice}}" value="{{product.sextuplePrice + ' 元每人'}}"/>
+      <van-cell title="10人及以上预约" wx:if="{{product.decuplePrice}}" value="{{product.decuplePrice + ' 元每人'}}"
+                border="{{false}}"/>
     </van-cell-group>
     <van-cell-group title="住宿信息">
-      <van-cell title="住宿选择 1" value="附近有酒店可以住宿"/>
-      <van-cell title="住宿选择 2" value="趣导提供住宿"/>
-      <van-cell title="趣导提供" value="2个房间 + 4个床位"/>
-      <van-cell title="房间价格" value="100元每晚"/>
-      <van-cell title="床位价格" value="40元每晚"/>
+      <van-cell title="酒店住宿" wx:if="{{product.nearbyHotel}}" value="附近有酒店可以住宿"/>
+      <van-cell title="趣导提供住宿" wx:if="{{product.roomNum > 0 || product.bedNum > 0}}"
+                value="{{product.roomNum + ' 个房间 + '+product.bedNum+' 个床位'}}"/>
+      <van-cell title="房间价格" wx:if="{{product.roomNum > 0}}" value="{{product.roomPrice + ' 元每晚'}}"/>
+      <van-cell title="床位价格" wx:if="{{product.bedNum > 0}}" value="{{product.bedPrice + ' 元每晚'}}"/>
     </van-cell-group>
-    <van-cell-group title="打折规则" border="{{false}}">
-      <van-cell title="连续预约2~4天" value="打9折"/>
-      <van-cell title="连续预约5~9天" value="打7折"/>
-      <van-cell title="连续预约10~30天" value="打6折"/>
-      <van-cell title="连续预约30天以上" value="打5折"/>
+    <van-cell-group title="打折规则" border="{{false}}"
+                    wx:if="{{product.daysDiscount || product.weekDiscount || product.monthDiscount || product.seasonDiscount}}">
+      <van-cell title="连续预约2~4天" wx:if="{{product.daysDiscount}}" value="{{'打 '+ product.daysDiscount + ' 折'}}"/>
+      <van-cell title="连续预约5~9天" wx:if="{{product.weekDiscount}}" value="{{'打 '+ product.weekDiscount + ' 折'}}"/>
+      <van-cell title="连续预约10~30天" wx:if="{{product.monthDiscount}}" value="{{'打 '+ product.monthDiscount + ' 折'}}"/>
+      <van-cell title="连续预约30天以上" wx:if="{{product.seasonDiscount}}" value="{{'打 '+ product.seasonDiscount + ' 折'}}"/>
     </van-cell-group>
     <mp-cell>
-      <mp-uploader max-count="0" title="封面图片" files="{{coverImgs}}" ></mp-uploader>
+      <mp-uploader max-count="0" title="封面图片" files="{{[product.coverPhoto]}}"></mp-uploader>
     </mp-cell>
     <mp-cell>
-      <mp-uploader max-count="0" title="活动图片" tips="活动现场照片" files="{{activityImgs}}" ></mp-uploader>
+      <mp-uploader max-count="0" title="活动图片" tips="活动现场照片" files="{{product.activityPhotos}}"></mp-uploader>
     </mp-cell>
     <mp-cell>
-      <mp-uploader max-count="0" title="餐饮图片" tips="吃的啥" files="{{foodImgs}}" ></mp-uploader>
+      <mp-uploader max-count="0" title="餐饮图片" tips="吃的啥" files="{{product.foodPhotos}}"></mp-uploader>
     </mp-cell>
     <mp-cell>
-      <mp-uploader max-count="0" title="住宿图片" tips="住的啥" files="{{stayOverImgs}}" ></mp-uploader>
+      <mp-uploader max-count="0" title="住宿图片" tips="住的啥" files="{{product.stayOverPhotos}}"></mp-uploader>
     </mp-cell>
     <van-tabs active="{{ activeTab }}" bind:change="tabChange">
       <van-tab title="本月预约概览"></van-tab>
@@ -91,51 +95,122 @@
       <van-cell title="订单数" value="100个"/>
       <van-cell title="订单总额" value="10000元"/>
     </van-cell-group>
-    <van-goods-action wx:if="{{!isGuider}}" custom-class="goods-action">
+    <van-goods-action wx:if="{{!isMerchant}}" custom-class="goods-action">
       <van-goods-action-icon icon="share" text="分享" open-type="share"/>
       <van-goods-action-icon icon="like" text="收藏" bind:click="collect"/>
       <van-goods-action-button text="立即预约" bind:click="bespeak"/>
     </van-goods-action>
-    <van-goods-action wx:if="{{isGuider}}" custom-class="goods-action">
-      <van-goods-action-icon icon="points" text="复制" bind:click="copy"/>
-      <van-goods-action-icon icon="descending" text="下架" bind:click="down"/>
+    <van-goods-action wx:if="{{isMerchant}}" custom-class="goods-action">
+      <van-goods-action-icon icon="calender-o" text="延期" bind:click="popupShow"
+                             disabled="{{product.status != 'ordering'}}"/>
+      <van-goods-action-icon icon="descending" text="下架" bind:click="offShelf"
+                             disabled="{{product.status != 'pending' && product.status != 'ordering'}}"/>
       <van-goods-action-button text="预约详情" bind:click="appointment"/>
     </van-goods-action>
   </view>
+  <van-popup position="bottom" show="{{ showEndDate }}" bind:close="popupClose">
+    <van-datetime-picker type="date" value="{{ endDateStamp }}" min-date="{{ endDateStamp }}"
+                         bind:confirm="dateConfirm"/>
+  </van-popup>
+  <van-toast id="van-toast"/>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
+    import store from '../components/store'
+    import Moment from 'moment'
+    import Toast from 'vant-weapp/dist/toast/toast'
 
+    let app = getApp();
     createPage({
         data: {
             id: '',
-            coverImgs: [
-                {
-                    url: 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'
-                }
-            ],
-            activityImgs: [
-                {
-                    url: 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'
-                },
-                {
-                    url: 'https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png'
-                }
-            ],
-            foodImgs: [],
-            stayOverImgs: [],
+            product: {},
+            merchant: {},
             activeTab: 0,
-            isGuider: false
+            endDate: null,
+            showEndDate: false
         },
         onLoad(query) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '服务'
             });
+            this.id = query.id;
+            this.fetchDetail();
         },
         onShow() {
             this.activeTab = 0;
+        },
+        computed: {
+            location() {
+                return store.state.location;
+            },
+            endDateStamp() {
+                return Moment(this.product.endDate).valueOf();
+            },
+            isMerchant(){
+                return this.merchant.customerId == store.state.customerInfo.id
+            }
+        },
+        fetchDetail() {
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/product/${this.id}`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    longitude: this.location.longitude || null,
+                    latitude: this.location.latitude || null
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        let product = res.data;
+                        product.tags = product.tags.split(',');
+                        product.coverPhoto = {
+                            url: 'http://yqxq.oss-cn-hangzhou.aliyuncs.com/' + product.coverPhoto
+                        };
+                        product.activityPhotos = product.activityPhotos.split(',').map((item) => {
+                            return {
+                                url: 'http://yqxq.oss-cn-hangzhou.aliyuncs.com/' + item
+                            };
+                        });
+                        product.foodPhotos = product.foodPhotos.split(',').map((item) => {
+                            return {
+                                url: 'http://yqxq.oss-cn-hangzhou.aliyuncs.com/' + item
+                            };
+                        });
+                        product.stayOverPhotos = product.stayOverPhotos.split(',').map((item) => {
+                            return {
+                                url: 'http://yqxq.oss-cn-hangzhou.aliyuncs.com/' + item
+                            };
+                        });
+                        this.product = product;
+                        this.fetchMerchant();
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        fetchMerchant() {
+            wx.request({
+                method: 'GET',
+                url: `${app.globalData.basePath}/weapp/merchant/${this.product.merchantId}`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.merchant = res.data;
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
         },
         guiderDetail(item) {
             wx.navigateTo({
@@ -150,11 +225,74 @@
                 url: '/tipOff' + '?sellerId=' + 0
             })
         },
-        copy() {
-
+        popupShow() {
+            this.showEndDate = true;
         },
-        down() {
-
+        popupClose() {
+            this.showEndDate = false;
+        },
+        dateConfirm(event) {
+            this.endDate = event.detail;
+            this.popupClose();
+            this.extend();
+        },
+        extend() {
+            Toast.loading({
+                duration: 0,
+                forbidClick: true
+            });
+            wx.request({
+                method: 'PUT',
+                url: `${app.globalData.basePath}/weapp/product/${this.product.id}/extend`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: Moment(this.endDate).format("YYYY-MM-DD"),
+                success: (res) => {
+                    Toast.clear();
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.product.endDate = Moment(this.endDate).format("YYYY-MM-DD");
+                        Toast.success('操作成功');
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                },
+                fail(res) {
+                    Toast.clear();
+                }
+            });
+        },
+        offShelf() {
+            Toast.loading({
+                duration: 0,
+                forbidClick: true
+            });
+            wx.request({
+                method: 'PUT',
+                url: `${app.globalData.basePath}/weapp/product/${this.product.id}/offShelf`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    Toast.clear();
+                    res = res.data;
+                    if (res.code == 0) {
+                        Toast.success({
+                            message: '操作成功',
+                            duration: 1000,
+                            onClose() {
+                                wx.navigateBack();
+                            }
+                        });
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                },
+                fail(res) {
+                    Toast.clear();
+                }
+            });
         },
         seller(event) {
             wx.navigateTo({
@@ -193,7 +331,8 @@
     .goods-action {
       z-index: 1;
     }
-    .weui-gallery__del{ /* 隐藏删除按钮 */
+
+    .weui-gallery__del { /* 隐藏删除按钮 */
       display: none;
     }
   }
