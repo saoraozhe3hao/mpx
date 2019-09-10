@@ -65,7 +65,8 @@
     <van-cell-group title="推荐">
       <van-card wx:for="{{products}}" wx:key="index" wx:if="{{products.length}}" lazy-load="true"
                 custom-class="card-item" tag="{{item.tags}}" title="{{ item.nickName }}" desc="{{ item.title }}"
-                price="{{item.singlePrice}}" thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+item.coverPhoto}}" bindtap="productDetail(item)">
+                price="{{item.singlePrice}}" thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+item.coverPhoto}}"
+                bindtap="productDetail(item)">
         <view slot="bottom">
           <van-rate value="{{ item.rate }}" readonly allow-half="true"/>
         </view>
@@ -76,8 +77,9 @@
     </van-cell-group>
     <text wx:if="{{false}}">{{isLogin}}</text>
     <text wx:if="{{false}}">{{location}}</text>
-    <view class="empty-data" wx:if="{{!products.length && !requesting}}"></view>
-    <mp-loading type="circle" show="{{hasNext || requesting}}" class="loading" wx:ref="loading"></mp-loading>
+    <view class="empty-data" wx:if="{{!products.length && !requesting && isLogin}}"></view>
+    <mp-loading type="circle" show="{{hasNext || requesting || !isLogin}}" class="loading"
+                wx:ref="loading"></mp-loading>
   </view>
 </template>
 <script>
@@ -124,7 +126,7 @@
             })
         },
         computed: {
-            isLogin() {    // computed store里的变量(并且独占一个元素)，必须在template使用了该变量，computed才能有效
+            isLogin() {    // computed store里的变量，必须在template使用了该变量(并且独占一个元素)，computed才能有效
                 return store.state.isLogin;
             },
             location() {
@@ -132,7 +134,7 @@
             },
             area() {
                 let area = store.state.area.split('-');
-                return area[area.length-1];
+                return area[area.length - 1];
             }
         },
         watch: {

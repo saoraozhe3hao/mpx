@@ -24,7 +24,7 @@
     </van-cell>
     <view class="functions">
       <view bindtap="collection">
-        <van-icon name="like-o"/>
+        <van-icon name="like"/>
         <view>收藏</view>
       </view>
       <view bindtap="profit">

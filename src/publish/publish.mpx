@@ -28,6 +28,18 @@
     <van-cell required title="详细地址" is-link value="{{location.address || '在地图上选择'}}" bind:click="locationClick"/>
     <van-cell required title="开始日期" is-link value="{{friendlyStartDate}}" bind:click="popupShow('showStartDate')"/>
     <van-cell required title="结束日期" is-link value="{{friendlyEndDate}}" bind:click="popupShow('showEndDate')"/>
+    <mp-cells title="标签">
+      <mp-checkbox-group prop="checkbox" multi="{{true}}" bindchange="inputBlur('tags',$event)">
+        <mp-checkbox label="打野" value="打野"></mp-checkbox>
+        <mp-checkbox label="赶海" value="赶海"></mp-checkbox>
+        <mp-checkbox label="野食" value="野食"></mp-checkbox>
+        <mp-checkbox label="探秘" value="探秘"></mp-checkbox>
+        <mp-checkbox label="捕捉" value="捕捉"></mp-checkbox>
+        <mp-checkbox label="民俗" value="民俗"></mp-checkbox>
+        <mp-checkbox label="采摘" value="采摘"></mp-checkbox>
+        <mp-checkbox label="野居" value="野居"></mp-checkbox>
+      </mp-checkbox-group>
+    </mp-cells>
     <van-field required maxlength="100" label="上午活动" type="textarea" placeholder="活动内容" autosize
                bind:blur="inputBlur('morningActivity', $event)"/>
     <van-field required maxlength="100" label="午饭" type="textarea" placeholder="午饭吃什么" autosize
@@ -41,20 +53,6 @@
     <van-cell required title="单天接待人数上限">
       <van-stepper max="100" integer="{{true}}" value="{{ topLimit }}" bind:change="fieldChange('topLimit', $event)"/>
     </van-cell>
-
-    <mp-cells title="标签">
-      <mp-checkbox-group prop="checkbox" multi="{{true}}" bindchange="inputBlur('tags',$event)">
-        <mp-checkbox label="打野" value="打野"></mp-checkbox>
-        <mp-checkbox label="赶海" value="赶海"></mp-checkbox>
-        <mp-checkbox label="野食" value="野食"></mp-checkbox>
-        <mp-checkbox label="探秘" value="探秘"></mp-checkbox>
-        <mp-checkbox label="捕捉" value="捕捉"></mp-checkbox>
-        <mp-checkbox label="民俗" value="民俗"></mp-checkbox>
-        <mp-checkbox label="采摘" value="采摘"></mp-checkbox>
-        <mp-checkbox label="野居" value="野居"></mp-checkbox>
-      </mp-checkbox-group>
-    </mp-cells>
-
     <van-cell-group title="价格规则">
       <van-field required maxlength="7" label="1人价格" placeholder="请输入" bind:blur="inputBlur('singlePrice', $event)">
         <text slot="right-icon">元/人</text>
@@ -145,7 +143,7 @@
     import {createPage} from '@mpxjs/core'
     import Notify from 'vant-weapp/dist/notify/notify'
     import Moment from 'moment'
-    import Toast from 'vant-weapp/dist/toast/toast';
+    import Toast from 'vant-weapp/dist/toast/toast'
 
     let today = new Date().getTime();
     let priceReg = /(^[1-9]\d*(\.\d{1,2})?$)|(^0(\.\d{1,2})?$)|(^$)/;
@@ -289,6 +287,18 @@
                     reject('结束日期不能早于开始日期');
                     return;
                 }
+                if (!/^[0-9]{1,3}$/.test(this.topLimit)) {
+                    reject('单天接待人数上限 必须为整数');
+                    return;
+                }
+                if (this.tags.length == 0) {
+                    reject('请至少选择一个标签');
+                    return;
+                }
+                if (this.tags.length > 3) {
+                    reject('选择的标签不能多于3个');
+                    return;
+                }
                 if (!this.morningActivity) {
                     reject('请填写上午活动');
                     return;
@@ -307,10 +317,6 @@
                 }
                 if (!this.eveningActivity) {
                     reject('请填写晚上活动');
-                    return;
-                }
-                if (!/^[0-9]{1,3}$/.test(this.topLimit)) {
-                    reject('单天接待人数上限 必须为整数');
                     return;
                 }
                 if (!this.singlePrice) {
