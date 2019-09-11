@@ -100,13 +100,12 @@
         },
         remove(item) {
             Toast.loading({
-                message: "正在提交",
                 forbidClick: true,
                 duration: 0
             });
             wx.request({
                 method: 'DELETE',
-                url: `${app.globalData.basePath}/weapp/merchant/collection?merchantId=${item.id}`,
+                url: `${app.globalData.basePath}/weapp/merchant/collection/${item.id}`,
                 header: {
                     'Cookie': wx.getStorageSync("sessionId")
                 },

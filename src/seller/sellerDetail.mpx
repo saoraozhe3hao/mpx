@@ -8,33 +8,36 @@
       "van-tab": "vant-weapp/dist/tab/index",
       "van-tabs": "vant-weapp/dist/tabs/index",
       "van-button": "vant-weapp/dist/button/index",
-      "van-rate": "vant-weapp/dist/rate/index"
+      "van-rate": "vant-weapp/dist/rate/index",
+      "van-toast": "vant-weapp/dist/toast/index"
     }
   }
 </script>
 
 <template>
   <view>
-    <van-card currency=" " tag="打野、民俗" price="距您100公里" desc="福建省三明市尤溪县" title="小六打野"
-              thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
+    <van-card currency=" " title="{{merchant.nickName}}" desc="{{product.address}}"
+              price="{{'距您 '+product.distance+' 公里'}}"
+              thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+merchant.avatar}}">
       <view slot="bottom">
-        <van-rate value="{{ 3.5 }}" readonly allow-half="true"/>
+        <van-rate value="{{ merchant.rate }}" readonly allow-half="true"/>
       </view>
       <view slot="footer">
         <van-button size="mini" icon="share" custom-class="card-btn" open-type="share">分享</van-button>
-        <van-button size="mini" icon="like" custom-class="card-btn" bind:click="collect">收藏</van-button>
+        <van-button size="mini" icon="like" custom-class="card-btn" wx:if="{{!isCollected}}" bind:click="collect">收藏
+        </van-button>
         <van-button size="mini" icon="bulb-o" custom-class="card-btn" bind:click="tipOff">投诉</van-button>
       </view>
     </van-card>
     <van-panel title="自媒体号">
       <van-cell-group>
-        <van-cell title="抖音号" value="aaaa"/>
-        <van-cell title="快手号" value="aaaa"/>
-        <van-cell title="斗鱼号" value="aaaa"/>
-        <van-cell title="西瓜号" value="aaaa"/>
-        <van-cell title="B站号" value="aaaa"/>
-        <van-cell title="微博号" value="aaaa"/>
-        <van-cell title="微信公众号" value="aaaa"/>
+        <van-cell title="抖音号" wx:if="{{selfMedia.douyin}}" value="{{selfMedia.douyin}}"/>
+        <van-cell title="快手号" wx:if="{{selfMedia.kuaishou}}" value="{{selfMedia.kuaishou}}"/>
+        <van-cell title="斗鱼号" wx:if="{{selfMedia.douyu}}" value="{{selfMedia.douyu}}"/>
+        <van-cell title="西瓜号" wx:if="{{selfMedia.xigua}}" value="{{selfMedia.xigua}}"/>
+        <van-cell title="B站号" wx:if="{{selfMedia.blibli}}" value="{{selfMedia.blibli}}"/>
+        <van-cell title="微博号" wx:if="{{selfMedia.weibo}}" value="{{selfMedia.weibo}}"/>
+        <van-cell title="微信公众号" wx:if="{{selfMedia.gongzhong}}" value="{{selfMedia.gongzhong}}"/>
       </van-cell-group>
     </van-panel>
 
@@ -43,31 +46,115 @@
       <van-tab title="趣友评价"></van-tab>
     </van-tabs>
 
-    <van-card tag="打野、民俗" price="100" desc="干塘体验一日游" title="野食小子" bindtap="productDetail"
-              thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg"
-              wx:if="{{activeTab == 0}}">
-      <view slot="bottom">
-        <van-rate value="{{ 3.5 }}" readonly allow-half="true"/>
-      </view>
-    </van-card>
+    <view wx:if="{{activeTab == 0}}">
+      <van-card tag="{{product.tags}}" title="{{product.nickName}}" desc="{{product.title}}"
+                price="{{product.singlePrice}}" bindtap="productDetail"
+                thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/' + product.coverPhoto}}"
+                wx:if="{{product.id}}">
+        <view slot="bottom">
+          <van-rate value="{{ product.rate }}" readonly allow-half="true"/>
+        </view>
+        <view slot="footer">
+          <text>{{product.startDate}} 到 {{product.endDate}}</text>
+        </view>
+      </van-card>
+      <view class="empty-data" wx:if="{{!product.id}}"></view>
+    </view>
   </view>
+  <van-toast id="van-toast"/>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
+    import store from '../components/store'
+    import Toast from 'vant-weapp/dist/toast/toast'
 
+    let app = getApp();
     createPage({
         data: {
-            activeTab: 0
+            id: 0,
+            merchant: {},
+            activeTab: 0,
+            product: {},
+            isCollected: false
         },
-        onLoad: function (query) {
+        onLoad(query) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '趣导'
             });
+            this.id = query.id;
+            this.fetchDetail();
+            this.fetchCollection();
         },
         onShow() {
             this.activeTab = 0;
+        },
+        computed: {
+            location() {
+                return store.state.location;
+            },
+            selfMedia() {
+                let selfMedia = this.merchant.selfMedia || "{}";
+                return JSON.parse(selfMedia);
+            }
+        },
+        fetchDetail() {
+            wx.request({
+                method: 'GET',
+                url: `${app.globalData.basePath}/weapp/merchant/${this.id}`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.merchant = res.data;
+                        this.fetchProduct();
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        fetchCollection() {
+            wx.request({
+                method: 'GET',
+                url: `${app.globalData.basePath}/weapp/merchant/collection/${this.id}`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.isCollected = res.data;
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        fetchProduct() {
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/product/merchant/${this.merchant.id}`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    longitude: this.location.longitude || null,
+                    latitude: this.location.latitude || null
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.product = res.data;
+                        this.product.tags = this.product.tags.split(',');
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
         },
         tabChange(event) {
             if (event.detail.index == 1) {
@@ -79,11 +166,34 @@
         },
         productDetail() {
             wx.navigateTo({
-                url: `/productDetail?id=${this.id}`
+                url: `/productDetail?id=${this.product.id}`
             })
         },
-        collect(event) {
-
+        collect() {
+            Toast.loading({
+                forbidClick: true,
+                duration: 0
+            });
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/merchant/collection/${this.merchant.id}`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    Toast.clear();
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.fetchCollection();
+                        Toast.success('操作成功');
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                },
+                fail(res) {
+                    Toast.clear();
+                }
+            });
         },
         tipOff(event) {
             wx.navigateTo({

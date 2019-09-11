@@ -23,16 +23,18 @@
 
 <template>
   <view class="product-detail">
-    <van-card currency=" " title="{{merchant.nickName}}" desc="{{product.title}}"
-              price="{{'距您 '+product.distance+' 公里'}}"
-              bindtap="guiderDetail" thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+merchant.avatar}}">
-      <view slot="bottom">
-        <van-rate value="{{ merchant.rate }}" readonly allow-half="true"/>
-      </view>
-      <view slot="footer">
-        <van-button size="mini" icon="bulb-o" bind:click="tipOff">投诉</van-button>
-      </view>
-    </van-card>
+    <van-cell-group title="趣导">
+      <van-card currency=" " title="{{merchant.nickName}}" desc="{{product.title}}"
+                price="{{'距您 '+product.distance+' 公里'}}"
+                bindtap="merchantDetail" thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+merchant.avatar}}">
+        <view slot="bottom">
+          <van-rate value="{{ merchant.rate }}" readonly allow-half="true"/>
+        </view>
+        <view slot="footer">
+          <van-button size="mini" icon="bulb-o" bind:click="tipOff">投诉</van-button>
+        </view>
+      </van-card>
+    </van-cell-group>
 
     <van-cell-group title="基本信息">
       <van-cell title="时间" value="{{product.startDate + ' 到 ' + product.endDate}}"/>
@@ -129,7 +131,8 @@
             merchant: {},
             activeTab: 0,
             endDate: null,
-            showEndDate: false
+            showEndDate: false,
+            isCollected: false
         },
         onLoad(query) {
             wx.showShareMenu();
@@ -149,8 +152,9 @@
             endDateStamp() {
                 return Moment(this.product.endDate).valueOf();
             },
-            isMerchant(){
-                return this.merchant.customerId == store.state.customerInfo.id
+            isMerchant() {
+                return false;
+                // return this.merchant.customerId == store.state.customerInfo.id
             }
         },
         fetchDetail() {
@@ -206,19 +210,64 @@
                     res = res.data;
                     if (res.code == 0) {
                         this.merchant = res.data;
+                        this.fetchCollection();
                     } else if (res.code == 401) {
                         app.loginWx();
                     }
                 }
             });
         },
-        guiderDetail(item) {
+        fetchCollection() {
+            wx.request({
+                method: 'GET',
+                url: `${app.globalData.basePath}/weapp/merchant/collection/${this.merchant.id}`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.isCollected = res.data;
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        merchantDetail(item) {
             wx.navigateTo({
-                url: `/sellerDetail?id=${this.id}`
+                url: `/sellerDetail?id=${this.merchant.id}`
             })
         },
-        collect(event) {
-
+        collect() {
+            if(this.isCollected){
+                Toast.success('已收藏');
+                return;
+            }
+            Toast.loading({
+                forbidClick: true,
+                duration: 0
+            });
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/merchant/collection/${this.merchant.id}`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    Toast.clear();
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.fetchCollection();
+                        Toast.success('操作成功');
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                },
+                fail(res) {
+                    Toast.clear();
+                }
+            });
         },
         tipOff(event) {
             wx.navigateTo({
