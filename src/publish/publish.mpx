@@ -519,6 +519,7 @@
                         Toast.success({
                             message: '操作成功',
                             duration: 1000,
+                            forbidClick: true,
                             onClose() {
                                 wx.navigateBack();
                             }

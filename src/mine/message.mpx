@@ -3,7 +3,9 @@
     "usingComponents": {
       "van-field": "vant-weapp/dist/field/index",
       "van-cell": "vant-weapp/dist/cell/index",
-      "van-button": "vant-weapp/dist/button/index"
+      "van-button": "vant-weapp/dist/button/index",
+      "van-notify": "vant-weapp/dist/notify/index",
+      "van-toast": "vant-weapp/dist/toast/index"
     }
   }
 </script>
@@ -11,48 +13,120 @@
 <template>
   <view class="message-container">
     <view>
-      <van-cell title="客服回复" value="****" class="receive-message"/>
-      <van-cell title="系统通知" value="****" class="receive-message"/>
-      <van-cell title="预约通知" value="****" class="receive-message"/>
-      <van-cell title="您的留言" value="****" class="send-message"/>
+      <van-cell wx:for="{{messages}}" wx:key="{{index}}" title="{{item.operatorId ? '客服回复':'您的留言'}}"
+                value="{{item.time}}" label="{{item.detail}}"/>
     </view>
-    <van-field use-button-slot label="留言" type="textarea" placeholder="请输入留言" autosize
-               value="{{ message }}" class="leave-word" bind:blur="messageBlur">
+    <van-field use-button-slot label="留言" type="textarea" placeholder="请输入留言" autosize maxlength="100"
+               value="{{message}}" class="leave-word" bind:change="messageChange">
       <van-button slot="button" size="small" bind:click="send">发送</van-button>
     </van-field>
   </view>
+  <van-notify id="van-notify"/>
+  <van-toast id="van-toast"/>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
+    import Toast from 'vant-weapp/dist/toast/toast'
+    import Notify from 'vant-weapp/dist/notify/notify'
 
+    let app = getApp();
     createPage({
         data: {
+            myLeave: [],
+            reply: [],
             message: ''
         },
-        onLoad: function (options) {
+        onLoad(options) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '消息中心'
-            })
+            });
+            this.fetchMessage();
+            this.fetchReply();
         },
-        messageBlur(event) {
-            this.message = event.detail.value;
+        computed: {
+            messages() {
+                return this.myLeave.concat(this.reply).sort((a, b)=>{
+                    return a.time > b.time ? 1 : -1;
+                });
+            }
+        },
+        fetchMessage() {
+            wx.request({
+                method: 'GET',
+                url: `${app.globalData.basePath}/weapp/message`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.myLeave = res.data;
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        fetchReply() {
+            wx.request({
+                method: 'GET',
+                url: `${app.globalData.basePath}/weapp/reply`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.reply = res.data;
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        messageChange(event) {
+            this.message = event.detail;
         },
         send() {
-
+            if (this.message.length < 5) {
+                Notify('请填写至少5个字');
+                return;
+            }
+            Toast.loading({
+                forbidClick: true,
+                duration: 0
+            });
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/message`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: this.message,
+                success: (res) => {
+                    Toast.clear();
+                    res = res.data;
+                    if (res.code == 0) {
+                        Toast.success("发送成功");
+                        this.message = "";
+                        this.fetchMessage();
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                },
+                fail(res) {
+                    Toast.clear();
+                }
+            });
         }
     })
 </script>
 
 <style lang="less">
-  .message-container{
+  .message-container {
     padding-bottom: 50px;
-    .receive-message {
-    }
-
-    .send-message {
-    }
 
     .leave-word {
       position: fixed;

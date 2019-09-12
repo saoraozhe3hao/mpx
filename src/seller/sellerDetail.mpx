@@ -197,7 +197,7 @@
         },
         tipOff(event) {
             wx.navigateTo({
-                url: '/tipOff' + '?sellerId=' + 0
+                url: `/tipOff?merchantId=${this.merchant.id}`
             })
         }
     })

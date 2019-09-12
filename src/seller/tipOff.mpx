@@ -3,7 +3,8 @@
     "usingComponents": {
       "van-cell-group": "vant-weapp/dist/cell-group/index",
       "van-field": "vant-weapp/dist/field/index",
-      "van-button": "vant-weapp/dist/button/index"
+      "van-button": "vant-weapp/dist/button/index",
+      "van-toast": "vant-weapp/dist/toast/index"
     }
   }
 </script>
@@ -11,30 +12,74 @@
 <template>
   <view>
     <van-cell-group title="投诉趣导">
-      <van-field label="详细描述" type="textarea" placeholder="请输入" autosize value="{{ detail }}"/>
+      <van-field label="详细描述" type="textarea" placeholder="请输入" autosize maxlength="200"
+                 error-message="{{inputError}}" bind:focus="inputFocus" bind:change="inputChange"/>
     </van-cell-group>
     <van-button custom-class="submit-btn" bind:click="submit" size="large">提交</van-button>
   </view>
+  <van-toast id="van-toast"/>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
+    import Toast from 'vant-weapp/dist/toast/toast'
 
+    let app = getApp();
     createPage({
         data: {
-            detail: ''
+            merchantId: '',
+            detail: '',
+            inputError: ''
         },
-        onLoad: function (options) {
+        onLoad(options) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '举报趣导'
-            })
+            });
+            this.merchantId = options.merchantId;
         },
-        typeChange(event) {
-            this.typeIndex = event.detail.value;
+        inputFocus() {
+            this.inputError = '';
         },
-        submit () {
-
+        inputChange(event) {
+            this.detail = event.detail;
+        },
+        submit() {
+            if (this.detail.length < 5) {
+                this.inputError = '请填写至少5个字';
+                return;
+            }
+            Toast.loading({
+                forbidClick: true,
+                duration: 0
+            });
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/merchant/tipOff/${this.merchantId}`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: this.detail,
+                success: (res) => {
+                    Toast.clear();
+                    res = res.data;
+                    if (res.code == 0) {
+                        Toast.success({
+                            message: "操作成功",
+                            forbidClick: true,
+                            duration: 1000,
+                            onClose() {
+                                wx.navigateBack();
+                            }
+                        });
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                },
+                fail(res) {
+                    Toast.clear();
+                }
+            });
         }
     })
 </script>

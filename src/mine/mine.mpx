@@ -119,7 +119,28 @@
         getUserInfo(res) {
             console.log(JSON.stringify(res));
             store.state.userInfo = res.detail.userInfo;
-            store.commit('change')
+            store.commit('change');
+            this.initAvatar();
+        },
+        initAvatar() {
+            if(this.customerInfo.avatar){
+                return;
+            }
+            wx.request({
+                method: 'PUT',
+                url: `${app.globalData.basePath}/weapp/customer/avatar`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: this.userInfo.avatarUrl,
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
         },
         fetchMerchant() {
             wx.request({

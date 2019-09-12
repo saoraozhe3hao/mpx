@@ -269,9 +269,9 @@
                 }
             });
         },
-        tipOff(event) {
+        tipOff() {
             wx.navigateTo({
-                url: '/tipOff' + '?sellerId=' + 0
+                url: `/tipOff?merchantId=${this.merchant.id}`
             })
         },
         popupShow() {
@@ -330,6 +330,7 @@
                         Toast.success({
                             message: '操作成功',
                             duration: 1000,
+                            forbidClick: true,
                             onClose() {
                                 wx.navigateBack();
                             }
