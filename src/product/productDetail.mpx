@@ -100,7 +100,7 @@
     <van-goods-action wx:if="{{!isMerchant}}" custom-class="goods-action">
       <van-goods-action-icon icon="share" text="分享" open-type="share"/>
       <van-goods-action-icon icon="like" text="收藏" bind:click="collect"/>
-      <van-goods-action-button text="立即预约" bind:click="bespeak"/>
+      <van-goods-action-button text="立即预约" bind:click="subscribe"/>
     </van-goods-action>
     <van-goods-action wx:if="{{isMerchant}}" custom-class="goods-action">
       <van-goods-action-icon icon="calender-o" text="延期" bind:click="popupShow"
@@ -110,9 +110,9 @@
       <van-goods-action-button text="预约详情" bind:click="appointment"/>
     </van-goods-action>
   </view>
-  <van-popup position="bottom" show="{{ showEndDate }}" bind:close="popupClose">
+  <van-popup position="bottom" show="{{ showEndDate }}">
     <van-datetime-picker type="date" value="{{ endDateStamp }}" min-date="{{ endDateStamp }}"
-                         bind:confirm="dateConfirm"/>
+                         bind:confirm="dateConfirm" bind:cancel="popupClose"/>
   </van-popup>
   <van-toast id="van-toast"/>
 </template>
@@ -153,8 +153,7 @@
                 return Moment(this.product.endDate).valueOf();
             },
             isMerchant() {
-                return false;
-                // return this.merchant.customerId == store.state.customerInfo.id
+                return this.merchant.customerId == store.state.customerInfo.id
             }
         },
         fetchDetail() {
@@ -344,11 +343,6 @@
                 }
             });
         },
-        seller(event) {
-            wx.navigateTo({
-                url: '/sellerDetail' + '?sellerId=' + 0
-            })
-        },
         tabChange(event) {
             if (event.detail.index == 1) {
                 wx.navigateTo({
@@ -357,9 +351,9 @@
             }
             this.activeTab = event.detail.index;
         },
-        bespeak(event) {
+        subscribe(event) {
             wx.navigateTo({
-                url: '/bespeak' + '?productId=' + this.id
+                url: `/subscribe?productId=${this.product.id}`
             })
         },
         appointment() {

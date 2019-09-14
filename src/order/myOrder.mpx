@@ -4,73 +4,139 @@
       "van-tab": "vant-weapp/dist/tab/index",
       "van-tabs": "vant-weapp/dist/tabs/index",
       "van-card": "vant-weapp/dist/card/index",
-      "van-button": "vant-weapp/dist/button/index"
+      "van-button": "vant-weapp/dist/button/index",
+      "mp-loading": "weui-miniprogram/miniprogram_dist/loading/loading"
     }
   }
 </script>
 
 <template>
   <view>
-    <van-tabs active="{{ active }}" bind:change="tabChange">
+    <van-tabs active="{{ activeTab }}" bind:change="tabChange">
       <van-tab title="全部"></van-tab>
+      <van-tab title="待付款"></van-tab>
       <van-tab title="待使用"></van-tab>
       <van-tab title="待评价"></van-tab>
-      <van-tab title="退款"></van-tab>
+      <van-tab title="退款中"></van-tab>
     </van-tabs>
     <van-card wx:for="{{orders}}" wx:key="index" lazy-load="true" custom-class="card-item"
-              tag="待使用" price="1000" desc="干塘体验一日游" title="{{ item.name }}" bindtap="orderDetail(item)"
-              thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
+              tag="{{statusMap[item.status]}}" title="{{ item.merchant.nickName }}" desc="{{item.product.title}}" price="{{item.total}}"
+              bindtap="orderDetail(item)"
+              thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+item.product.coverPhoto}}">
       <view slot="bottom">
-        <view>预约时间：2009年33月33日</view>
+        <view>预约时间：{{item.startDate}} 到 {{item.lastDate}}</view>
       </view>
       <view slot="footer">
         <van-button size="mini" catch:tap="evaluate" custom-class="card-btn">评价</van-button>  <!-- 使用小程序原生事件才能阻止冒泡 -->
         <van-button size="mini" catch:tap="refund" custom-class="card-btn">申请退款</van-button>
       </view>
     </van-card>
+    <view class="empty-order" wx:if="{{!orders.length && !requesting}}"></view>
+    <mp-loading type="circle" show="{{hasNext || requesting}}" class="loading" wx:ref="loading"></mp-loading>
   </view>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
+    import store from '../components/store'
 
+    let app = getApp();
     createPage({
         data: {
             activeTab: 0,
-            orders: [
-                {
-                    name: '野食小子-干塘体验'
-                },
-                {
-                    name: '野居青年-野居体验'
-                }
-            ]
+            statusMap: {
+                'pending': '待付款',
+                'unused': '待使用',
+                'used': '待评价',
+                'evaluated': '已评价',
+                'refunding': '退款中',
+                'refunded': '已退款'
+            },
+            tabToStatus: {
+                1: 'pending',
+                2: 'unused',
+                3: 'used',
+                4: 'refunding'
+            },
+            orders: [],
+            pageNum: 1,
+            hasNext: false,
+            requesting: false,  // 是否正在请求
         },
-        onLoad (options) {
+        onLoad(options) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '我的订单'
-            })
+            });
+
+            // 这里只是定义查询规则，后面的 exec() 才真正查询
+            this.query = this.createSelectorQuery();
+            this.query.select('.loading').boundingClientRect();
         },
         onShow() {
             this.getTabBar && this.getTabBar().setData({
                 active: 2
+            });
+            this.orders = [];
+            this.fetchOrders();
+        },
+        onPageScroll() {
+            // 正在查询元素，正在请求数据，没有更多数据
+            if (this.requesting || !this.hasNext) {
+                return;
+            }
+            this.query.exec((res) => {
+                if (!this.requesting && res[0].top < store.state.systemInfo.windowHeight - 50) {
+                    this.pageNum++;
+                    this.fetchOrders();
+                }
             })
         },
-        tabChange (event) {
+        tabChange(event) {
             this.activeTab = event.detail.index;
+            this.orders = [];
+            this.fetchOrders();
         },
-        orderDetail (item) {
+        fetchOrders() {
+            this.requesting = true;
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/order/mine`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    pageNum: this.pageNum,
+                    pageSize: 10,
+                    status: this.tabToStatus[this.activeTab] || null
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.orders = this.orders.concat(res.data.list);
+                        this.hasNext = res.data.hasNextPage;
+                        this.requesting = false;
+                        this.onPageScroll();  // 怕没滚动时，加载图标就出现了，主动触发一次滚动响应
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                },
+                complete: () => {
+                    this.requesting = false;
+                }
+            });
+        },
+        orderDetail(item) {
             wx.navigateTo({
-                url: '/orderDetail' + '?orderId=' + item.id
+                url: `/orderDetail?id=${item.id}`
             })
         },
-        refund (event) {
+        refund(event) {
             wx.navigateTo({
                 url: '/refund' + '?orderId=' + event.currentTarget.id
             })
         },
-        evaluate (event) {
+        evaluate(event) {
             wx.navigateTo({
                 url: '/evaluate' + '?orderId=' + event.currentTarget.id
             })

@@ -127,13 +127,13 @@
     </mp-cell>
     <van-button type="default" custom-class="submit-btn" bind:click="submit" size="large">提交</van-button>
   </view>
-  <van-popup position="bottom" show="{{ showStartDate }}" bind:close="popupClose">
+  <van-popup position="bottom" show="{{ showStartDate }}">
     <van-datetime-picker type="date" value="{{ startDate }}" min-date="{{ minDate }}"
-                         bind:confirm="dateConfirm('startDate', $event)"/>
+                         bind:confirm="dateConfirm('startDate', $event)" bind:cancel="popupClose"/>
   </van-popup>
-  <van-popup position="bottom" show="{{ showEndDate }}" bind:close="popupClose">
+  <van-popup position="bottom" show="{{ showEndDate }}">
     <van-datetime-picker type="date" value="{{ endDate }}" min-date="{{ minDate }}"
-                         bind:confirm="dateConfirm('endDate', $event)"/>
+                         bind:confirm="dateConfirm('endDate', $event)" bind:cancel="popupClose"/>
   </van-popup>
   <van-notify id="van-notify"/>
   <van-toast id="van-toast"/>
@@ -141,8 +141,8 @@
 
 <script>
     import {createPage} from '@mpxjs/core'
-    import Notify from 'vant-weapp/dist/notify/notify'
     import Moment from 'moment'
+    import Notify from 'vant-weapp/dist/notify/notify'
     import Toast from 'vant-weapp/dist/toast/toast'
 
     let today = new Date().getTime();
@@ -468,7 +468,7 @@
                 this.uploadCover();
             }).catch((res) => {
                 Notify(res);
-            })
+            });
         },
         publish() {
             console.log(this.uploadedImgs);
@@ -486,11 +486,11 @@
                 afternoonActivity: this.afternoonActivity,
                 dinner: this.dinner,
                 eveningActivity: this.eveningActivity,
-                singlePrice: this.singlePrice,
-                doublePrice: this.doublePrice || null,
-                treblePrice: this.treblePrice || null,
-                sextuplePrice: this.sextuplePrice || null,
-                decuplePrice: this.decuplePrice || null,
+                singlePrice: this.singlePrice * 100,
+                doublePrice: this.doublePrice ? this.doublePrice * 100 : null,
+                treblePrice: this.treblePrice ? this.treblePrice * 100 : null,
+                sextuplePrice: this.sextuplePrice ? this.sextuplePrice * 100 : null,
+                decuplePrice: this.decuplePrice ? this.decuplePrice * 100 : null,
                 daysDiscount: this.daysDiscount || null,
                 weekDiscount: this.weekDiscount || null,
                 monthDiscount: this.monthDiscount || null,
@@ -527,6 +527,9 @@
                     } else if (res.code == 401) {
                         app.loginWx();
                     }
+                },
+                fail(res) {
+                    Toast.clear();
                 }
             });
         }

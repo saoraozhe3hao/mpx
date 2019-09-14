@@ -3,7 +3,9 @@
     "usingComponents": {
       "van-cell-group": "vant-weapp/dist/cell-group/index",
       "van-field": "vant-weapp/dist/field/index",
-      "van-button": "vant-weapp/dist/button/index"
+      "van-button": "vant-weapp/dist/button/index",
+      "van-notify": "vant-weapp/dist/notify/index",
+      "van-toast": "vant-weapp/dist/toast/index"
     }
   }
 </script>
@@ -11,48 +13,79 @@
 <template>
   <view>
     <van-cell-group>
-      <van-field maxlength="32" placeholder="请输入" label="订单验证码"
-                 value="{{ code }}" error-message="{{codeError}}" bind:blur="codeBlur" bind:focus="codeFocus">
+      <van-field maxlength="10" placeholder="预约期间内，验证码才有效" label="订单验证码" value="{{code}}" bind:change="codeChange">
         <van-button slot="button" size="small" bind:click="verify">验证</van-button>
       </van-field>
     </van-cell-group>
     <van-button icon="scan" custom-class="submit-btn" bind:click="scan">扫描订单二维码</van-button>
   </view>
+  <van-toast id="van-toast"/>
+  <van-notify id="van-notify"/>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
+    import Notify from 'vant-weapp/dist/notify/notify'
+    import Toast from 'vant-weapp/dist/toast/toast'
 
+    let app = getApp();
     createPage({
         data: {
-            code: '',
-            codeError: ''
+            code: ''
         },
-        onLoad: function (options) {
+        onLoad(options) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '验证订单'
-            })
+            });
         },
-        codeBlur(event) {
-            this.code = event.detail.value;
+        codeChange(event) {
+            this.code = event.detail;
         },
-        codeFocus(event) {
-            this.codeError = "";
-        },
-        verify(event) {
+        verify() {
             if (!this.code) {
-                this.codeError = "请输入订单验证码";
+                Notify("请输入验证码");
                 return;
             }
+            this.submit();
         },
         scan(event) {
             wx.scanCode({
                 onlyFromCamera: true,
                 success(res) {
-                    console.log(res)
+                    this.submit(res);
                 }
             })
+        },
+        submit(){
+            Toast.loading({
+                message: "正在验证",
+                forbidClick: true,
+                duration: 0
+            });
+            wx.request({
+                method: 'PUT',
+                url: `${app.globalData.basePath}/weapp/order/verify`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: this.code,
+                success: (res) => {
+                    Toast.clear();
+                    res = res.data;
+                    if (res.code == 0) {
+                        Toast.success('验证成功');
+                        this.code = '';
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    } else {
+                        Toast.fail('无效验证码');
+                    }
+                },
+                fail(res) {
+                    Toast.clear();
+                }
+            });
         }
     })
 </script>

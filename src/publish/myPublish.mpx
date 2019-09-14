@@ -5,7 +5,7 @@
       "van-rate": "vant-weapp/dist/rate/index",
       "van-cell-group": "vant-weapp/dist/cell-group/index",
       "van-button": "vant-weapp/dist/button/index",
-      "van-notify": "vant-weapp/dist/notify/index",
+      "van-toast": "vant-weapp/dist/toast/index",
       "mp-loading": "weui-miniprogram/miniprogram_dist/loading/loading"
     }
   }
@@ -32,15 +32,16 @@
     </van-cell-group>
     <view class="empty-data" wx:if="{{!products.length && !requesting}}"></view>
     <mp-loading type="circle" show="{{hasNext || requesting}}" class="loading" wx:ref="loading"></mp-loading>
-    <van-button round icon="plus" bind:click="publish" class="plus-btn"></van-button>
+    <van-button round icon="plus" bind:click="publish" class="plus-btn" wx:if="store.state.customerInfo.mobile"></van-button>
+    <van-button round icon="plus" open-type="getPhoneNumber" bind:getphonenumber="getMobileFromWx" class="plus-btn" wx:else></van-button>
   </view>
-  <van-notify id="van-notify"/>
+  <van-toast id="van-toast"/>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
     import store from '../components/store'
-    import Notify from 'vant-weapp/dist/notify/notify'
+    import Toast from 'vant-weapp/dist/toast/toast'
 
     let app = getApp();
     createPage({
@@ -61,6 +62,10 @@
             wx.setNavigationBarTitle({
                 title: '我的发布'
             });
+
+            // 这里只是定义查询规则，后面的 exec() 才真正查询
+            this.query = this.createSelectorQuery();
+            this.query.select('.loading').boundingClientRect();
         },
         onShow() {
             this.getTabBar && this.getTabBar().setData({
@@ -119,11 +124,45 @@
                 url: `/productDetail?id=${item.id}`
             })
         },
-        publish() {
-            if (!store.state.customerInfo.mobile) {
-                Notify("请先到“我的”获取手机号码");
-                return;
+        getMobileFromWx(e) {
+            console.log(e.detail.errMsg);
+            if (e.detail.iv) {
+                this.getMobileFromServer(e.detail.iv, e.detail.encryptedData);
             }
+        },
+        getMobileFromServer(iv, encryptedData) {
+            Toast.loading({
+                forbidClick: true,
+                duration: 0
+            });
+            wx.request({
+                method: 'PUT',
+                url: `${app.globalData.basePath}/weapp/customer/mobile`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    iv, encryptedData
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        store.state.customerInfo.mobile = this.data;
+                        store.state.customerInfo = Object.assign({}, store.state.customerInfo)
+                        store.commit("change");
+                        wx.navigateTo({
+                            url: '/publish'
+                        })
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                },
+                complete(res) {
+                    Toast.clear();
+                }
+            });
+        },
+        publish() {
             wx.navigateTo({
                 url: '/publish'
             })

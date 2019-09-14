@@ -47,7 +47,11 @@
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '我的收藏'
-            })
+            });
+            // 这里只是定义查询规则，后面的 exec() 才真正查询
+            this.query = this.createSelectorQuery();
+            this.query.select('.loading').boundingClientRect();
+
             this.merchants = [];
             this.fetchMerchants();
         },

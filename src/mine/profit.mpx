@@ -3,7 +3,9 @@
     "usingComponents": {
       "van-cell": "vant-weapp/dist/cell/index",
       "van-cell-group": "vant-weapp/dist/cell-group/index",
-      "van-button": "vant-weapp/dist/button/index"
+      "van-button": "vant-weapp/dist/button/index",
+      "van-notify": "vant-weapp/dist/notify/index",
+      "van-toast": "vant-weapp/dist/toast/index"
     }
   }
 </script>
@@ -11,35 +13,106 @@
 <template>
   <view>
     <van-cell-group>
-      <van-cell title="已提现金额" value="1000" />
-      <van-cell title="提现中金额" value="100" />
-      <van-cell title="可提现金额" value="100" />
+      <van-cell title="已提现金额" value="{{paid}}"/>
+      <van-cell title="提现中金额" value="{{pendingAmount / 100}}"/>
+      <van-cell title="可提现金额" value="{{leftBalance}}"/>
     </van-cell-group>
-    <van-button custom-class="submit-btn" bind:click="withdraw">提现</van-button>
+    <van-button custom-class="submit-btn" wx:if="{{leftBalance > 0}}" bind:click="withdraw">申请提现</van-button>
   </view>
+  <van-notify id="van-notify"/>
+  <van-toast id="van-toast"/>
 </template>
 
 <script>
-  import { createPage } from '@mpxjs/core'
+    import {createPage} from '@mpxjs/core'
+    import store from '../components/store'
+    import Notify from 'vant-weapp/dist/notify/notify'
+    import Toast from 'vant-weapp/dist/toast/toast'
 
-  createPage({
-    data: {
-
-    },
-    onLoad: function(options) {
-      wx.showShareMenu();
-      wx.setNavigationBarTitle({
-        title: '收益'
-      })
-    },
-    withdraw: function(event) {
-      wx.showToast({
-        title: '一个月只能申请一次',
-        icon: 'none',
-        duration: 2000
-      })
-    }
-  })
+    let app = getApp();
+    createPage({
+        data: {
+            withdrawList: {}, // 提现历史信息
+        },
+        onLoad(options) {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '收益'
+            });
+            this.fetchWithdraw();
+        },
+        computed: {
+            merchantInfo() {
+                return store.state.merchantInfo;
+            },
+            pendingAmount(){
+                let pending = this.withdrawList.find((item)=>{
+                    return item.status == 'pending';
+                });
+                return pending && pending.amount || 0;
+            },
+            leftBalance(){
+                return (this.merchantInfo.balance - this.pendingAmount) / 100;
+            },
+            paid(){
+                let paidList = this.withdrawList.filter((item)=>{
+                    return item.status == 'paid';
+                });
+                let paid = 0;
+                paidList.forEach((item)=>{
+                    paid += item.amount;
+                });
+                return paid / 100;
+            }
+        },
+        fetchWithdraw() {
+            wx.request({
+                method: 'GET',
+                url: `${app.globalData.basePath}/weapp/withdraw`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.withdrawList = res.data;
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        withdraw(event) {
+            if(this.pendingAmount){
+                Notify('您有一笔提现正在进行中');
+            }
+            Toast.loading({
+                message: "正在提交",
+                forbidClick: true,
+                duration: 0
+            });
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/withdraw`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    Toast.clear();
+                    res = res.data;
+                    if (res.code == 0) {
+                        Toast.success("申请已提交")
+                        this.fetchWithdraw();
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                },
+                fail(res) {
+                    Toast.clear();
+                }
+            });
+        }
+    })
 </script>
 
 <style lang="less">

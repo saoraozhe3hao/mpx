@@ -2,7 +2,7 @@
   {
     "pages": [
       "./productDetail",
-      "./bespeak"
+      "./subscribe"
     ]
   }
 </script>

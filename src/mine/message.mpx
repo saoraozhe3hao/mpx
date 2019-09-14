@@ -20,6 +20,7 @@
                value="{{message}}" class="leave-word" bind:change="messageChange">
       <van-button slot="button" size="small" bind:click="send">发送</van-button>
     </van-field>
+    <view class="empty-message" wx:if="{{!messages.length && !requesting}}"></view>
   </view>
   <van-notify id="van-notify"/>
   <van-toast id="van-toast"/>
@@ -35,7 +36,8 @@
         data: {
             myLeave: [],
             reply: [],
-            message: ''
+            message: '',
+            requesting: false  // 是否正在请求
         },
         onLoad(options) {
             wx.showShareMenu();
@@ -53,6 +55,7 @@
             }
         },
         fetchMessage() {
+            this.requesting = true;
             wx.request({
                 method: 'GET',
                 url: `${app.globalData.basePath}/weapp/message`,
@@ -66,6 +69,9 @@
                     } else if (res.code == 401) {
                         app.loginWx();
                     }
+                },
+                complete: () => {
+                    this.requesting = false;
                 }
             });
         },

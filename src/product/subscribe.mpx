@@ -1,0 +1,348 @@
+<script type="application/json">
+  {
+    "usingComponents": {
+      "van-card": "vant-weapp/dist/card/index",
+      "van-rate": "vant-weapp/dist/rate/index",
+      "van-field": "vant-weapp/dist/field/index",
+      "van-datetime-picker": "vant-weapp/dist/datetime-picker/index",
+      "van-popup": "vant-weapp/dist/popup/index",
+      "van-cell-group": "vant-weapp/dist/cell-group/index",
+      "van-cell": "vant-weapp/dist/cell/index",
+      "van-stepper": "vant-weapp/dist/stepper/index",
+      "van-notify": "vant-weapp/dist/notify/index",
+      "van-toast": "vant-weapp/dist/toast/index",
+      "van-button": "vant-weapp/dist/button/index",
+      "van-submit-bar": "vant-weapp/dist/submit-bar/index"
+    }
+  }
+</script>
+
+<template>
+  <view class="subscribe">
+    <van-card tag="{{product.tags}}" title="{{merchant.nickName}}" desc="{{product.title}}" currency=" "
+              price="{{product.startDate + ' 到 ' + product.endDate}}"
+              thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/' + product.coverPhoto}}">
+      <view slot="bottom">
+        <van-rate value="{{ product.rate }}" readonly allow-half="true"/>
+      </view>
+      <view slot="footer">
+        <text>{{product.address}}</text>
+      </view>
+    </van-card>
+    <van-cell-group title=" ">
+      <van-cell title="预约开始日期" is-link label="{{'可选范围：'+ product.startDate + ' 到 ' + product.endDate}}"
+                value="{{startDate || '点击选择'}}" bind:click="startDateClick"/>
+      <van-cell title="预约天数" use-label-slot>
+        <van-stepper max="{{leftDays}}" integer="{{true}}" value="{{ days }}"
+                     bind:change="fieldChange('days', $event)"/>
+        <view slot="label">
+          <view>可预约 {{leftDays}} 天</view>
+          <view wx:if="{{product.daysDiscount}}">连续预约2~4天, 打 {{product.daysDiscount}} 折</view>
+          <view wx:if="{{product.weekDiscount}}">连续预约5~9天, 打 {{product.weekDiscount}} 折</view>
+          <view wx:if="{{product.monthDiscount}}">连续预约10~30天, 打 {{product.monthDiscount}} 折</view>
+          <view wx:if="{{product.seasonDiscount}}">连续预约30天以上, 打 {{product.seasonDiscount}} 折</view>
+        </view>
+      </van-cell>
+      <van-cell title="预约人数" use-label-slot>
+        <van-stepper max="{{product.topLimit}}" integer="{{true}}" value="{{ customerNum }}"
+                     bind:change="fieldChange('customerNum', $event)"/>
+        <view slot="label">
+          <view>可预约{{product.topLimit}} 人</view>
+          <view>1人预约, {{product.singlePrice}} 元</view>
+          <view wx:if="{{product.doublePrice}}">2人预约, {{product.doublePrice}} 元每人</view>
+          <view wx:if="{{product.treblePrice}}">3~5人预约, {{product.treblePrice}} 元每人</view>
+          <view wx:if="{{product.sextuplePrice}}">6~9人预约, {{product.sextuplePrice}}" 元每人</view>
+          <view wx:if="{{product.decuplePrice}}">10人及以上预约, {{product.decuplePrice}} 元每人</view>
+        </view>
+      </van-cell>
+      <van-cell title="预约房间数" use-label-slot wx:if="product.roomNum">
+        <van-stepper min="0" max="{{product.roomNum}}" integer="{{true}}" value="{{ roomNum }}"
+                     bind:change="fieldChange('roomNum', $event)"/>
+        <view slot="label">
+          <view>还剩 {{product.roomNum}} 间</view>
+          <view>每间 {{product.roomPrice}} 元每晚</view>
+        </view>
+      </van-cell>
+      <van-cell title="预约床位数" use-label-slot wx:if="product.bedNum">
+        <van-stepper min="0" max="{{product.bedNum}}" integer="{{true}}" value="{{ bedNum }}"
+                     bind:change="fieldChange('bedNum', $event)"/>
+        <view slot="label">
+          <view>还剩 {{product.bedNum}} 个床位</view>
+          <view>每个床位 {{product.bedPrice}} 元每晚</view>
+        </view>
+      </van-cell>
+      <van-cell title="联系电话">
+        <view>
+          <text class="mobile" wx:if="{{customerInfo.mobile}}">{{customerInfo.mobile}}</text>
+          <van-button size="mini" open-type="getPhoneNumber" bind:getphonenumber="getMobileFromWx">
+            {{customerInfo.mobile ? "重新获取": "点击获取"}}
+          </van-button>
+        </view>
+      </van-cell>
+    </van-cell-group>
+    <van-submit-bar price="{{ sum }}" button-text="提交订单" bind:submit="subscribe"/>
+  </view>
+  <van-popup position="bottom" show="{{ showStartDate }}" bind:close="popupClose">
+    <van-datetime-picker type="date" value="{{ endDateStamp }}" min-date="{{ minDate }}" max-date="{{maxDate}}"
+                         bind:confirm="startDateConfirm" bind:cancel="dateCancel"/>
+  </van-popup>
+  <van-notify id="van-notify"/>
+  <van-toast id="van-toast"/>
+</template>
+
+<script>
+    import {createPage} from '@mpxjs/core'
+    import store from '../components/store'
+    import Moment from 'moment'
+    import Notify from 'vant-weapp/dist/notify/notify'
+    import Toast from 'vant-weapp/dist/toast/toast'
+
+    let app = getApp();
+    createPage({
+        data: {
+            productId: '',
+            product: {},
+            merchant: {},
+            startDate: '',
+            showStartDate: false,
+            days: 1,
+            customerNum: 1,
+            roomNum: 0,
+            bedNum: 0
+        },
+        onLoad(options) {
+            wx.showShareMenu();
+            wx.setNavigationBarTitle({
+                title: '预约'
+            });
+            this.productId = options.productId;
+            this.fetchProduct();
+        },
+        computed: {
+            endDateStamp() {
+                return Moment(this.startDate).valueOf();
+            },
+            minDate() {
+                let minDate = Moment();
+                if (this.product.startDate && minDate.isBefore(this.product.startDate)) {
+                    minDate = Moment(this.product.startDate);
+                }
+                return minDate.valueOf();
+            },
+            maxDate() {
+                return this.product.endDate ? Moment(this.product.endDate).valueOf() : "";
+            },
+            leftDays() {
+                let leftDays = 1;
+                if (this.product.endDate) {
+                    leftDays = Moment(this.product.endDate).diff(Moment().startOf('day'), 'days') + 1;
+                    if(this.startDate){
+                        leftDays = Moment(this.product.endDate).diff(Moment(this.startDate), 'days') + 1;
+                    }
+                }
+                return leftDays;
+            },
+            customerInfo() {
+                return store.state.customerInfo;
+            },
+            sum() {
+                let price = this.product.singlePrice;
+                if (this.product.decuplePrice && this.customerNum >= 10) {
+                    price = this.product.decuplePrice;
+                } else if (this.product.sextuplePrice && this.customerNum >= 6) {
+                    price = this.product.sextuplePrice;
+                } else if (this.product.treblePrice && this.customerNum >= 3) {
+                    price = this.product.treblePrice;
+                } else if (this.product.doublePrice && this.customerNum >= 2) {
+                    price = this.product.doublePrice;
+                }
+                let total = price * this.customerNum;
+                let roomMoney = this.product.roomPrice * this.roomNum;
+                let bedMoney = this.product.bedPrice * this.bedNum;
+                total = total + roomMoney + bedMoney;
+                let discount = 10;
+                if (this.product.seasonDiscount && this.days > 30) {
+                    discount = this.product.seasonDiscount;
+                } else if (this.product.monthDiscount && this.days >= 10) {
+                    discount = this.product.monthDiscount;
+                } else if (this.product.weekDiscount && this.days >= 5) {
+                    discount = this.product.weekDiscount;
+                } else if (this.product.daysDiscount && this.days >= 2) {
+                    discount = this.product.daysDiscount;
+                }
+                total = total * this.days * discount / 10 * 100;  // submit-bar 组件的单位是分
+                return total;
+            }
+        },
+        fetchProduct() {
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/product/${this.productId}`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {},
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        let product = res.data;
+                        product.tags = product.tags.split(',');
+                        this.product = product;
+                        this.fetchMerchant();
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        fetchMerchant() {
+            wx.request({
+                method: 'GET',
+                url: `${app.globalData.basePath}/weapp/merchant/${this.product.merchantId}`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.merchant = res.data;
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        popupClose() {
+            this.showStartDate = false;
+        },
+        startDateClick() {
+            this.showStartDate = true;
+        },
+        dateCancel() {
+            this.showStartDate = false;
+        },
+        startDateConfirm(event) {
+            this.showStartDate = false;
+            this.startDate = Moment(event.detail).format("YYYY-MM-DD");
+            this.days = 1;
+        },
+        fieldChange(field, event) {
+            this[field] = event.detail;
+        },
+        getMobileFromWx(e) {
+            console.log(e.detail.errMsg);
+            if (e.detail.iv) {
+                this.getMobileFromServer(e.detail.iv, e.detail.encryptedData);
+            }
+        },
+        getMobileFromServer(iv, encryptedData) {
+            wx.request({
+                method: 'PUT',
+                url: `${app.globalData.basePath}/weapp/customer/mobile`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    iv, encryptedData
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        store.state.customerInfo.mobile = this.data;
+                        store.state.customerInfo = Object.assign({}, store.state.customerInfo)
+                        store.commit("change");
+                        Toast.success('操作成功');
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        validate() {
+            let promise = new Promise((resolve, reject) => {
+                if (!this.startDate) {
+                    reject('请选择预约日期');
+                    return;
+                }
+                if (!/^[0-9]{1,3}$/.test(this.days)) {
+                    reject('预约天数 必须为整数');
+                    return;
+                }
+                if (!/^[0-9]{1,3}$/.test(this.customerNum)) {
+                    reject('预约天数 必须为整数');
+                    return;
+                }
+                if (!/^[0-9]{1,3}$/.test(this.roomNum)) {
+                    reject('房间数 必须为整数');
+                    return;
+                }
+                if (!/^[0-9]{1,3}$/.test(this.bedNum)) {
+                    reject('床位数 必须为整数');
+                    return;
+                }
+                if (!this.customerInfo.mobile) {
+                    reject('请点击获取您绑定的手机号');
+                    return;
+                }
+                resolve();
+            });
+            return promise;
+        },
+        subscribe() {
+            this.validate().then(() => {
+                this.submit();
+            }).catch((res) => {
+                Notify(res);
+            });
+        },
+        submit() {
+            Toast.loading({
+                message: "正在提交",
+                forbidClick: true,
+                duration: 0
+            });
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/order`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    productId: this.product.id,
+                    startDate: this.startDate,
+                    days: this.days,
+                    customerNum: this.customerNum,
+                    roomNum: this.roomNum,
+                    bedNum: this.bedNum
+                },
+                success: (res) => {
+                    Toast.clear();
+                    res = res.data;
+                    if (res.code == 0) {
+                        Toast.success({
+                            message: '预约成功',
+                            duration: 1000,
+                            forbidClick: true,
+                            onClose() {
+                                wx.switchTab({
+                                    url: '/order/myOrder'
+                                })
+                            }
+                        });
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                },
+                fail(res) {
+                    Toast.clear();
+                }
+            });
+        }
+    })
+</script>
+
+<style lang="less">
+  .subscribe {
+    padding-bottom: 50px;
+  }
+</style>

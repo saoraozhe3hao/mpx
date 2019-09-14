@@ -13,53 +13,87 @@
 
 <template>
   <view>
-    <van-card tag="打野，捕捉" price="1000" desc="干塘体验一日游" title="野食小子" bindtap="productDetail"
-              thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
+    <van-card tag="{{order.product.tags}}" title="{{order.merchant.nickName}}" desc="{{order.product.title}}"
+              currency=" " price="{{productStatusMap[order.product.status]}}" bindtap="productDetail"
+              thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+order.product.coverPhoto}}">
       <view slot="bottom">
-        <van-rate value="{{ 3.5 }}" readonly allow-half="true"/>
+        <van-rate value="{{ order.product.rate }}" readonly allow-half="true"/>
       </view>
       <view slot="footer">
-        <text class="text">陕西省西安市临潼区</text>
+        <text class="text">{{order.product.address}}</text>
       </view>
     </van-card>
     <van-cell-group title="订单信息">
-      <van-panel title="订单确认二维码" desc="1111111111111" status=" ">
-        <view class="qr"><image mode="widthFix" src="https://res.wx.qq.com/wxdoc/dist/assets/img/11.12bd51cf.png"></image></view>
+      <van-panel title="订单确认码" desc="{{order.code}}" status="该验证码只在预约期间有效">
+        <canvas class="qr" canvas-id="qr-code"/>
       </van-panel>
-      <van-cell title="订单号" value="1111111111111" />
-      <van-cell title="付款时间" value="2019年12月1日" />
-      <van-cell title="预约时间" value="2020年1月2日" />
-      <van-cell title="人数" value="3人" />
-      <van-cell title="房间数" value="2间" />
-      <van-cell title="床位数" value="0个" />
-      <van-cell title="订单总价" value="500" />
+      <van-cell title="订单号" value="{{id}}"/>
+      <van-cell title="付款时间" value="{{order.startDate}}"/>
+      <van-cell title="预约时间" value="{{order.lastDate}}"/>
+      <van-cell title="人数" value="{{order.customerNum + ' 人'}}"/>
+      <van-cell title="房间数" wx:if="{{order.roomNum}}" value="{{order.roomNum + ' 间'}}"/>
+      <van-cell title="床位数" wx:if="{{order.bedNum}}" value="{{order.bedNum + ' 个'}}"/>
+      <van-cell title="订单总价" value="{{order.total + ' 元'}}"/>
     </van-cell-group>
   </view>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
+    import QR from '../components/qrcode.js'
 
+    let app = getApp();
     createPage({
         data: {
-            productId: ''
+            id: '',
+            order: {},
+            productStatusMap: {
+                ordering: '预约中',
+                underShelf: '已下架'
+            }
         },
         onLoad(options) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '订单详情'
-            })
+            });
+            this.id = options.id;
+            this.fetchDetail();
+        },
+        fetchDetail() {
+            wx.request({
+                method: 'GET',
+                url: `${app.globalData.basePath}/weapp/order/${this.id}`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.order = res.data;
+                        this.qr();
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        qr(){
+            QR.api.draw(this.order.code, 'qr-code', 300, 300);
         },
         productDetail() {
             wx.navigateTo({
-                url: `/productDetail?id=${this.productId}`
+                url: `/productDetail?id=${this.order.productId}`
             })
         }
     })
 </script>
 
 <style lang="less" scoped>
-  .qr{
-    text-align: center;
+  .qr {
+    margin: 0 auto;
+    width: 300px;
+    height: 300px;
+    background: #f1f1f1;
   }
 </style>

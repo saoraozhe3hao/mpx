@@ -87,19 +87,24 @@
             })
         },
         updateRealName() {
-            let data = {
-                realName: this.realName,
-                bankNum: this.bankNum,
-                openBank: this.openBank
-            };
+            Toast.loading({
+                message: "正在提交",
+                forbidClick: true,
+                duration: 0
+            });
             wx.request({
                 method: 'PUT',
                 url: `${app.globalData.basePath}/weapp/merchant/realName`,
                 header: {
                     'Cookie': wx.getStorageSync("sessionId")
                 },
-                data: data,
+                data: {
+                    realName: this.realName,
+                    bankNum: this.bankNum,
+                    openBank: this.openBank
+                },
                 success: (res) => {
+                    Toast.clear();
                     res = res.data;
                     if (res.code == 0) {
                         Object.assign(store.state.merchantInfo, data);
@@ -115,6 +120,9 @@
                     } else if (res.code == 401) {
                         app.loginWx();
                     }
+                },
+                fail(res) {
+                    Toast.clear();
                 }
             });
         }
