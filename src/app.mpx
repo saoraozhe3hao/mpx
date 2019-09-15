@@ -143,6 +143,80 @@
                     store.commit("change");
                 }
             })
+        },
+        userInfoAuth() {
+            wx.getSetting({
+                success: (res) => {
+                    // 已授权
+                    if (res.authSetting['scope.userInfo']) {
+                        wx.getUserInfo({
+                            success: (res) => {
+                                this.getUserInfo({detail: res});
+                            }
+                        })
+                    }
+                }
+            })
+        },
+        getUserInfo(res) {
+            console.log(res);
+            store.state.userInfo = res.detail.userInfo;
+            store.commit('change');
+            this.initCustomer();
+        },
+        initCustomer() {
+            let customerInfo = store.state.customerInfo;
+            let userInfo = store.state.userInfo;
+            if(customerInfo.avatar == userInfo.avatarUrl && customerInfo.nickname == userInfo.nickName){
+                return;
+            }
+            wx.request({
+                method: 'PUT',
+                url: `${this.globalData.basePath}/weapp/customer/init?nickName=${userInfo.nickName}`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: userInfo.avatarUrl,
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        store.state.customerInfo.avatar = store.state.userInfo.avatarUrl;
+                        store.state.customerInfo.nickname = store.state.userInfo.nickName;
+                        store.state.customerInfo = Object.assign({}, store.state.customerInfo)
+                        store.commit("change");
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        getMobileFromWx(e) {
+            console.log(e.detail.errMsg);
+            if (e.detail.iv) {
+                this.getMobileFromServer(e.detail.iv, e.detail.encryptedData);
+            }
+        },
+        getMobileFromServer(iv, encryptedData) {
+            wx.request({
+                method: 'PUT',
+                url: `${this.globalData.basePath}/weapp/customer/mobile`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    iv, encryptedData
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        store.state.customerInfo.mobile = this.data;
+                        store.state.customerInfo = Object.assign({}, store.state.customerInfo)
+                        store.commit("change");
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
         }
     })
 </script>

@@ -231,32 +231,7 @@
         },
         getMobileFromWx(e) {
             console.log(e.detail.errMsg);
-            if (e.detail.iv) {
-                this.getMobileFromServer(e.detail.iv, e.detail.encryptedData);
-            }
-        },
-        getMobileFromServer(iv, encryptedData) {
-            wx.request({
-                method: 'PUT',
-                url: `${app.globalData.basePath}/weapp/customer/mobile`,
-                header: {
-                    'Cookie': wx.getStorageSync("sessionId")
-                },
-                data: {
-                    iv, encryptedData
-                },
-                success: (res) => {
-                    res = res.data;
-                    if (res.code == 0) {
-                        store.state.customerInfo.mobile = this.data;
-                        store.state.customerInfo = Object.assign({}, store.state.customerInfo)
-                        store.commit("change");
-                        Toast.success('操作成功');
-                    } else if (res.code == 401) {
-                        app.loginWx();
-                    }
-                }
-            });
+            app.getMobileFromWx(e);
         },
         validate() {
             let promise = new Promise((resolve, reject) => {

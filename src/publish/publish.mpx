@@ -125,6 +125,14 @@
                    bindselect="chooseImage('stayOverImgs', $event)"
                    binddelete="removeImage('stayOverImgs', $event)"></mp-uploader>
     </mp-cell>
+    <van-cell title="联系电话">
+      <view>
+        <text class="mobile" wx:if="{{customerInfo.mobile}}">{{customerInfo.mobile}}</text>
+        <van-button size="mini" open-type="getPhoneNumber" bind:getphonenumber="getMobileFromWx">
+          {{customerInfo.mobile ? "重新获取": "点击获取"}}
+        </van-button>
+      </view>
+    </van-cell>
     <van-button type="default" custom-class="submit-btn" bind:click="submit" size="large">提交</van-button>
   </view>
   <van-popup position="bottom" show="{{ showStartDate }}">
@@ -141,6 +149,7 @@
 
 <script>
     import {createPage} from '@mpxjs/core'
+    import store from '../components/store'
     import Moment from 'moment'
     import Notify from 'vant-weapp/dist/notify/notify'
     import Toast from 'vant-weapp/dist/toast/toast'
@@ -198,6 +207,9 @@
             },
             friendlyEndDate() {
                 return Moment(this.endDate).format("YYYY-MM-DD");
+            },
+            customerInfo() {
+                return store.state.customerInfo;
             }
         },
         inputBlur(field, event) {
@@ -365,6 +377,10 @@
                     reject('请添加住宿图片');
                     return;
                 }
+                if (!this.customerInfo.mobile) {
+                    reject('请点击获取您绑定的手机号');
+                    return;
+                }
                 resolve();
             });
             return promise;
@@ -452,6 +468,10 @@
                 Notify("图片上传失败");
             })
         },
+        getMobileFromWx(e) {
+            console.log(e.detail.errMsg);
+            app.getMobileFromWx(e);
+        },
         submit() {
             this.validate().then(() => {
                 Toast.loading({
@@ -536,6 +556,7 @@
     })
 </script>
 
+<style src="../../node_modules/weui-miniprogram/miniprogram_dist/weui-wxss/dist/style/weui.wxss"></style>
 <style lang="less">
   .publish {
     position: relative;

@@ -11,7 +11,7 @@
 </script>
 
 <template>
-  <view>
+  <view class="my-order">
     <van-tabs active="{{ activeTab }}" bind:change="tabChange">
       <van-tab title="全部"></van-tab>
       <van-tab title="待付款"></van-tab>
@@ -20,15 +20,22 @@
       <van-tab title="退款中"></van-tab>
     </van-tabs>
     <van-card wx:for="{{orders}}" wx:key="index" lazy-load="true" custom-class="card-item"
-              tag="{{statusMap[item.status]}}" title="{{ item.merchant.nickName }}" desc="{{item.product.title}}" price="{{item.total}}"
-              bindtap="orderDetail(item)"
+              tag="{{statusMap[item.status]}}" title="{{ item.merchant.nickName }}" desc="{{item.product.title}}"
+              price="{{item.total}}" bindtap="orderDetail(item)"
               thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+item.product.coverPhoto}}">
       <view slot="bottom">
         <view>预约时间：{{item.startDate}} 到 {{item.lastDate}}</view>
       </view>
       <view slot="footer">
-        <van-button size="mini" catch:tap="evaluate" custom-class="card-btn">评价</van-button>  <!-- 使用小程序原生事件才能阻止冒泡 -->
-        <van-button size="mini" catch:tap="refund" custom-class="card-btn">申请退款</van-button>
+        <!-- 使用小程序原生事件才能阻止冒泡 -->
+        <van-button size="mini" custom-class="card-btn" catch:tap="evaluate(item)"
+                    wx:if="{{item.status == 'used' || item.status == 'overdue'}}">
+          评价
+        </van-button>
+        <van-button size="mini" catch:tap="refund(item)" custom-class="card-btn"
+                    wx:if="{{item.status == 'unused' || item.status == 'used' || item.status == 'overdue' || item.status == 'evaluated'}}">
+          申请退款
+        </van-button>
       </view>
     </van-card>
     <view class="empty-order" wx:if="{{!orders.length && !requesting}}"></view>
@@ -48,15 +55,16 @@
                 'pending': '待付款',
                 'unused': '待使用',
                 'used': '待评价',
+                'overdue': '待评价',
                 'evaluated': '已评价',
                 'refunding': '退款中',
                 'refunded': '已退款'
             },
             tabToStatus: {
-                1: 'pending',
-                2: 'unused',
-                3: 'used',
-                4: 'refunding'
+                1: ['pending'],
+                2: ['unused'],
+                3: ['used', 'overdue'],
+                4: ['refunding']
             },
             orders: [],
             pageNum: 1,
@@ -108,7 +116,7 @@
                 data: {
                     pageNum: this.pageNum,
                     pageSize: 10,
-                    status: this.tabToStatus[this.activeTab] || null
+                    statusList: this.tabToStatus[this.activeTab] || null
                 },
                 success: (res) => {
                     res = res.data;
@@ -131,19 +139,21 @@
                 url: `/orderDetail?id=${item.id}`
             })
         },
-        refund(event) {
+        refund(item) {
             wx.navigateTo({
-                url: '/refund' + '?orderId=' + event.currentTarget.id
+                url: `/refund?orderId=${item.id}`
             })
         },
-        evaluate(event) {
+        evaluate(item) {
             wx.navigateTo({
-                url: '/evaluate' + '?orderId=' + event.currentTarget.id
+                url: `/evaluate?orderId=${item.id}&nickName=${item.merchant.nickName}&title=${item.product.title}`
             })
         }
     })
 </script>
 
 <style lang="less">
-
+  .my-order {
+    padding-bottom: 50px;
+  }
 </style>

@@ -25,8 +25,8 @@
   <view class="product-detail">
     <van-cell-group title="趣导">
       <van-card currency=" " title="{{merchant.nickName}}" desc="{{product.title}}"
-                price="{{'距您 '+product.distance+' 公里'}}"
-                bindtap="merchantDetail" thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+merchant.avatar}}">
+                price="{{'距您 '+product.distance+' 公里'}}" bindtap="merchantDetail"
+                thumb="{{avatar}}">
         <view slot="bottom">
           <van-rate value="{{ merchant.rate }}" readonly allow-half="true"/>
         </view>
@@ -100,7 +100,8 @@
     <van-goods-action wx:if="{{!isMerchant}}" custom-class="goods-action">
       <van-goods-action-icon icon="share" text="分享" open-type="share"/>
       <van-goods-action-icon icon="like" text="收藏" bind:click="collect"/>
-      <van-goods-action-button text="立即预约" bind:click="subscribe"/>
+      <van-goods-action-button text="立即预约" bind:click="subscribe" wx:if="{{customerInfo.nickname}}"/>
+      <van-goods-action-button text="立即预约" open-type="getUserInfo" bind:getuserinfo="getUserInfo" wx:else/>
     </van-goods-action>
     <van-goods-action wx:if="{{isMerchant}}" custom-class="goods-action">
       <van-goods-action-icon icon="calender-o" text="延期" bind:click="popupShow"
@@ -154,6 +155,14 @@
             },
             isMerchant() {
                 return this.merchant.customerId == store.state.customerInfo.id
+            },
+            customerInfo() {
+                return store.state.customerInfo;
+            },
+            avatar(){
+                let avatar = this.merchant.avatar || {};
+                avatar = avatar.startsWith('http') ? avatar : `http://yqxq.oss-cn-hangzhou.aliyuncs.com/${avatar}`;
+                return avatar;
             }
         },
         fetchDetail() {
@@ -239,7 +248,7 @@
             })
         },
         collect() {
-            if(this.isCollected){
+            if (this.isCollected) {
                 Toast.success('已收藏');
                 return;
             }
@@ -346,12 +355,17 @@
         tabChange(event) {
             if (event.detail.index == 1) {
                 wx.navigateTo({
-                    url: '/valuation' + '?productId=' + 0
+                    url: `/valuation?productId=${this.product.id}&target=${this.merchant.nickName}-${this.product.title}`
                 })
             }
             this.activeTab = event.detail.index;
         },
-        subscribe(event) {
+        getUserInfo(res) {
+            console.log(JSON.stringify(res));
+            app.getUserInfo(res);
+            this.subscribe();
+        },
+        subscribe() {
             wx.navigateTo({
                 url: `/subscribe?productId=${this.product.id}`
             })

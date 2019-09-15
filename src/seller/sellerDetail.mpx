@@ -18,7 +18,7 @@
   <view>
     <van-card currency=" " title="{{merchant.nickName}}" desc="{{product.address}}"
               price="{{'距您 '+product.distance+' 公里'}}"
-              thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+merchant.avatar}}">
+              thumb="{{avatar}}">
       <view slot="bottom">
         <van-rate value="{{ merchant.rate }}" readonly allow-half="true"/>
       </view>
@@ -48,9 +48,8 @@
 
     <view wx:if="{{activeTab == 0}}">
       <van-card tag="{{product.tags}}" title="{{product.nickName}}" desc="{{product.title}}"
-                price="{{product.singlePrice}}" bindtap="productDetail"
-                thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/' + product.coverPhoto}}"
-                wx:if="{{product.id}}">
+                price="{{product.singlePrice}}" bindtap="productDetail" wx:if="{{product.id}}"
+                thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/' + product.coverPhoto}}">
         <view slot="bottom">
           <van-rate value="{{ product.rate }}" readonly allow-half="true"/>
         </view>
@@ -97,6 +96,11 @@
             selfMedia() {
                 let selfMedia = this.merchant.selfMedia || "{}";
                 return JSON.parse(selfMedia);
+            },
+            avatar(){
+                let avatar = this.merchant.avatar || {};
+                avatar = avatar.startsWith('http') ? avatar : `http://yqxq.oss-cn-hangzhou.aliyuncs.com/${avatar}`;
+                return avatar;
             }
         },
         fetchDetail() {
@@ -159,7 +163,7 @@
         tabChange(event) {
             if (event.detail.index == 1) {
                 wx.navigateTo({
-                    url: '/valuation' + '?sellerId=' + 0
+                    url: `/valuation?merchantId=${this.merchant.id}&target=${this.merchant.nickName}`
                 })
             }
             this.activeTab = event.detail.index;

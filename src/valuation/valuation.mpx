@@ -5,62 +5,167 @@
       "van-card": "vant-weapp/dist/card/index",
       "van-cell-group": "vant-weapp/dist/cell-group/index",
       "van-field": "vant-weapp/dist/field/index",
-      "van-popup": "vant-weapp/dist/popup/index"
+      "van-rate": "vant-weapp/dist/rate/index",
+      "van-popup": "vant-weapp/dist/popup/index",
+      "mp-loading": "weui-miniprogram/miniprogram_dist/loading/loading",
+      "van-toast": "vant-weapp/dist/toast/index"
     }
   }
 </script>
 
 <template>
-  <van-cell-group title="小六打野的用户评价">
+  <van-cell-group title="{{target + ' 的用户评价'}}">
     <van-card wx:for="{{valuations}}" wx:key="index" lazy-load="true" currency=" " custom-class="card-item"
-              tag="这位网友" title="我觉得还行，勉强合格" desc="2019年12月1日" price="3分"
-              thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
+              tag="{{item.customerName}}" title="{{item.detail || '没有具体评论'}}" desc="{{item.commentTime}}"
+              price="{{item.response ? '趣导回应：'+ item.response : ''}}"
+              thumb="{{item.avatar}}">
       <view slot="bottom">
-        趣导回应：xxxxxxxxxxxxxxxxxxxxxxxx
+        <van-rate value="{{ item.rate }}" readonly allow-half="true"/>
       </view>
       <view slot="footer">
-        <van-button size="mini" bind:click="reply(item.id)">回应</van-button>
+        <!-- item.merchantId 实际设置的是merchant对应的customerId -->
+        <van-button size="mini" bind:click="reply(index)" wx:if="{{!item.response && item.merchantId == customerInfo.id}}">回应</van-button>
       </view>
     </van-card>
   </van-cell-group>
   <van-popup position="bottom" show="{{ showPopup }}" bind:close="popupClose">
     <van-field use-button-slot label="回应" type="textarea" placeholder="请输入" autosize
-               value="{{ response }}" bind:blur="replyBlur">
+               value="{{ response }}" bind:change="replyChange">
       <van-button slot="button" size="small" bind:click="submit">提交</van-button>
     </van-field>
   </van-popup>
+  <view class="empty-data" wx:if="{{!valuations.length && !requesting}}"></view>
+  <mp-loading type="circle" show="{{hasNext || requesting}}" class="loading" wx:ref="loading"></mp-loading>
+  <van-toast id="van-toast"/>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
+    import store from '../components/store'
+    import Toast from 'vant-weapp/dist/toast/toast'
 
+    let app = getApp();
     createPage({
         data: {
-            valuations: [
-                {},
-                {}
-            ],
+            productId: '',
+            merchantId: '',
+            target: '',
+            currentIndex: '',
+            valuations: [],
+            pageNum: 1,
+            hasNext: false,
+            requesting: false,  // 是否正在请求
             showPopup: false,
             response: ''
         },
-        onLoad (query) {
+        onLoad(query) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '用户评价'
             });
+            this.productId = query.productId;
+            this.merchantId = query.merchantId;
+            this.target = query.target;
+
+            // 这里只是定义查询规则，后面的 exec() 才真正查询
+            this.query = this.createSelectorQuery();
+            this.query.select('.loading').boundingClientRect();
+
+            this.fetchValuation();
         },
-        reply(id){
+        onPageScroll() {
+            // 正在查询元素，正在请求数据，没有更多数据
+            if (this.requesting || !this.hasNext) {
+                return;
+            }
+            this.query.exec((res) => {
+                if (!this.requesting && res[0].top < store.state.systemInfo.windowHeight - 50) {
+                    this.pageNum++;
+                    this.fetchValuation();
+                }
+            })
+        },
+        computed: {
+            customerInfo() {
+                return store.state.customerInfo;
+            }
+        },
+        fetchValuation() {
+            this.requesting = true;
+            let url = `${app.globalData.basePath}/weapp/comment/`;
+            url = this.merchantId ? url + `merchant/${this.merchantId}` : url + `product/${this.productId}`;
+            wx.request({
+                method: 'POST',
+                url: url,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    pageNum: this.pageNum,
+                    pageSize: 10
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.valuations = this.valuations.concat(res.data.list);
+                        this.valuations.forEach((item)=>{
+                            item.avatar = item.avatar.startsWith('http') ? item.avatar : 'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+item.avatar;
+                        });
+                        this.hasNext = res.data.hasNextPage;
+                        this.requesting = false;
+                        this.onPageScroll();  // 怕没滚动时，加载图标就出现了，主动触发一次滚动响应
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                },
+                complete: () => {
+                    this.requesting = false;
+                }
+            });
+        },
+        reply(index) {
             this.showPopup = true;
+            this.currentIndex = index;
             this.response = '';
         },
-        replyBlur(event) {
-            this.response = event.detail.value;
+        replyChange(event) {
+            this.response = event.detail;
         },
-        popupClose(){
+        popupClose() {
             this.showPopup = false;
         },
-        submit(event) {
-            this.showPopup = false;
+        submit() {
+            if(!this.response){
+                return;
+            }
+            Toast.loading({
+                forbidClick: true,
+                duration: 0
+            });
+            wx.request({
+                method: 'PUT',
+                url: `${app.globalData.basePath}/weapp/comment/${this.valuations[this.currentIndex].id}/response`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: this.response,
+                success: (res) => {
+                    Toast.clear();
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.showPopup = false;
+                        this.valuations[this.currentIndex].response = this.response;
+                        this.valuations = this.valuations.concat([]);
+                        this.response = '';
+                        Toast.success('回应成功');
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                },
+                fail(res) {
+                    Toast.clear();
+                }
+            });
         }
     })
 </script>

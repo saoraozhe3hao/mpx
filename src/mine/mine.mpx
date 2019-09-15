@@ -55,7 +55,7 @@
         <van-cell title="银行卡号" value="{{merchantInfo.bankNum ? '已提交':'未提交'}}" is-link url="/bankCard"/>
       </van-cell-group>
     </view>
-    <van-button custom-class="submit-btn" wx:if="{{!userInfo.nickName}}" bind:getuserinfo="getUserInfo">点击获取用户信息
+    <van-button custom-class="submit-btn" wx:if="{{!userInfo.nickName}}" open-type="getUserInfo" bind:getuserinfo="getUserInfo">点击获取用户信息
     </van-button>
   </view>
   <van-toast id="van-toast"/>
@@ -77,7 +77,7 @@
             wx.setNavigationBarTitle({
                 title: '我的'
             })
-            this.userInfoAuth();
+            app.userInfoAuth();
             this.fetchMerchant();
         },
         onShow() {
@@ -96,51 +96,16 @@
                 return store.state.merchantInfo;
             },
             avatar() {
-                let avatarUrl = this.customerInfo.avatar ? "http://yqxq.oss-cn-hangzhou.aliyuncs.com/" + this.customerInfo.avatar : this.userInfo.avatarUrl;
+                let avatarUrl = this.customerInfo.avatar || this.userInfo.avatarUrl;
+                avatarUrl = avatarUrl.startsWith('http') ? avatarUrl : `http://yqxq.oss-cn-hangzhou.aliyuncs.com/${avatarUrl}?${this.avatarVersion}`;
                 return {
-                    backgroundImage: `url('${avatarUrl}?${this.avatarVersion}')`
+                    backgroundImage: `url('${avatarUrl}')`
                 }
             }
-        },
-        userInfoAuth() {
-            wx.getSetting({
-                success: (res) => {
-                    // 已授权
-                    if (res.authSetting['scope.userInfo']) {
-                        wx.getUserInfo({
-                            success: (res) => {
-                                this.getUserInfo({detail: res});
-                            }
-                        })
-                    }
-                }
-            })
         },
         getUserInfo(res) {
             console.log(JSON.stringify(res));
-            store.state.userInfo = res.detail.userInfo;
-            store.commit('change');
-            this.initAvatar();
-        },
-        initAvatar() {
-            if(this.customerInfo.avatar){
-                return;
-            }
-            wx.request({
-                method: 'PUT',
-                url: `${app.globalData.basePath}/weapp/customer/avatar`,
-                header: {
-                    'Cookie': wx.getStorageSync("sessionId")
-                },
-                data: this.userInfo.avatarUrl,
-                success: (res) => {
-                    res = res.data;
-                    if (res.code == 0) {
-                    } else if (res.code == 401) {
-                        app.loginWx();
-                    }
-                }
-            });
+            app.getUserInfo(res);
         },
         fetchMerchant() {
             wx.request({

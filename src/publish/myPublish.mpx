@@ -20,8 +20,8 @@
       </van-card>
       <van-card wx:for="{{products}}" wx:key="index" wx:if="{{products.length}}" lazy-load="true" currency=" "
                 custom-class="card-item" tag="{{item.tags}}" title="{{ item.nickName }}" desc="{{ item.title }}"
-                price="{{statusMap[item.status]}}" thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+item.coverPhoto}}"
-                bindtap="productDetail(item)">
+                price="{{statusMap[item.status]}}" bindtap="productDetail(item)"
+                thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+item.coverPhoto}}">
         <view slot="bottom">
           <van-rate value="{{ item.rate }}" readonly allow-half="true"/>
         </view>
@@ -32,8 +32,9 @@
     </van-cell-group>
     <view class="empty-data" wx:if="{{!products.length && !requesting}}"></view>
     <mp-loading type="circle" show="{{hasNext || requesting}}" class="loading" wx:ref="loading"></mp-loading>
-    <van-button round icon="plus" bind:click="publish" class="plus-btn" wx:if="store.state.customerInfo.mobile"></van-button>
-    <van-button round icon="plus" open-type="getPhoneNumber" bind:getphonenumber="getMobileFromWx" class="plus-btn" wx:else></van-button>
+    <van-button round icon="plus" bind:click="publish" class="plus-btn" wx:if="{{customerInfo.nickname}}"></van-button>
+    <van-button round icon="plus" open-type="getUserInfo" bind:getuserinfo="getUserInfo" class="plus-btn"
+                wx:else></van-button>
   </view>
   <van-toast id="van-toast"/>
 </template>
@@ -41,7 +42,6 @@
 <script>
     import {createPage} from '@mpxjs/core'
     import store from '../components/store'
-    import Toast from 'vant-weapp/dist/toast/toast'
 
     let app = getApp();
     createPage({
@@ -50,7 +50,7 @@
             products: [],
             hasNext: false,
             requesting: false,  // 是否正在请求
-            statusMap:{
+            statusMap: {
                 pending: '待审核',
                 unapproved: '审核不通过',
                 ordering: '预约中',
@@ -124,43 +124,10 @@
                 url: `/productDetail?id=${item.id}`
             })
         },
-        getMobileFromWx(e) {
-            console.log(e.detail.errMsg);
-            if (e.detail.iv) {
-                this.getMobileFromServer(e.detail.iv, e.detail.encryptedData);
-            }
-        },
-        getMobileFromServer(iv, encryptedData) {
-            Toast.loading({
-                forbidClick: true,
-                duration: 0
-            });
-            wx.request({
-                method: 'PUT',
-                url: `${app.globalData.basePath}/weapp/customer/mobile`,
-                header: {
-                    'Cookie': wx.getStorageSync("sessionId")
-                },
-                data: {
-                    iv, encryptedData
-                },
-                success: (res) => {
-                    res = res.data;
-                    if (res.code == 0) {
-                        store.state.customerInfo.mobile = this.data;
-                        store.state.customerInfo = Object.assign({}, store.state.customerInfo)
-                        store.commit("change");
-                        wx.navigateTo({
-                            url: '/publish'
-                        })
-                    } else if (res.code == 401) {
-                        app.loginWx();
-                    }
-                },
-                complete(res) {
-                    Toast.clear();
-                }
-            });
+        getUserInfo(res) {
+            console.log(JSON.stringify(res));
+            app.getUserInfo(res);
+            this.publish();
         },
         publish() {
             wx.navigateTo({
@@ -171,9 +138,10 @@
 </script>
 
 <style lang="less" scoped>
-  .my-publish{
+  .my-publish {
     padding-bottom: 50px;
   }
+
   .plus-btn {
     position: fixed;
     width: 50px;

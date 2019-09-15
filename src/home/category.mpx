@@ -30,8 +30,9 @@
     </view>
     <van-cell-group title="{{category}}">
       <van-card wx:for="{{products}}" wx:key="index" wx:if="{{products.length}}" lazy-load="true"
-                custom-class="card-item" tag="{{item.tags}}" title="{{ item.merchantName }}" desc="{{ item.name }}"
-                price="{{item.singlePrice}}" thumb="{{item.coverPhoto}}" bindtap="productDetail(item)">
+                custom-class="card-item" tag="{{item.tags}}" title="{{ item.nickName }}" desc="{{ item.title }}"
+                price="{{item.singlePrice}}" bindtap="productDetail(item)"
+                thumb="{{'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+item.coverPhoto}}">
         <view slot="bottom">
           <van-rate value="{{ item.rate }}" readonly allow-half="true"/>
         </view>
@@ -82,7 +83,7 @@
             },
             area() {
                 let area = store.state.area.split('-');
-                return area[area.length-1];
+                return area[area.length - 1];
             }
         },
         watch: {

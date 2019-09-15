@@ -60,7 +60,7 @@
                 });
                 let paid = 0;
                 paidList.forEach((item)=>{
-                    paid += item.amount;
+                    paid = paid + item.amount;
                 });
                 return paid / 100;
             }

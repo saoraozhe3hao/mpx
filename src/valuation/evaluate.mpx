@@ -5,28 +5,36 @@
       "van-cell": "vant-weapp/dist/cell/index",
       "van-cell-group": "vant-weapp/dist/cell-group/index",
       "van-field": "vant-weapp/dist/field/index",
-      "van-button": "vant-weapp/dist/button/index"
+      "van-button": "vant-weapp/dist/button/index",
+      "van-toast": "vant-weapp/dist/toast/index"
     }
   }
 </script>
 
 <template>
   <view>
-    <van-cell-group title="对野食小子-干塘一日游的评价">
+    <van-cell-group title="{{'对 '+nickName+' - '+title+' 的评价'}}">
       <van-cell title="评分" label="{{rate}}分">
         <van-rate allow-half custom-class="rate" size="30" value="{{ rate }}" bind:change="rateChange"/>
       </van-cell>
-      <van-field label="评论" type="textarea" placeholder="请输入评论" autosize value="{{ comment }}"/>
+      <van-field label="评论" type="textarea" placeholder="请输入评论" autosize value="{{ comment }}"
+                 bind:change="inputChange"/>
     </van-cell-group>
     <van-button custom-class="submit-btn" bind:click="submit" size="large">提交</van-button>
   </view>
+  <van-toast id="van-toast"/>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
+    import Toast from 'vant-weapp/dist/toast/toast'
 
+    let app = getApp();
     createPage({
         data: {
+            orderId: '',
+            nickName: '',
+            title: '',
             rate: 5,
             comment: ''
         },
@@ -35,12 +43,52 @@
             wx.setNavigationBarTitle({
                 title: '评价'
             });
+            this.orderId = query.orderId;
+            this.nickName = query.nickName;
+            this.title = query.title;
+        },
+        inputChange(event) {
+            this.comment = event.detail;
         },
         rateChange(event) {
             this.rate = event.detail;
         },
-        submit(event) {
-
+        submit() {
+            Toast.loading({
+                forbidClick: true,
+                duration: 0
+            });
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/comment`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    rate: this.rate,
+                    detail: this.comment,
+                    orderId: this.orderId
+                },
+                success: (res) => {
+                    Toast.clear();
+                    res = res.data;
+                    if (res.code == 0) {
+                        Toast.success({
+                            message: '评论成功',
+                            duration: 1000,
+                            forbidClick: true,
+                            onClose() {
+                                wx.navigateBack();
+                            }
+                        });
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                },
+                fail(res) {
+                    Toast.clear();
+                }
+            });
         }
     })
 </script>
