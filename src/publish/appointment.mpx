@@ -9,7 +9,9 @@
       "van-cell": "vant-weapp/dist/cell/index",
       "van-card": "vant-weapp/dist/card/index",
       "van-button": "vant-weapp/dist/button/index",
-      "van-icon": "vant-weapp/dist/icon/index"
+      "van-notify": "vant-weapp/dist/notify/index",
+      "van-icon": "vant-weapp/dist/icon/index",
+      "mp-loading": "weui-miniprogram/miniprogram_dist/loading/loading"
     }
   }
 </script>
@@ -17,104 +19,334 @@
 <template>
   <view>
     <van-tabs active="{{ activeTab }}" bind:change="tabChange">
-      <van-tab title="按天"></van-tab>
-      <van-tab title="按月"></van-tab>
+      <van-tab title="下单统计"></van-tab>
+      <van-tab title="预约统计"></van-tab>
     </van-tabs>
-    <van-cell title="日期" is-link value="{{date}}" bind:click="dateClick" wx:if="{{activeTab == 0}}"/>
-    <van-cell title="月份" is-link value="{{month}}" bind:click="monthClick" wx:if="{{activeTab == 1}}"/>
-    <van-cell-group title="预约统计" border="{{false}}">
-      <van-cell title="预约人次" value="100人*次"/>
-      <van-cell title="预约人天" value="100人*天"/>
-      <van-cell title="预约房间数*天数" value="10间*天"/>
-      <van-cell title="预约床位数*天数" value="12个*天"/>
-      <van-cell title="订单数" value="100个"/>
-      <van-cell title="订单总额" value="10000元"/>
+    <van-cell title="开始日期" is-link value="{{friendlyStartDate}}" bind:click="popupShow('showStartDate')"/>
+    <van-cell title="结束日期" is-link value="{{friendlyEndDate}}" bind:click="popupShow('showEndDate')"/>
+    <van-cell-group title="下单统计" border="{{false}}" wx:if="{{activeTab == 0}}">
+      <van-cell title="下单数" value="{{summary.orderNum + ' 个订单'}}"/>
+      <van-cell title="下单总额" value="{{summary.orderAmount / 100 + ' 元'}}"/>
+      <van-cell title="人数*天数" value="{{summary.personDay + ' 人*天'}}"/>
+      <van-cell title="房间数*天数" value="{{summary.roomDay + ' 间*天'}}"/>
+      <van-cell title="床位数*天数" value="{{summary.bedDay + ' 床*天'}}"/>
+    </van-cell-group>
+    <van-cell-group title="预约统计" border="{{false}}" wx:if="{{activeTab == 1}}">
+      <van-cell title="涉及订单数" value="{{summary.orderNum + ' 个订单'}}"/>
+      <van-cell title="摊到这段时间的订单总额" value="{{summary.orderAmount / 100 + ' 元'}}"/>
+      <van-cell title="人数*天数" value="{{summary.personDay + ' 人*天'}}"/>
+      <van-cell title="房间数*天数" value="{{summary.roomDay + ' 间*天'}}"/>
+      <van-cell title="床位数*天数" value="{{summary.bedDay + ' 床*天'}}"/>
     </van-cell-group>
     <van-cell-group title="订单列表" border="{{false}}">
-      <van-card wx:for="{{orders}}" wx:key="index" custom-class="card-item" lazy-load="true" bindtap="orderDetail(item)"
-                tag="待使用" title="我就是我" price="1000" desc="2020年3月3日-2020年4月3日"
-                thumb="http://i0.hdslb.com/bfs/archive/7c46c8e44717f57388b91e1403c686ee62a2a768.jpg">
+      <van-card wx:for="{{computedOrders}}" wx:key="index" custom-class="card-item" lazy-load="true"
+                bindtap="orderDetail(item)"
+                tag="{{statusMap[item.status]}}" title="{{item.customer.nickname}}" desc="{{'下单时间: ' +item.orderTime}}"
+                price="{{item.total / 100}}"
+                thumb="{{item.customer.avatarUrl}}">
         <view slot="bottom">
-          6人，3房间，4床位
+          <view>{{item.during}}</view>
+          <view> {{item.customerNum}} 人，{{item.roomNum}} 房间，{{item.bedNum}} 床位</view>
         </view>
-        <view slot="footer" catch:tap="phoneCall">
-          <view class="card-footer-text">15202926290</view>
+        <view slot="footer" catch:tap="phoneCall(item)">
+          <view class="card-footer-text">{{item.customer.mobile}}</view>
           <van-icon class="card-footer-icon" name="phone" size="2em" color="#FDD03F"/>
         </view>
       </van-card>
     </van-cell-group>
+    <view class="empty-order" wx:if="{{!orders.length && !requesting}}"></view>
+    <mp-loading type="circle" show="{{hasNext || requesting}}" class="loading" wx:ref="loading"></mp-loading>
   </view>
-  <van-popup position="bottom" show="{{ showDate }}" bind:close="popupClose">
-    <van-datetime-picker type="date" value="{{ date }}" min-date="{{ minDate }}" bind:confirm="dateConfirm"/>
+  <van-popup position="bottom" show="{{ showStartDate }}" bind:close="popupClose">
+    <van-datetime-picker type="date" value="{{ startDate }}" bind:cancel="popupClose"
+                         bind:confirm="dateConfirm('startDate', $event)"/>
   </van-popup>
-  <van-popup position="bottom" show="{{ showMonth }}" bind:close="popupClose">
-    <van-datetime-picker type="year-month" value="{{ month }}" min-date="{{ minDate }}"
-                         bind:confirm="monthConfirm"/>
+  <van-popup position="bottom" show="{{ showEndDate }}" bind:close="popupClose">
+    <van-datetime-picker type="year-month" value="{{ endDate }}" bind:cancel="popupClose"
+                         bind:confirm="dateConfirm('endDate', $event)"/>
   </van-popup>
+  <van-notify id="van-notify"/>
 </template>
 
 <script>
     import {createPage} from '@mpxjs/core'
+    import store from '../components/store'
+    import Moment from 'moment'
+    import Notify from 'vant-weapp/dist/notify/notify'
 
+    let app = getApp();
+    let today = new Date().getTime();
     createPage({
         data: {
+            productId: '',
+            publishTime: '',
+            productStartDate: '',
+            productEndDate: '',
             activeTab: 0,
-            minDate: new Date().getTime(),
-            date: new Date().getTime(),
-            showDate: false,
-            month: new Date().getTime(),
-            showMonth: false,
-            orders: [
-                {},
-                {}
-            ]
+            showStartDate: false,
+            startDate: today,
+            showEndDate: false,
+            endDate: today,
+            summary: {},
+            pageNum: 1,
+            hasNext: false,
+            requesting: false,  // 是否正在请求
+            orders: [],
+            statusMap: {
+                'pending': '待付款',
+                'unused': '待使用',
+                'used': '待评价',
+                'overdue': '待评价',
+                'evaluated': '已评价',
+                'refunding': '退款中',
+                'refunded': '已退款'
+            }
         },
         onLoad(options) {
             wx.showShareMenu();
             wx.setNavigationBarTitle({
                 title: '预约情况'
             });
+            // 这里只是定义查询规则，后面的 exec() 才真正查询
+            this.query = this.createSelectorQuery();
+            this.query.select('.loading').boundingClientRect();
+
+            this.productId = options.productId;
+            this.publishTime = options.publishTime;
+            this.productStartDate = options.startDate;
+            this.productEndDate = options.endDate;
+            if (this.productId) {
+                this.initDate();
+            } else {
+                this.fetchMyProduct();
+            }
+        },
+        onPageScroll() {
+            // 正在查询元素，正在请求数据，没有更多数据
+            if (this.requesting || !this.hasNext) {
+                return;
+            }
+            this.query.exec((res) => {
+                if (!this.requesting && res[0].top < store.state.systemInfo.windowHeight) {
+                    this.pageNum++;
+                    this.fetchOrders();
+                }
+            })
+        },
+        computed: {
+            friendlyStartDate() {
+                return Moment(this.startDate).format("YYYY-MM-DD");
+            },
+            friendlyEndDate() {
+                return Moment(this.endDate).format("YYYY-MM-DD");
+            },
+            computedOrders() {
+                this.orders.forEach((item) => {
+                    item.during = item.startDate == item.lastDate ? item.startDate : item.startDate + ' 到 ' + item.lastDate;
+                    let avatar = item.customer.avatar || '';
+                    item.customer.avatarUrl = avatar.startsWith('http') ? avatar : `http://yqxq.oss-cn-hangzhou.aliyuncs.com/${avatar}`;
+                    return item;
+                });
+                return this.orders;
+            }
+        },
+        initDate(){
+            if(this.activeTab == 0){
+                this.startDate = Moment(this.publishTime).valueOf();
+                this.endDate = today;
+            }
+            else{
+                this.startDate = Moment(this.productStartDate).valueOf();
+                this.endDate = Moment(this.productEndDate).valueOf();
+            }
+            this.fetchAll();
         },
         tabChange(event) {
             this.activeTab = event.detail.index;
+            this.initDate();
+        },
+        popupShow(popupShow) {
+            this[popupShow] = true;
         },
         popupClose() {
-            this.showDate = false;
-            this.showMonth = false;
+            this.showStartDate = false;
+            this.showEndDate = false;
         },
-        dateClick() {
-            this.showDate = true;
+        dateConfirm(field, event) {
+            this[field] = event.detail;
+            this.popupClose();
+            this.fetchAll();
         },
-        dateConfirm(event) {
-            this.showDate = false;
-            this.date = event.detail;
+        // 不是从产品详情页面跳过来，没有productId信息，需要先查询
+        fetchMyProduct() {
+            wx.request({
+                method: 'GET',
+                url: `${app.globalData.basePath}/weapp/product/mine`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.productId = res.data.id;
+                        this.publishTime = res.data.publishTime;
+                        this.productStartDate = res.data.startDate;
+                        this.productEndDate = res.data.endDate;
+                        this.initDate();
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
         },
-        monthClick() {
-            this.showMonth = true;
+        fetchAll() {
+            if (this.startDate > this.endDate) {
+                Notify('结束日期不能早于开始日期');
+                return;
+            }
+            this.pageNum = 1;
+            this.orders = [];
+            this.fetchSummary();
+            this.fetchOrders();
         },
-        monthConfirm(event) {
-            this.showMonth = false;
-            this.month = event.detail;
+        fetchSummary() {
+            if (this.activeTab == 0) {
+                this.fetchBookSummary();
+            } else {
+                this.fetchPlanSummary();
+            }
         },
-        orderDetail (item) {
+        fetchOrders() {
+            if (this.activeTab == 0) {
+                this.fetchBookOrders();
+            } else {
+                this.fetchPlanOrders();
+            }
+        },
+        // 下单统计
+        fetchBookSummary() {
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/product/${this.productId}/summary/book`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    startDate: this.friendlyStartDate,
+                    endDate: this.friendlyEndDate
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.summary = res.data;
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        // 预约统计
+        fetchPlanSummary() {
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/product/${this.productId}/summary/plan`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    startDate: this.friendlyStartDate,
+                    endDate: this.friendlyEndDate
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.summary = res.data;
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        // 按下单时间查询
+        fetchBookOrders() {
+            this.requesting = true;
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/order/product/${this.productId}/book`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    pageNum: this.pageNum,
+                    pageSize: 10,
+                    startDate: this.friendlyStartDate,
+                    endDate: this.friendlyEndDate
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.orders = this.orders.concat(res.data.list);
+                        this.hasNext = res.data.hasNextPage;
+                        this.requesting = false;
+                        setTimeout(() => {
+                            this.onPageScroll();  // 怕没滚动时，加载图标就出现了，主动触发一次滚动响应
+                        }, 0);
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        // 按预约时间查询
+        fetchPlanOrders() {
+            this.requesting = true;
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/order/product/${this.productId}/plan`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    pageNum: this.pageNum,
+                    pageSize: 10,
+                    startDate: this.friendlyStartDate,
+                    endDate: this.friendlyEndDate
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.orders = this.orders.concat(res.data.list);
+                        this.hasNext = res.data.hasNextPage;
+                        this.requesting = false;
+                        setTimeout(() => {
+                            this.onPageScroll();  // 怕没滚动时，加载图标就出现了，主动触发一次滚动响应
+                        }, 0);
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        orderDetail(item) {
             wx.navigateTo({
-                url: '/orderDetail' + '?orderId=' + item.id
+                url: `/orderDetail?orderId=${item.id}`
             })
         },
-        phoneCall(){
+        phoneCall(item) {
             wx.makePhoneCall({
-                phoneNumber: '15202926290'
+                phoneNumber: item.customer.mobile
             })
         }
     })
 </script>
 
 <style lang="less">
-  .card-footer-icon{
+  .card-footer-icon {
     display: inline-block;
     vertical-align: middle;
   }
-  .card-footer-text{
+
+  .card-footer-text {
     display: inline-block;
     vertical-align: middle;
   }

@@ -167,7 +167,8 @@
         initCustomer() {
             let customerInfo = store.state.customerInfo;
             let userInfo = store.state.userInfo;
-            if(customerInfo.avatar == userInfo.avatarUrl && customerInfo.nickname == userInfo.nickName){
+            // 初始化过了
+            if(customerInfo.avatar){
                 return;
             }
             wx.request({

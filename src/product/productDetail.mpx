@@ -85,17 +85,23 @@
     <mp-cell>
       <mp-uploader max-count="0" title="住宿图片" tips="住的啥" files="{{product.stayOverPhotos}}"></mp-uploader>
     </mp-cell>
-    <van-tabs active="{{ activeTab }}" bind:change="tabChange">
+    <van-tabs active="{{ activeTab }}" bind:change="tabChange" class="tab">
       <van-tab title="本月预约概览"></van-tab>
       <van-tab title="趣友评论"></van-tab>
     </van-tabs>
-    <van-cell-group title="8月份预约统计" border="{{false}}">
-      <van-cell title="预约人次" value="100人*次"/>
-      <van-cell title="预约人天" value="100人*天"/>
-      <van-cell title="预约房间数*天数" value="10间*天"/>
-      <van-cell title="预约床位数*天数" value="12个*天"/>
-      <van-cell title="订单数" value="100个"/>
-      <van-cell title="订单总额" value="10000元"/>
+    <van-cell-group title="本月下单统计" border="{{false}}">
+      <van-cell title="下单数" value="{{bookSummary.orderNum + ' 个订单'}}"/>
+      <van-cell title="下单总额" wx:if="{{isMerchant}}" value="{{bookSummary.orderAmount / 100 + ' 元'}}"/>
+      <van-cell title="人数*天数" value="{{bookSummary.personDay + ' 人*天'}}"/>
+      <van-cell title="房间数*天数" wx:if="{{product.roomNum > 0}}" value="{{bookSummary.roomDay + ' 间*天'}}"/>
+      <van-cell title="床位数*天数" wx:if="{{product.bedNum > 0}}" value="{{bookSummary.bedDay + ' 床*天'}}"/>
+    </van-cell-group>
+    <van-cell-group title="本月预约统计" border="{{false}}">
+      <van-cell title="涉及订单数" value="{{planSummary.orderNum + ' 个订单'}}"/>
+      <van-cell title="摊到本月的订单总额" wx:if="{{isMerchant}}" value="{{planSummary.orderAmount / 100 + ' 元'}}"/>
+      <van-cell title="人数*天数" value="{{planSummary.personDay + ' 人*天'}}"/>
+      <van-cell title="房间数*天数" wx:if="{{product.roomNum > 0}}" value="{{planSummary.roomDay + ' 间*天'}}"/>
+      <van-cell title="床位数*天数" wx:if="{{product.bedNum > 0}}" value="{{planSummary.bedDay + ' 床*天'}}"/>
     </van-cell-group>
     <van-goods-action wx:if="{{!isMerchant}}" custom-class="goods-action">
       <van-goods-action-icon icon="share" text="分享" open-type="share"/>
@@ -133,7 +139,10 @@
             activeTab: 0,
             endDate: null,
             showEndDate: false,
-            isCollected: false
+            isCollected: false,
+            bookSummary: {},
+            planSummary: {},
+            arriveTab: false
         },
         onLoad(query) {
             wx.showShareMenu();
@@ -142,6 +151,10 @@
             });
             this.id = query.id;
             this.fetchDetail();
+
+            // 这里只是定义查询规则，后面的 exec() 才真正查询
+            this.query = this.createSelectorQuery();
+            this.query.select('.tab').boundingClientRect();
         },
         onShow() {
             this.activeTab = 0;
@@ -159,11 +172,23 @@
             customerInfo() {
                 return store.state.customerInfo;
             },
-            avatar(){
-                let avatar = this.merchant.avatar || {};
+            avatar() {
+                let avatar = this.merchant.avatar || '';
                 avatar = avatar.startsWith('http') ? avatar : `http://yqxq.oss-cn-hangzhou.aliyuncs.com/${avatar}`;
                 return avatar;
             }
+        },
+        onPageScroll() {
+            if (this.arriveTab) {
+                return;
+            }
+            this.query.exec((res) => {
+                if (!this.arriveTab && res[0].top < store.state.systemInfo.windowHeight - 50) {
+                    this.arriveTab = true;
+                    this.fetchBookSummary();
+                    this.fetchPlanSummary();
+                }
+            })
         },
         fetchDetail() {
             wx.request({
@@ -236,6 +261,52 @@
                     res = res.data;
                     if (res.code == 0) {
                         this.isCollected = res.data;
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        // 下单统计
+        fetchBookSummary() {
+            let now = Moment();
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/product/${this.id}/summary/book`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    startDate: now.startOf('month').format("YYYY-MM-DD"),
+                    endDate: now.endOf('month').format("YYYY-MM-DD"),
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.bookSummary = res.data;
+                    } else if (res.code == 401) {
+                        app.loginWx();
+                    }
+                }
+            });
+        },
+        // 预约统计
+        fetchPlanSummary() {
+            let now = Moment();
+            wx.request({
+                method: 'POST',
+                url: `${app.globalData.basePath}/weapp/product/${this.id}/summary/plan`,
+                header: {
+                    'Cookie': wx.getStorageSync("sessionId")
+                },
+                data: {
+                    startDate: now.startOf('month').format("YYYY-MM-DD"),
+                    endDate: now.endOf('month').format("YYYY-MM-DD"),
+                },
+                success: (res) => {
+                    res = res.data;
+                    if (res.code == 0) {
+                        this.planSummary = res.data;
                     } else if (res.code == 401) {
                         app.loginWx();
                     }
@@ -372,7 +443,7 @@
         },
         appointment() {
             wx.navigateTo({
-                url: '/appointment' + '?productId=' + this.id
+                url: `/appointment?productId=${this.id}&publishTime=${this.product.publishTime}&startDate=${this.product.startDate}&endDate=${this.product.endDate}`
             })
         }
     })

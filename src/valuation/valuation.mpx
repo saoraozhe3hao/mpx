@@ -24,7 +24,9 @@
       </view>
       <view slot="footer">
         <!-- item.merchantId 实际设置的是merchant对应的customerId -->
-        <van-button size="mini" bind:click="reply(index)" wx:if="{{!item.response && item.merchantId == customerInfo.id}}">回应</van-button>
+        <van-button size="mini" bind:click="reply(index)"
+                    wx:if="{{!item.response && item.merchantId == customerInfo.id}}">回应
+        </van-button>
       </view>
     </van-card>
   </van-cell-group>
@@ -108,12 +110,14 @@
                     res = res.data;
                     if (res.code == 0) {
                         this.valuations = this.valuations.concat(res.data.list);
-                        this.valuations.forEach((item)=>{
-                            item.avatar = item.avatar.startsWith('http') ? item.avatar : 'http://yqxq.oss-cn-hangzhou.aliyuncs.com/'+item.avatar;
+                        this.valuations.forEach((item) => {
+                            item.avatar = item.avatar.startsWith('http') ? item.avatar : 'http://yqxq.oss-cn-hangzhou.aliyuncs.com/' + item.avatar;
                         });
                         this.hasNext = res.data.hasNextPage;
                         this.requesting = false;
-                        this.onPageScroll();  // 怕没滚动时，加载图标就出现了，主动触发一次滚动响应
+                        setTimeout(() => {
+                            this.onPageScroll();  // 怕没滚动时，加载图标就出现了，主动触发一次滚动响应
+                        }, 0);
                     } else if (res.code == 401) {
                         app.loginWx();
                     }
@@ -135,7 +139,7 @@
             this.showPopup = false;
         },
         submit() {
-            if(!this.response){
+            if (!this.response) {
                 return;
             }
             Toast.loading({

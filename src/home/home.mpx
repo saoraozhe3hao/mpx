@@ -142,12 +142,14 @@
                 let pages = getCurrentPages();
                 let curPage = pages[pages.length - 1];
                 if (val && curPage.route == 'home/home') {
+                    this.pageNum = 1;
                     this.products = [];
                     this.fetchProducts();
                 }
             },
             area(newval, oldval) {
                 if (oldval !== "全国") {  // 第一次变化 不拉数据，因为监听isLogin的地方已经拉了数据
+                    this.pageNum = 1;
                     this.products = [];
                     this.fetchProducts();
                 }
@@ -187,7 +189,9 @@
                     if (res.code == 0) {
                         this.products = this.products.concat(res.data.list);
                         this.hasNext = res.data.hasNextPage;
-                        this.onPageScroll();  // 怕没滚动时，加载图标就出现了，主动触发一次滚动响应
+                        setTimeout(()=>{
+                            this.onPageScroll();  // 怕没滚动时，加载图标就出现了，主动触发一次滚动响应
+                        },0);
                     } else if (res.code == 401) {
                         app.loginWx();
                     }
@@ -208,6 +212,7 @@
             })
         },
         onSearch(event) {
+            this.pageNum = 1;
             this.products = [];
             this.fetchProducts(event.detail)
         },

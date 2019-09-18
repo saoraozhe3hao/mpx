@@ -71,6 +71,8 @@
             this.getTabBar && this.getTabBar().setData({
                 active: 1
             });
+
+            this.pageNum = 1;
             this.products = [];
             this.fetchProducts();
         },
@@ -109,7 +111,9 @@
                         this.products = this.products.concat(res.data.list);
                         this.hasNext = res.data.hasNextPage;
                         this.requesting = false;
-                        this.onPageScroll();  // 怕没滚动时，加载图标就出现了，主动触发一次滚动响应
+                        setTimeout(()=>{
+                            this.onPageScroll();  // 怕没滚动时，加载图标就出现了，主动触发一次滚动响应
+                        },0);
                     } else if (res.code == 401) {
                         app.loginWx();
                     }

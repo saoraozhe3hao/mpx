@@ -12,7 +12,11 @@
 
 <template>
   <view class="my-order">
-    <van-tabs active="{{ activeTab }}" bind:change="tabChange">
+    <van-tabs active="{{ navigatorTab }}" bind:change="tabChange" wx:if="{{customerInfo.merchant}}">
+      <van-tab title="我下的单"></van-tab>
+      <van-tab title="我接的单"></van-tab>
+    </van-tabs>
+    <van-tabs active="{{ statusTab }}" bind:change="statusChange">
       <van-tab title="全部"></van-tab>
       <van-tab title="待付款"></van-tab>
       <van-tab title="待使用"></van-tab>
@@ -50,7 +54,8 @@
     let app = getApp();
     createPage({
         data: {
-            activeTab: 0,
+            navigatorTab: 0,
+            statusTab: 0,
             statusMap: {
                 'pending': '待付款',
                 'unused': '待使用',
@@ -85,6 +90,9 @@
             this.getTabBar && this.getTabBar().setData({
                 active: 2
             });
+
+            this.navigatorTab = 0;
+            this.pageNum = 1;
             this.orders = [];
             this.fetchOrders();
         },
@@ -100,8 +108,22 @@
                 }
             })
         },
+        computed: {
+            customerInfo() {
+                return store.state.customerInfo;
+            }
+        },
         tabChange(event) {
-            this.activeTab = event.detail.index;
+            if (event.detail.index == 1) {
+                wx.navigateTo({
+                    url: `/appointment`
+                })
+            }
+            this.navigatorTab = event.detail.index;
+        },
+        statusChange(event) {
+            this.statusTab = event.detail.index;
+            this.pageNum = 1;
             this.orders = [];
             this.fetchOrders();
         },
@@ -116,7 +138,7 @@
                 data: {
                     pageNum: this.pageNum,
                     pageSize: 10,
-                    statusList: this.tabToStatus[this.activeTab] || null
+                    statusList: this.tabToStatus[this.statusTab] || null
                 },
                 success: (res) => {
                     res = res.data;
@@ -124,7 +146,9 @@
                         this.orders = this.orders.concat(res.data.list);
                         this.hasNext = res.data.hasNextPage;
                         this.requesting = false;
-                        this.onPageScroll();  // 怕没滚动时，加载图标就出现了，主动触发一次滚动响应
+                        setTimeout(()=>{
+                            this.onPageScroll();  // 怕没滚动时，加载图标就出现了，主动触发一次滚动响应
+                        },0);
                     } else if (res.code == 401) {
                         app.loginWx();
                     }

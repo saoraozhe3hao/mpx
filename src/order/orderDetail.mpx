@@ -6,6 +6,7 @@
       "van-cell-group": "vant-weapp/dist/cell-group/index",
       "van-cell": "vant-weapp/dist/cell/index",
       "van-rate": "vant-weapp/dist/rate/index",
+      "van-icon": "vant-weapp/dist/icon/index",
       "van-panel": "vant-weapp/dist/panel/index"
     }
   }
@@ -27,9 +28,16 @@
       <van-panel title="订单确认码" desc="{{order.code}}" status="该验证码只在预约期间有效">
         <canvas class="qr" canvas-id="qr-code"/>
       </van-panel>
+      <van-cell title="趣导联系电话">
+        <view catch:tap="phoneCall(order.merchant.mobile)">
+          <view class="cell-right-text">{{order.merchant.mobile}}</view>
+          <van-icon class="cell-right-icon" name="phone" size="1.6em" color="#FDD03F"/>
+        </view>
+      </van-cell>
       <van-cell title="订单号" value="{{id}}"/>
-      <van-cell title="付款时间" value="{{order.startDate}}"/>
-      <van-cell title="预约时间" value="{{order.lastDate}}"/>
+      <van-cell title="下单时间" value="{{order.orderTime}}"/>
+      <van-cell title="付款时间" value="{{order.payTime}}"/>
+      <van-cell title="预约时间" value="{{order.startDate == order.lastDate ? order.startDate : order.startDate + ' 到 ' + order.lastDate}}"/>
       <van-cell title="人数" value="{{order.customerNum + ' 人'}}"/>
       <van-cell title="房间数" wx:if="{{order.roomNum}}" value="{{order.roomNum + ' 间'}}"/>
       <van-cell title="床位数" wx:if="{{order.bedNum}}" value="{{order.bedNum + ' 个'}}"/>
@@ -85,6 +93,11 @@
             wx.navigateTo({
                 url: `/productDetail?id=${this.order.productId}`
             })
+        },
+        phoneCall(mobile) {
+            wx.makePhoneCall({
+                phoneNumber: mobile
+            })
         }
     })
 </script>
@@ -95,5 +108,14 @@
     width: 300px;
     height: 300px;
     background: #f1f1f1;
+  }
+
+  .cell-right-icon {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .cell-right-text {
+    display: inline-block;
   }
 </style>
